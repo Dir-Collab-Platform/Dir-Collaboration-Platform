@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+
+    /* Colors */
+
+    /* bg color */
+    --dark-bg: #18181B;
+    --dimmer-dark-bg: #1A1A1E;
+    --notification-count-bg: #BE2D2D;
+    --card-bg: #1D1D29;
+    --card-bg-lighter: #222230;
+    --primary-button: #1F1F56;
+    --primary-button-hover: #29297F;
+    --primary-button-active: #19194D;
+    --secondary-button: #242429;
+    --secondary-button-hover: #303036;
+    --meta-tag-color: #303040;
+    --active-tab-bg: #1F1F31;
+    --received-message: #213370;
+    --sent-message: #1A295B;
+    
+    /* font color */
+    --primary-text-color: #FFFFFF;
+    --secondary-text-color: #9CA3AF;
+    --active-text-color: #5B5EDE;
+    --code-keyword: #4255C2;
+    --code-string: #E06666;
+    --code-function: #AEC4AB;
+    --channel-hash-color: #806346;
+    --mid-dim-font-color: #C4C4C4;
+    
+    /* border color */
+    --main-border-color: hsla(0, 3%, 94%, .45);
+    --popup-border: #EFEEEE; /* opacity supposed to be - 28%*/
+
+    /* shadow color */
+    --card-shadow-color: #8B4A4A;
+    --popup-shadow: #E1A6A6; /* opacity supposed to be - 15%*/
+
+    /* Font family */
+    --main-font-family: "Inter", sans-serif;
+}

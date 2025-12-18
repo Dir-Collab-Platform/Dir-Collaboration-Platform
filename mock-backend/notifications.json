@@ -1,0 +1,5 @@
+[
+  { "_id": "n1", "user_id": "u1", "type": "message", "message": "Alex sent a message in #general", "repo_id": "r1", "target_type": "message", "target_id": "m2", "is_read": false, "created_at": "2025-12-01T14:15:00Z" },
+  { "_id": "n2", "user_id": "u1", "type": "task", "message": "New task assigned: Build landing page", "repo_id": "r1", "target_type": "task", "target_id": "t1", "is_read": false, "created_at": "2025-12-01T12:05:00Z" },
+  { "_id": "n3", "user_id": "u2", "type": "repo", "message": "Added to repository: Dir-Frontend", "repo_id": "r1", "target_type": "repo", "target_id": "r1", "is_read": false, "created_at": "2025-12-02T12:10:00Z" }
+]

@@ -1,0 +1,55 @@
+[
+  {
+    "_id": "r1",
+    "name": "Dir-Frontend",
+    "description": "Frontend for Dir platform",
+    "owner_id": "u1",
+    "created_at": "2025-12-01T10:00:00Z",
+    "members": [
+      { "user_id": "u1", "role": "admin", "joined_at": "2025-12-01T10:00:00Z" },
+      { "user_id": "u2", "role": "member", "joined_at": "2025-12-02T10:00:00Z" },
+      { "user_id": "u3", "role": "member", "joined_at": "2025-12-03T10:00:00Z" }
+    ],
+    "channels": [
+      { "channel_id": "c1", "name": "general", "created_at": "2025-12-01T11:00:00Z" },
+      { "channel_id": "c2", "name": "design", "created_at": "2025-12-01T11:30:00Z" }
+    ],
+    "tags": ["React", "Frontend", "UI"],
+    "tasks": ["t1", "t2"],
+    "files": ["f1", "f2", "f3"],
+    "webhook_events": ["e1"]
+  },
+  {
+    "_id": "r2",
+    "name": "Dir-Backend",
+    "description": "Backend API for Dir platform",
+    "owner_id": "u1",
+    "created_at": "2025-12-02T10:00:00Z",
+    "members": [
+      { "user_id": "u1", "role": "admin", "joined_at": "2025-12-02T10:00:00Z" }
+    ],
+    "channels": [
+      { "channel_id": "c3", "name": "backend-discussion", "created_at": "2025-12-02T11:00:00Z" }
+    ],
+    "tags": ["Node.js", "API"],
+    "tasks": ["t3"],
+    "files": ["f4", "f5"],
+    "webhook_events": ["e2"]
+  },
+  {
+    "_id": "r3",
+    "name": "Sample-Repo",
+    "description": "Test repository",
+    "owner_id": "u2",
+    "created_at": "2025-12-05T10:00:00Z",
+    "members": [
+      { "user_id": "u2", "role": "admin", "joined_at": "2025-12-05T10:00:00Z" },
+      { "user_id": "u1", "role": "member", "joined_at": "2025-12-06T10:00:00Z" }
+    ],
+    "channels": [],
+    "tags": ["Python"],
+    "tasks": ["t4"],
+    "files": ["f6"],
+    "webhook_events": []
+  }
+]

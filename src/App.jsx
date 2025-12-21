@@ -9,6 +9,7 @@ import Workspaces from './pages/Workspaces/Workspaces/Workspaces'
 function App() {
   return (
     <>
+      {/* This is temporary routing to let everyone see the page they are building */}
       <Routes>
         <Route path='/' element={<Dashboard />}/> 
         <Route path='/repositories' element={<Repositories />} />

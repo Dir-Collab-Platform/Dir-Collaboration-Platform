@@ -1,4 +1,3 @@
-/* ===== MAIN NAV BAR ===== */
 .nav {
     background-color: var(--dark-bg);
     border-bottom: 1px solid var(--main-border-color);
@@ -8,7 +7,6 @@
     left: 0;
     right: 0;
     z-index: 1000;
-    font-family: var(--main-font-family);
 }
 
 .nav-container {
@@ -17,27 +15,22 @@
     align-items: center;
     max-width: 1400px;
     margin: 0 auto;
-} 
+}
 
-/* ===== LEFT SECTION ===== */
+/* ===== LEFT SECTION: Logo ===== */
 .left-section {
     display: flex;
     align-items: center;
     gap: 2rem;
 }
 
+/* Logo */
 .logo-div img {
     height: 40px;
     width: auto;
 }
 
-.right-section {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-}
-
-/* Your New Repository Button */
+/* YOUR New Repository Button (ON NAV BAR) */
 .new-repo-btn {
     display: flex;
     align-items: center;
@@ -51,12 +44,11 @@
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
-    font-family: var(--main-font-family);
 }
 
 .new-repo-btn:hover {
-    background-color: var(--primary-button-hover);
     transform: translateY(-1px);
+    background-color: var(--primary-button-hover);
 }
 
 .new-repo-btn:active {
@@ -66,20 +58,405 @@
 .new-repo-btn img {
     width: 16px;
     height: 16px;
-    filter: brightness(0) invert(1);
+    filter: invert(1);
 }
 
-/* Bell Icon */
-.bell-icon {
+/* ===== RIGHT SECTION ===== */
+.right-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* ===== NOTIFICATION PANEL STYLES ===== */
+
+/* Bell Button with Badge */
+.bell-container {
+    position: relative;
+}
+
+.bell-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.bell-btn:hover {
+    background-color: var(--secondary-button-hover);
+}
+
+.bell-btn img {
     width: 24px;
     height: 24px;
-    cursor: pointer;
     filter: brightness(0) invert(0.9);
-    transition: transform 0.2s;
 }
 
-.bell-icon:hover {
-    transform: scale(1.1);
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: var(--notification-count-bg);
+    color: var(--primary-text-color);
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Notification Panel */
+.notification-panel {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    width: 380px;
+    max-height: 500px;
+    background-color: var(--dimmer-dark-bg);
+    border: 1px solid rgba(239, 238, 238, 0.2); 
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(225, 166, 166, 0.15); 
+    z-index: 3000;
+    display: none;
+    overflow: hidden;
+}
+
+.notification-panel.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Notification Header */
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid rgba(239, 238, 238, 0.2); 
+    background-color: var(--dark-bg);
+}
+
+.notification-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-title img {
+    width: 20px;
+    height: 20px;
+    filter: brightness(0) invert(0.8);
+}
+
+.notification-title h3 {
+    color: var(--secondary-text-color);
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.notification-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mark-all-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    border: none;
+    color: var(--primary-text-color);
+    background-color: var(--primary-button);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 8px 18px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.mark-all-btn:hover {
+    background-color: var(--primary-button-hover);
+}
+
+.mark-all-btn img {
+    width: 12px;
+    height: 12px;
+    filter: brightness(0) invert(0.7);
+}
+
+.close-panel-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.close-panel-btn:hover {
+    background-color: var(--secondary-button-hover);
+}
+
+.close-panel-btn img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(0.7);
+}
+
+/* Notifications List */
+.notifications-list {
+    flex: 1;
+    overflow-y: auto;
+    max-height: 400px;
+    padding: 8px;
+}
+
+/* Individual Notification Item */
+.notification-item {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(239, 238, 238, 0.2); 
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.notification-item:hover {
+    background-color: var(--card-bg-lighter);
+}
+
+.notification-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.notification-type {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.notification-icon {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(0.8);
+}
+
+.notification-label {
+    color: var(--primary-text-color);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.notification-time {
+    color: var(--secondary-text-color);
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.external-link {
+    width: 12px;
+    height: 12px;
+    filter: brightness(0) invert(0.6);
+}
+
+.close-notification-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.close-notification-btn:hover {
+    background-color: var(--secondary-button-hover);
+}
+
+.close-notification-btn img {
+    width: 12px;
+    height: 12px;
+    filter: brightness(0) invert(0.7);
+}
+
+/* Notification Content */
+.notification-channel,
+.notification-repo {
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.alert-repo {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.alert-repo img:first-child {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(0.8);
+}
+
+.alert-repo h4 {
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0;
+    text-align: left;
+}
+
+.notification-content {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+/* User Avatars and Icons */
+.user-avatar,
+.github-icon {
+    flex-shrink: 0;
+}
+
+.user-avatar img,
+.github-icon img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(239, 238, 238, 0.2); 
+}
+
+.github-icon img {
+    border-radius: 6px;
+}
+
+/* Message Preview */
+.message-preview,
+.pr-details,
+.alert-message {
+    flex: 1;
+}
+
+.message-preview p,
+.pr-details p,
+.alert-message p {
+    color: var(--secondary-text-color);
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.pr-description {
+    color: var(--mid-dim-font-color) !important;
+    font-size: 12px !important;
+    margin-top: 4px;
+}
+
+/* ===== UNIFORM BUTTON STYLES ===== */
+
+/* More button */
+.view-more-btn {
+    background: none;
+    border: none;
+    color: var(--active-text-color);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 4px;
+    text-decoration: underline;
+}
+
+.view-more-btn:hover {
+    opacity: 0.8;
+}
+
+/* UNIFORM ACTION BUTTONS */
+.action-btn {
+    padding: 6px 12px;
+    background-color: var(--secondary-button);
+    border: 1px solid rgba(239, 238, 238, 0.2); 
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--secondary-text-color);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.action-btn:hover {
+    background-color: var(--secondary-button-hover);
+    border-color: rgba(239, 238, 238, 0.3);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* Remove individual button colors */
+.reply-btn,
+.mark-read-btn,
+.review-btn,
+.reject-btn,
+.checkout-btn,
+.ignore-btn {
+}
+
+/* Notification Actions Row */
+.notification-actions-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+/* ===== LOAD PAST NOTIFICATIONS BUTTON ===== */
+.notification-footer {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(220, 219, 219, 0.2); 
+    background-color: var(--dark-bg);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.load-past-btn {
+    padding: 8px 16px;
+    background-color: var(--secondary-button);
+    color: var(--secondary-text-color);
+    border: 1px solid rgba(239, 238, 238, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.load-past-btn:hover {
+    background-color: var(--secondary-button-hover);
+    border-color: rgba(239, 238, 238, 0.4); /* Slightly more opacity on hover */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.load-past-btn:active {
+    transform: translateY(0);
 }
 
 /* Hamburger Button */
@@ -109,13 +486,12 @@
     right: -300px;
     width: 280px;
     height: 100vh;
-    background-color: var(--dimmer-dark-bg);
-    border-left: 1px solid var(--main-border-color);
+    background-color: var(--dark-bg);
+    border-left: 1px solid rgba(239, 238, 238, 0.28); /* var(--popup-border) with 28% opacity */
     padding: 2rem 1.5rem;
     z-index: 2000;
     transition: right 0.3s ease;
     overflow-y: auto;
-    font-family: var(--main-font-family);
 }
 
 .sidebar-menu.open {
@@ -137,7 +513,7 @@
 .close-btn img {
     width: 20px;
     height: 20px;
-    filter: brightness(0) invert(0.9);
+    filter: brightness(0) invert(0.7);
 }
 
 .close-btn:hover {
@@ -153,7 +529,7 @@
     margin-bottom: 2rem;
     padding: 1rem;
     border-radius: 10px;
-    background-color: var(--card-bg-lighter);
+    background-color: var(--card-bg);
 }
 
 .profile-pic {
@@ -180,7 +556,7 @@
     align-items: center;
     gap: 1rem;
     padding: 12px 16px;
-    color: var(--mid-dim-font-color);
+    color: var(--secondary-text-color);
     cursor: pointer;
     border-radius: 8px;
     margin-bottom: 8px;
@@ -188,19 +564,14 @@
 }
 
 .menu-item:hover {
-    background-color: var(--active-tab-bg);
+    background-color: var(--secondary-button-hover);
     color: var(--primary-text-color);
-}
-
-.menu-item.active {
-    background-color: var(--active-tab-bg);
-    color: var(--active-text-color);
 }
 
 .menu-item img {
     width: 20px;
     height: 20px;
-    filter: brightness(0) invert(0.8);
+    filter: brightness(0) invert(0.7);
 }
 
 .menu-item span {
@@ -210,17 +581,17 @@
 
 /* Logout Item */
 .logout-item:hover {
-    background-color: rgba(190, 45, 45, 0.1); /* Using --notification-count-bg with opacity */
+    background-color: rgba(248, 81, 73, 0.1);
 }
 
 .logout-item img {
-    filter: brightness(0) invert(0.6) sepia(1) saturate(5) hue-rotate(320deg);
+    filter: invert(0.4) sepia(1) saturate(5) hue-rotate(320deg);
 }
 
 /* Menu Divider */
 .menu-divider {
     border: none;
-    border-top: 1px solid var(--main-border-color);
+    border-top: 1px solid rgba(239, 238, 238, 0.2); 
     margin: 1.5rem 0;
 }
 
@@ -238,6 +609,25 @@
 
 .menu-overlay.active {
     display: block;
+}
+
+/* Scrollbar Styling */
+.notifications-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.notifications-list::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+    border-radius: 3px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb {
+    background: rgba(239, 238, 238, 0.2); 
+    border-radius: 3px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(239, 238, 238, 0.2); 
 }
 
 /* ===== RESPONSIVE ===== */
@@ -267,12 +657,53 @@
     .logo-div img {
         height: 35px;
     }
+    
+    /* Notification panel responsive */
+    .notification-panel {
+        position: fixed;
+        top: 70px;
+        left: 16px;
+        right: 16px;
+        width: auto;
+        max-height: 70vh;
+    }
+    
+    .bell-btn {
+        padding: 6px;
+    }
+    
+    .notification-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+    }
+    
+    .notification-footer {
+        padding: 10px;
+        justify-content: center;
+    }
+    
+    .load-past-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .notification-panel {
+        max-height: 60vh;
+    }
+    
+    .notification-header {
+        padding: 12px;
+    }
+    
+    .notification-item {
+        padding: 10px;
+    }
 }
 
 /* Add space so content isn't hidden under nav */
 body {
     padding-top: 80px;
-    background-color: var(--dark-bg);
-    color: var(--primary-text-color);
-    font-family: var(--main-font-family);
 }

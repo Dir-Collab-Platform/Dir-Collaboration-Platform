@@ -8,7 +8,7 @@ function Footer() {
         <div className="container">Dir</div>
         <div className="container">2025</div>
         <div className="container">
-          <img src="/images/copyright 1.png" alt="copyright" />
+          <img src="/assets/images/copyright 1.png" alt="copyright" />
         </div>
         <div className="container">All rights reserved</div>
         <div className="container"><a href="#">Docs</a></div>

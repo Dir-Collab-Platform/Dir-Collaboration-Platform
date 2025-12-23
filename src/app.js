@@ -15,7 +15,7 @@ dotenv.config();
 const app = express();
 
 // mounting better-auth routes
-app.all("/api/auth/", toNodeHandler(auth));
+app.all("/api/auth", toNodeHandler(auth));
 
 //middlewares
 app.use(express.json());

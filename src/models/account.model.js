@@ -1,44 +1,23 @@
 import mongoose from "mongoose";
 
-export const accountSchema = new mongoose.Schema(
+const accountSchema = new mongoose.Schema(
   {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-
-    provider: {
-      type: String,
-      required: true,
-      default: "github",
-    },
-
-    providerAccountId: {
-      type: String,
-      required: true,
-    },
-    accessToken: { 
-        type: String,  
-    },
-    // refreshToken: { 
-    //     type: String,
-    // }, no refresh token for github
-    accessTokenExpiresAt: {
-      type: Date,
-    },
+    _id: { type: String },
+    userId: { type: String, required: true, index: true }, // Must be String to match User._id
+    accountId: { type: String, required: true }, // The ID from GitHub
+    providerId: { type: String, required: true, default: "github" }, 
+    accessToken: { type: String },
+    refreshToken: { type: String },
+    accessTokenExpiresAt: { type: Date },
+    refreshTokenExpiresAt: { type: Date },
+    scope: { type: String },
+    idToken: { type: String },
+    password: { type: String }, // Required by internal schema (usually null for OAuth)
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true, _id: false }
 );
 
-// Prevent duplicate provider accounts
-accountSchema.index(
-  { provider: 1, providerAccountId: 1 },
-  { unique: true }
-);
+// Match your index requirement
+accountSchema.index({ providerId: 1, accountId: 1 }, { unique: true });
 
-const Account = mongoose.model("Account", accountSchema);
-export default Account;
+export default mongoose.models.Account || mongoose.model("Account", accountSchema);

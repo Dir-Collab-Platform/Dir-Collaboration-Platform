@@ -2,31 +2,14 @@ import mongoose from "mongoose";
 
 const sessionSchema = new mongoose.Schema(
   {
-    sessionId: {
-      type: String,
-      required: true,
-      unique: true,
-      index: true,
-    },
-
-    userId: {
-      type: String,
-      required: true,
-      index: true,
-    },
-
-    expiresAt: {
-      type: Date,
-      required: true,
-      index: { expires: 0 }, // TTL index → auto delete
-    },
-
+    _id: { type: String },
+    userId: { type: String, required: true, index: true },
+    token: { type: String, required: true, unique: true }, // The actual session cookie value
+    expiresAt: { type: Date, required: true, index: { expires: 0 } },
+    ipAddress: { type: String },
+    userAgent: { type: String },
   },
-  {
-    timestamps: true, // adds createdAt & updatedAt
-  }
+  { timestamps: true, _id: false }
 );
 
-
-const Session = mongoose.model("Session", sessionSchema);
-export default Session;
+export default mongoose.models.Session || mongoose.model("Session", sessionSchema);

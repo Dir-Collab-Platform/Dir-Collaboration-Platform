@@ -255,8 +255,3 @@
         height: 35px;
     }
 }
-
-/* Add space so content isn't hidden under nav */
-body {
-    padding-top: 80px;
-}

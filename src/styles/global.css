@@ -16,5 +16,39 @@
     color: var(--primary-text-color);
     font-family: var(--main-font-family);
     min-height: 100vh;
+    padding-top: 80px;
+  }
+
+  /* default font sizes */
+
+  .header1 {
+    font-size: var(--header1-size);
+  }
+  .header2 {
+    font-size: var(--header2-size);
+  }
+  .paragraph1 {
+    font-size: var(--paragraph1-size);
+  }
+  .paragraph2 {
+    font-size: var(--paragraph2-size);
+  }
+  .paragraph-mini {
+    font-size: var(--paragraph-mini-size);
+  }
+
+  .svg-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.67;
+    }
   }
 }

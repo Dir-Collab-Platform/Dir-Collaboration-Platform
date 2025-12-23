@@ -7,13 +7,18 @@ dotenv.config();
 
 // Ensure connection before initializing Auth
 await mongoose.connect(process.env.MONGO_URI);
-const db = mongoose.connection.db; 
+const db = mongoose.connection.db;
+
+console.log("Better Auth Config Check:");
+console.log("BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
+console.log("GITHUB_CLIENT_ID exists:", !!process.env.GITHUB_CLIENT_ID);
+console.log("GITHUB_CLIENT_SECRET exists:", !!process.env.GITHUB_CLIENT_SECRET);
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   basePath: "/api/auth",
-  
+
   // FIX: Use the adapter function and pass the native 'db' object
   database: mongodbAdapter(db, {
     collections: {
@@ -39,7 +44,7 @@ export const auth = betterAuth({
       },
     },
   },
-  
+
   // Allow Better Auth to recognize your custom Mongoose fields
   user: {
     additionalFields: {
@@ -51,5 +56,8 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: false,
+  },
+  logger: {
+    level: "debug", // This will print EVERY route match attempt to your terminal
   },
 });

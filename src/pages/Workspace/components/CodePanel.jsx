@@ -1,17 +1,11 @@
+import { CodeBody } from "./CodeBody.jsx";
+import RepoSidebar from "./RepoSidebar.jsx";
+
 export default function CodePanel() {
     return (
-        <div className="code-panel">
-            <div className="code-header">
-                {/* replace with fetched data */}
-                <h1>username/My-repository</h1>
-                <span className="public-private">public</span>
-            </div>
-
-            <div className="code-container">
-                <div className="foder-structure">
-                    
-                </div>
-            </div>
+        <div className="grid grid-cols-[17rem_1fr] border border-(--main-border-color) h-full rounded-2xl overflow-hidden">
+            <RepoSidebar />
+            <CodeBody />
         </div>
     )
 }

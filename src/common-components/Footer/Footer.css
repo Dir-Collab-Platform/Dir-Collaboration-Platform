@@ -1,6 +1,6 @@
-footer {
-    background-color: #161b22;
-    border-top: 1px solid #30363d;
+.footer {
+    background-color: var(--dark-bg);
+    border-top: 1px solid var(--main-border-color);
     padding: 1.5rem 2rem;
     margin-top: auto; 
 }
@@ -8,18 +8,18 @@ footer {
 .footer-container {
     display: flex;
     justify-content: center; 
-    align-items: center; /* Centers vertically */
-    flex-wrap: wrap; /* Wraps on small screens */
-    gap: 1.5rem; /* Space between items */
+    align-items: center; 
+    flex-wrap: wrap; 
+    gap: 1.5rem; 
     max-width: 1200px;
-    margin: 0 auto; /* Centers the container itself */
+    margin: 0 auto; 
 }
 
 .container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #8b949e;
+    color: var(--secondary-text-color);
     font-size: 14px;
 }
 
@@ -27,25 +27,29 @@ footer {
     font-weight: 600;
 }
 
-.container img {
-    width: 16px;
-    height: 16px;
-    filter: invert(0.7);
+/* Style only the copyright Lucide icon */
+.container:nth-child(3) svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 .container a {
-    color: #8b949e;
+    color: var(--secondary-text-color);
     text-decoration: none;
     transition: color 0.2s;
 }
 
 .container a:hover {
-    color: #58a6ff;
+    color: var(--active-text-color);
     text-decoration: underline;
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+    .footer {
+        padding: 1.5rem 1rem;
+    }
+    
     .footer-container {
         gap: 1rem;
         padding: 0 1rem;
@@ -53,6 +57,11 @@ footer {
     
     .container {
         font-size: 13px;
+    }
+    
+    .container:nth-child(3) svg {
+        width: 14px;
+        height: 14px;
     }
 }
 

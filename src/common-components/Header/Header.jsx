@@ -1,5 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
+import {
+  Bell,
+  MessageSquare,
+  Github,
+  AlertCircle,
+  Plus,
+  Menu,
+  X,
+  ExternalLink,
+  GitBranchPlus,
+  CheckCheck,
+  LogOut,
+  LayoutDashboard,
+  Search,
+  Folder,
+  Briefcase,
+  Settings
+} from 'lucide-react';
 
 function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -8,7 +26,6 @@ function Header() {
     {
       id: 1,
       type: 'message',
-      icon: '/assets/images/message-square 1.png',
       label: 'Message',
       time: '2hrs ago',
       channel: '#Front-end team',
@@ -20,11 +37,9 @@ function Header() {
     {
       id: 2,
       type: 'github',
-      icon: '/assets/images/mdi_github.png',
       label: 'GitHub',
       time: '2hrs ago',
       repo: 'My-repository',
-      icon2: '/assets/images/git-branch-plus 1.png',
       user: 'Abrsh123',
       prDescription: 'I implemented the file browsing features with drag-and-drop support and improved the UI...',
       hasMore: true
@@ -32,10 +47,8 @@ function Header() {
     {
       id: 3,
       type: 'alert',
-      icon: '/assets/images/circle-alert 1.png',
       label: 'Alert',
       time: '2hrs ago',
-      repoIcon: '/assets/images/mdi_github.png',
       repo: 'My-repository',
       message: 'Someone logged in with your GitHub account from a new device in London, UK. If this wasn\'t you, please secure your account...',
       hasMore: true
@@ -112,7 +125,6 @@ function Header() {
         {
           id: Date.now() + 1,
           type: 'message',
-          icon: '/assets/images/message-square 1.png',
           label: 'Message',
           time: 'Yesterday',
           channel: '#Design-team',
@@ -125,11 +137,9 @@ function Header() {
         {
           id: Date.now() + 2,
           type: 'github',
-          icon: '/assets/images/mdi_github.png',
           label: 'GitHub',
           time: '1 day ago',
           repo: 'Design-system',
-          icon2: '/assets/images/git-pull-request-arrow 1.png',
           user: 'DesignLead',
           prDescription: 'Added new color variables and typography scale to the design system...',
           hasMore: true,
@@ -220,7 +230,7 @@ function Header() {
         <div className={`notification-item ${notification.read ? 'read' : ''}`} key={notification.id}>
           <div className="notification-header-row">
             <div className="notification-type">
-              <img src={notification.icon} alt="message" className="notification-icon" />
+              <MessageSquare size={16} className="notification-icon" />
               <span className="notification-label">{notification.label}</span>
               <span className="notification-time">{notification.time}</span>
             </div>
@@ -228,7 +238,7 @@ function Header() {
               className="close-notification-btn"
               onClick={() => handleCloseNotification(notification.id)}
             >
-              <img src="/assets/images/x 2.png" alt="close" />
+              <X size={12} />
             </button>
           </div>
           <h4 className="notification-channel">{notification.channel}</h4>
@@ -262,22 +272,22 @@ function Header() {
         <div className={`notification-item ${notification.read ? 'read' : ''}`} key={notification.id}>
           <div className="notification-header-row">
             <div className="notification-type">
-              <img src={notification.icon} alt="github" className="notification-icon" />
+              <Github size={16} className="notification-icon" />
               <span className="notification-label">{notification.label}</span>
-              <img src="/assets/images/external-link 1.png" alt="external link" className="external-link" />
+              <ExternalLink size={12} className="external-link" />
               <span className="notification-time">{notification.time}</span>
             </div>
             <button 
               className="close-notification-btn"
               onClick={() => handleCloseNotification(notification.id)}
             >
-              <img src="/assets/images/x 2.png" alt="close" />
+              <X size={12} />
             </button>
           </div>
           <h4 className="notification-repo">{notification.repo}</h4>
           <div className="notification-content">
             <div className="github-icon">
-              <img src={notification.icon2} alt="pull request" />
+              <GitBranchPlus size={32} />
             </div>
             <div className="pr-details">
               <p><strong>{notification.user}</strong> created a pull request</p>
@@ -307,20 +317,20 @@ function Header() {
           <div className="notification-header-row">
             <div className="notification-type">
               <span className="notification-label">{notification.label}</span>
-              <img src={notification.icon} alt="alert" className="notification-icon" />
+              <AlertCircle size={16} className="notification-icon" />
               <span className="notification-time">{notification.time}</span>
             </div>
             <button 
               className="close-notification-btn"
               onClick={() => handleCloseNotification(notification.id)}
             >
-              <img src="/assets/images/x 2.png" alt="close" />
+              <X size={12} />
             </button>
           </div>
           <div className="alert-repo">
-            <img src={notification.repoIcon} alt="github" />
+            <Github size={16} />
             <h4>{notification.repo}</h4>
-            <img src="/assets/images/external-link 1.png" alt="external link" className="external-link" />
+            <ExternalLink size={12} className="external-link" />
           </div>
           <div className="notification-content">
             <div className="alert-message">
@@ -369,7 +379,7 @@ function Header() {
               onClick={handleNewRepoClick}
               className="new-repo-btn"
             >
-              <img src="/assets/images/plus 1.png" alt="plus" />
+              <Plus size={16} />
               <span>New Repository</span>
             </button>
 
@@ -380,7 +390,7 @@ function Header() {
                 onClick={toggleNotificationPanel}
                 className="bell-btn"
               >
-                <img src="/assets/images/bell 1.png" alt="bell" />
+                <Bell size={24} />
                 {notifications.length > 0 && (
                   <span className="notification-badge">{notifications.length}</span>
                 )}
@@ -393,7 +403,7 @@ function Header() {
               >
                 <div className="notification-header">
                   <div className="notification-title">
-                    <img src="/assets/images/bell 1.png" alt="bell" />
+                    <Bell size={20} />
                     <h3>Notifications ({notifications.length})</h3>
                   </div>
                   <div className="notification-actions">
@@ -402,13 +412,13 @@ function Header() {
                       onClick={handleMarkAllAsRead}
                     >
                       <span>Mark all as read</span>
-                      <img src="/assets/images/double tick.png" alt="mark read" />
+                      <CheckCheck size={12} />
                     </button>
                     <button 
                       className="close-panel-btn"
                       onClick={closeNotificationPanel}
                     >
-                      <img src="/assets/images/x 2.png" alt="close" />
+                      <X size={16} />
                     </button>
                   </div>
                 </div>
@@ -438,7 +448,7 @@ function Header() {
               onClick={() => setIsMenuOpen(true)}
               className="hamburger"
             >
-              <img src="/assets/images/menu 1.png" alt="menu" />
+              <Menu size={24} />
             </button>
           </div>
         </div>
@@ -450,7 +460,7 @@ function Header() {
           onClick={() => setIsMenuOpen(false)}
           className="close-btn"
         >
-          <img src="/assets/images/x 2.png" alt="close" />
+          <X size={20} />
         </button>
 
         {/* User Profile */}
@@ -466,27 +476,27 @@ function Header() {
 
         {/* Menu Items */}
         <div className="menu-item" onClick={() => handleMenuItemClick('Dashboard')}>
-          <img src="/assets/images/layout-dashboard 1.png" alt="dashboard" />
+          <LayoutDashboard size={20} />
           <span>Dashboard</span>
         </div>
 
         <div className="menu-item" onClick={() => handleMenuItemClick('Explore')}>
-          <img src="/assets/images/search 1.png" alt="explore" />
+          <Search size={20} />
           <span>Explore</span>
         </div>
 
         <div className="menu-item" onClick={() => handleMenuItemClick('Repositories')}>
-          <img src="/assets/images/folder 2.png" alt="repos" />
+          <Folder size={20} />
           <span>Repositories</span>
         </div>
 
         <div className="menu-item" onClick={() => handleMenuItemClick('Workspaces')}>
-          <img src="/assets/images/workspace 1.png" alt="workspace" />
+          <Briefcase size={20} />
           <span>Workspaces</span>
         </div>
 
         <div className="menu-item" onClick={() => handleMenuItemClick('Settings')}>
-          <img src="/assets/images/settings 1.png" alt="setting" />
+          <Settings size={20} />
           <span>Settings</span>
         </div>
 
@@ -494,7 +504,7 @@ function Header() {
 
         {/* Logout */}
         <div className="menu-item logout-item" onClick={handleLogout}>
-          <img src="/assets/images/log-out 1.png" alt="logout" />
+          <LogOut size={20} />
           <span>Log out</span>
         </div>
       </div>

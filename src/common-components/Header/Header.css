@@ -30,7 +30,7 @@
     width: auto;
 }
 
-/* YOUR New Repository Button (ON NAV BAR) */
+/* New Repository Button (ON NAV BAR) */
 .new-repo-btn {
     display: flex;
     align-items: center;
@@ -55,10 +55,10 @@
     background-color: var(--primary-button-active);
 }
 
-.new-repo-btn img {
-    width: 16px;
-    height: 16px;
-    filter: invert(1);
+/* Lucide icons in new repo button */
+.new-repo-btn svg {
+    color: var(--primary-text-color);
+    stroke: currentColor;
 }
 
 /* ===== RIGHT SECTION ===== */
@@ -89,10 +89,10 @@
     background-color: var(--secondary-button-hover);
 }
 
-.bell-btn img {
-    width: 24px;
-    height: 24px;
-    filter: brightness(0) invert(0.9);
+/* Lucide icons in bell button */
+.bell-btn svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 .notification-badge {
@@ -148,10 +148,10 @@
     gap: 8px;
 }
 
-.notification-title img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(0.8);
+/* Lucide icons in notification title */
+.notification-title svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 .notification-title h3 {
@@ -185,10 +185,10 @@
     background-color: var(--primary-button-hover);
 }
 
-.mark-all-btn img {
-    width: 12px;
-    height: 12px;
-    filter: brightness(0) invert(0.7);
+/* Lucide icons in mark all button */
+.mark-all-btn svg {
+    color: var(--primary-text-color);
+    stroke: currentColor;
 }
 
 .close-panel-btn {
@@ -204,10 +204,10 @@
     background-color: var(--secondary-button-hover);
 }
 
-.close-panel-btn img {
-    width: 16px;
-    height: 16px;
-    filter: brightness(0) invert(0.7);
+/* Lucide icons in close panel button */
+.close-panel-btn svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 /* Notifications List */
@@ -245,10 +245,10 @@
     gap: 6px;
 }
 
+/* Lucide notification icons */
 .notification-icon {
-    width: 16px;
-    height: 16px;
-    filter: brightness(0) invert(0.8);
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 .notification-label {
@@ -263,10 +263,11 @@
     margin-left: 4px;
 }
 
+/* Lucide external link icon */
 .external-link {
-    width: 12px;
-    height: 12px;
-    filter: brightness(0) invert(0.6);
+    color: var(--secondary-text-color);
+    stroke: currentColor;
+    opacity: 0.6;
 }
 
 .close-notification-btn {
@@ -282,10 +283,10 @@
     background-color: var(--secondary-button-hover);
 }
 
-.close-notification-btn img {
-    width: 12px;
-    height: 12px;
-    filter: brightness(0) invert(0.7);
+/* Lucide icons in close notification button */
+.close-notification-btn svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 /* Notification Content */
@@ -305,10 +306,10 @@
     margin-bottom: 8px;
 }
 
-.alert-repo img:first-child {
-    width: 16px;
-    height: 16px;
-    filter: brightness(0) invert(0.8);
+/* Lucide icons in alert repo */
+.alert-repo svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 .alert-repo h4 {
@@ -342,6 +343,12 @@
 
 .github-icon img {
     border-radius: 6px;
+}
+
+/* Lucide github icon */
+.github-icon svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 /* Message Preview */
@@ -450,7 +457,7 @@
 
 .load-past-btn:hover {
     background-color: var(--secondary-button-hover);
-    border-color: rgba(239, 238, 238, 0.4); /* Slightly more opacity on hover */
+    border-color: rgba(239, 238, 238, 0.4);
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
     transform: translateY(-1px);
 }
@@ -473,10 +480,10 @@
     background-color: var(--secondary-button-hover);
 }
 
-.hamburger img {
-    width: 24px;
-    height: 24px;
-    filter: brightness(0) invert(0.9);
+/* Lucide icons in hamburger */
+.hamburger svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 /* ===== SIDEBAR MENU ===== */
@@ -487,7 +494,7 @@
     width: 280px;
     height: 100vh;
     background-color: var(--dark-bg);
-    border-left: 1px solid rgba(239, 238, 238, 0.28); /* var(--popup-border) with 28% opacity */
+    border-left: 1px solid rgba(239, 238, 238, 0.28);
     padding: 2rem 1.5rem;
     z-index: 2000;
     transition: right 0.3s ease;
@@ -510,14 +517,14 @@
     border-radius: 6px;
 }
 
-.close-btn img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(0.7);
-}
-
 .close-btn:hover {
     background-color: var(--secondary-button-hover);
+}
+
+/* Lucide icons in close button */
+.close-btn svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
 }
 
 /* User Profile in Sidebar */
@@ -568,10 +575,15 @@
     color: var(--primary-text-color);
 }
 
-.menu-item img {
-    width: 20px;
-    height: 20px;
-    filter: brightness(0) invert(0.7);
+/* Lucide icons in menu items */
+.menu-item svg {
+    color: var(--secondary-text-color);
+    stroke: currentColor;
+    transition: color 0.2s;
+}
+
+.menu-item:hover svg {
+    color: var(--primary-text-color);
 }
 
 .menu-item span {
@@ -582,10 +594,6 @@
 /* Logout Item */
 .logout-item:hover {
     background-color: rgba(248, 81, 73, 0.1);
-}
-
-.logout-item img {
-    filter: invert(0.4) sepia(1) saturate(5) hue-rotate(320deg);
 }
 
 /* Menu Divider */
@@ -627,7 +635,7 @@
 }
 
 .notifications-list::-webkit-scrollbar-thumb:hover {
-    background: rgba(239, 238, 238, 0.2); 
+    background: rgba(239, 238, 238, 0.3); 
 }
 
 /* ===== RESPONSIVE ===== */
@@ -703,7 +711,6 @@
     }
 }
 
-/* Add space so content isn't hidden under nav */
 body {
     padding-top: 80px;
 }

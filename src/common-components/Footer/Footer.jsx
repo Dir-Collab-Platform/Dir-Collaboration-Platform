@@ -1,14 +1,15 @@
 import React from 'react';
+import { Copyright } from 'lucide-react';
 import './Footer.css';
 
 function Footer() {
   return (
-    <footer>
+    <footer className="footer">
       <div className="footer-container">
         <div className="container">Dir</div>
         <div className="container">2025</div>
         <div className="container">
-          <img src="/assets/images/copyright 1.png" alt="copyright" />
+          <Copyright size={16} />
         </div>
         <div className="container">All rights reserved</div>
         <div className="container"><a href="#">Docs</a></div>

@@ -5,19 +5,25 @@ import Repositories from './pages/Repositories/Repositories/Repositories'
 import Workspace from './pages/Workspace/Workspace/Workspace'
 import Repository from './pages/Repository/Repository/Repository'
 import Workspaces from './pages/Workspaces/Workspaces/Workspaces'
+import Header from "./common-components/Header/Header";
+import Footer from "./common-components/Footer/Footer";
 
 function App() {
   return (
     <>
-      <Routes>
-        <Route path='/' element={<Dashboard />}/> 
-        <Route path='/repositories' element={<Repositories />} />
-        <Route path='/repository' element={<Repository />} />
-        <Route path='/workspace' element={<Workspace />} />
-        <Route path='/workspaces' element={<Workspaces />} />
-      </Routes>
+      <Header />
+      <main className="main-content">
+        <Routes>
+          <Route path='/' element={<Dashboard />}/> 
+          <Route path='/repositories' element={<Repositories />} />
+          <Route path='/repository' element={<Repository />} />
+          <Route path='/workspace' element={<Workspace />} />
+          <Route path='/workspaces' element={<Workspaces />} />
+        </Routes>
+      </main>
+      <Footer />
     </>
   )
 }
 
-export default App
+export default App;

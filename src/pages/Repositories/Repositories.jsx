@@ -1,4 +1,4 @@
-import RepositoryList from "./RepositoryList/RepositoryList";
+import RepositoryList from "./RepositoryList";
 export default function Repositories() {
     return(
         < RepositoryList/>

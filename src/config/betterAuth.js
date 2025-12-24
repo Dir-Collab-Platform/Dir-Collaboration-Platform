@@ -7,20 +7,20 @@ dotenv.config();
 
 // Ensure connection before initializing Auth
 await mongoose.connect(process.env.MONGO_URI);
-const db = mongoose.connection.db; 
+const db = mongoose.connection.db;
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.BETTER_AUTH_URL,
   basePath: "/api/auth",
-  
+
   // FIX: Use the adapter function and pass the native 'db' object
   database: mongodbAdapter(db, {
     collections: {
-      user: "users",       // Map to your Mongoose collection names
+      user: "users", // Map to your Mongoose collection names
       session: "sessions",
       account: "accounts",
-    }
+    },
   }),
 
   socialProviders: {
@@ -39,14 +39,14 @@ export const auth = betterAuth({
       },
     },
   },
-  
+
   // Allow Better Auth to recognize your custom Mongoose fields
   user: {
     additionalFields: {
       githubUserName: { type: "string" },
       gitHubID: { type: "string" },
       role: { type: "string" },
-    }
+    },
   },
 
   emailAndPassword: {

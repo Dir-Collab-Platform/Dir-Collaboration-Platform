@@ -33,17 +33,6 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    //OAuth tokens
-    accessToken: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    refreshToken: {
-      type: String,
-      select: false,
-    },
-
     //system control fields
     role: {
       type: String,

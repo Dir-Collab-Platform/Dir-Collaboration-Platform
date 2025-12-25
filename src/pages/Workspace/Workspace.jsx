@@ -2,7 +2,7 @@ import Footer from "../../common-components/Footer/Footer"
 import Header from "../../common-components/Header/Header"
 import ChatPanel from "./components/ChatPanel"
 import CodePanel from "./components/CodePanel"
-import WorkspaceHeader from "./components/WorkspaceHeader"
+import WorkspaceHeader from "./components/Code/WorkspaceHeader"
 
 export default function Workspace() {
     return (

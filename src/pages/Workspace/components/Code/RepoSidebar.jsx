@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react";
-import { GithubIcon } from "../../../../public/assets/icons/icons";
+import { GithubIcon } from "../../../../../public/assets/icons/icons";
 import FileTree from "./FileTree";
 import SidebarToolbar from "./SidebarToolbar";
 import LanguageStatsBar from "./LanguageStatsBar";

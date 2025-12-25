@@ -1,5 +1,5 @@
 import { GitFork, GitPullRequest } from "lucide-react";
-import MetaTag from "../../../common-components/MetaTag";
+import MetaTag from "../../../../common-components/MetaTag";
 
 function CounterButton({icon, name, count}) {
     return (

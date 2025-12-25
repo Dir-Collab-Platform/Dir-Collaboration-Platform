@@ -1,3 +1,2 @@
-export default function Workspaces() {
-    return <h1>Workspaces List page</h1>
-}
+import Header from "../../../common-components/Header/Header";
+export default function Workspaces() {}

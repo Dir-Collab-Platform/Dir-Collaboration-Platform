@@ -13,7 +13,7 @@ function CounterButton({icon, name, count}) {
 
 export default function WorkspaceHeader() {
     return (
-        <div className="flex justify-between py-4">
+        <div className="flex justify-between py-4 px-6">
             <div className="workspace-name flex gap-4 font-semibold items-center">
                 {/* tobe replaced by actual data */}
                 <h1 className="header1">username/My-repository</h1>

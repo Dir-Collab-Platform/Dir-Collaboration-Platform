@@ -6,8 +6,10 @@ export function CodeBody() {
     return (
         <div className="code-body flex flex-col gap-4 h-full">
             <CodeViewerHeader />
-            <CodeViewer />
-            <ReadMe />
+            <div className="flex flex-col gap-8 pr-6">
+                <CodeViewer />
+                <ReadMe />
+            </div>
         </div>
     )
 }

@@ -5,6 +5,7 @@ import {Repository} from "../models/repository.model.js";
 import { Notification } from "../models/notification.model.js";
 import axios from "axios"
 import crypto from "crypto"
+import { repositoryService } from "../services/github.service.js";
 
 passport.use(new GitHubStrategy(
   {
@@ -60,36 +61,7 @@ passport.use(new GitHubStrategy(
 
 
                 //fetching repos from github API
-                const repoRes = await axios.get("https://api.github.com/user/repos", {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`
-                    },
-                    params: {
-                        type: 'owner',
-                        sort: 'updated',
-                        per_page:100
-                    }
-                });
-
-                
-
-                const reposObjectIds = await Promise.all(repoRes.data.map( async (repo) => {
-                    const r = await Repository.findOneAndUpdate(
-                        {name: repo.full_name}, // using repo's full name for unique identification
-                        {
-                            name: repo.full_name,
-                            description: repo.description,
-                            ownerId: user._id, // linking to the user first saved
-                        },
-                        {upsert: true, new:true}
-
-                    );
-
-                    return r._id
-                }
-                ));
-
-                user.reposOwned = reposObjectIds;
+                const reposObjectIds =await repositoryService.syncUserRepos(user,accessToken)
 
                 // Handling Notification
 

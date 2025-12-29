@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Repository } from "../models/repository.model";
+import { Repository } from "../models/repository.model.js";
 
 
 

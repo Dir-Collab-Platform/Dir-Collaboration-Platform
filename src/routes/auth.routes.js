@@ -7,7 +7,7 @@ env.config();
 const authRouter = Router();
 
 //starting github authentication, github login
-authRouter.get("/github", passport.authenticate("github", {scope: ["user:email"]}));
+authRouter.get("/github", passport.authenticate("github", {scope: ["user:email", " read:user", "repo", "workflow", "delete_repo"]}));
 
 //github callback url
 authRouter.get(

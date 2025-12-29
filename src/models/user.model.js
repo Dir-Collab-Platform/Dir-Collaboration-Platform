@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    _id: String,
     //github profile fields
     githubUsername: {
       type: String,

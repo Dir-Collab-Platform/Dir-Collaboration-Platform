@@ -4,7 +4,7 @@ import './github.strategy.js';
 
 //serialize user id 
 passport.serializeUser((user, cb) => {
-    cb(null, user.id);
+    cb(null, user._id);
 });
 //deserialze from session 
 passport.deserializeUser(async (id, cb) => {

@@ -27,7 +27,7 @@ app.use(cors({
 //session middleware
 app.use(session({
   name: "dir.sid",
-  secret: process.env.SESSION_SECRET, 
+  secret: process.env.JWT_SECRET, 
   resave: false,
   saveUninitialized: false,
   cookie: {

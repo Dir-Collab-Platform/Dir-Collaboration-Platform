@@ -12,4 +12,3 @@ export const globalErrorHandler = (err, req, res, next) => {
     status: "error",
   });
 };
-

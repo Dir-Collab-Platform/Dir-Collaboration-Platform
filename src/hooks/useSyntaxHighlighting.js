@@ -1,37 +1,79 @@
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from 'react'
+import { cleanHTMLData } from '../utils/security'
 
+/**
+ * Custom hook to highlight code using PrismJS.
+ * It handles its own Prism dependency by checking and loading scripts dynamically.
+ * Note: cleanHTMLData is implemented locally to ensure the file is self-contained and resolves build errors.
+ */
 export function useSyntaxHighlighting(code, language = 'none') {
-    return useMemo(() => {
-        if (!code) return ""
-        
-        // Ensure Prism is available on the window object
-        const Prism = window.Prism
+  const [isPrismReady, setIsPrismReady] = useState(!!window.Prism)
 
-        if (!Prism) {
-            console.warn("PrismJS not found on window object")
-            return code
+  useEffect(() => {
+    if (window.Prism) return
+
+    // 1. Load CSS
+    if (!document.getElementById('prism-theme')) {
+      const link = document.createElement('link')
+      link.id = 'prism-theme'
+      link.rel = 'stylesheet'
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css'
+      document.head.appendChild(link)
+    }
+
+    // 2. Load JS
+    if (!document.getElementById('prism-core')) {
+      const script = document.createElement('script')
+      script.id = 'prism-core'
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js'
+      script.async = true
+      script.onload = () => setIsPrismReady(true)
+      document.body.appendChild(script)
+    } else {
+      // If script exists but onload hasn't fired yet for this hook instance
+      const checkInterval = setInterval(() => {
+        if (window.Prism) {
+          setIsPrismReady(true)
+          clearInterval(checkInterval)
         }
+      }, 100)
+      return () => clearInterval(checkInterval)
+    }
+  }, [])
 
-        // Use the language/extension directly as Prism handles most common aliases
-        const normalizedLang = language.toLowerCase()
+  return useMemo(() => {
+    if (!code) return ""
+    
+    const Prism = window.Prism
 
-        // Check if the grammar for the language is loaded
-        if (Prism.languages[normalizedLang]) {
-            try {
-                return Prism.highlight(code, Prism.languages[normalizedLang], normalizedLang)
-            } catch (error) {
-                console.error("Highlighting error:", error)
-                return code
-            }
-        }
+    // Helper to escape HTML characters for plain text fallback
+    const escapeHTML = (str) => {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+    }
 
-        // Fallback to basic HTML escaping if language grammar isn't loaded
-        return code
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;")
-            
-    }, [code, language])
+    if (!Prism || !isPrismReady) {
+      return cleanHTMLData(escapeHTML(code))
+    }
+
+    const normalizedLang = language.toLowerCase()
+    
+    // Check if the specific language grammar is loaded
+    if (!Prism.languages[normalizedLang]) {
+      return cleanHTMLData(escapeHTML(code))
+    }
+
+    try {
+      // Highlight and then sanitize the resulting HTML string
+      const highlighted = Prism.highlight(code, Prism.languages[normalizedLang], normalizedLang)
+      return cleanHTMLData(highlighted)
+    } catch (error) {
+      console.error("Highlighting error:", error)
+      return cleanHTMLData(escapeHTML(code))
+    }
+  }, [code, language, isPrismReady])
 }

@@ -1,5 +1,5 @@
 export default function getRelativeTime (dateString) {
-    if (!dateString) return '2mo'
+    if (!dateString) return null
     const date = new Date(dateString)
     const now = new Date()
     const diffInSeconds = Math.floor((now - date) / 1000)

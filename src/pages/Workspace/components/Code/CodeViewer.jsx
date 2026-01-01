@@ -1,15 +1,11 @@
-import { useContext, useMemo, useEffect, useRef } from 'react'
+import { useContext, useMemo } from 'react'
 import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
-import { decodeFileContent } from '../../../../utils/utils';
-
-const PRISM_CDN = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js";
-const PRISM_THEME = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css";
-const PRISM_AUTO_LOADER = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js";
+import { decodeFileContent } from '../../../../utils/utils'
+import { useSyntaxHighlighting } from '../../../../hooks/useSyntaxHighlighting'
 
 export default function CodeViewer() {
-    const context = useContext(WorkspaceContext);
-    const codeRef = useRef(null);
-    const { activeFile } = context || {};
+    const context = useContext(WorkspaceContext)
+    const { activeFile } = context || {}
 
     const extToLang = {
         'py': 'Python',
@@ -22,54 +18,30 @@ export default function CodeViewer() {
         'html': 'HTML',
         'md': 'Markdown',
         'json': 'JSON'
-    };
+    }
 
-    // 1. Load Prism Library
-    useEffect(() => {
-        if (!document.getElementById('prism-theme')) {
-            const link = document.createElement('link');
-            link.id = 'prism-theme';
-            link.rel = 'stylesheet';
-            link.href = PRISM_THEME;
-            document.head.appendChild(link);
-        }
-
-        if (!window.Prism) {
-            const script = document.createElement('script');
-            script.src = PRISM_CDN;
-            script.onload = () => {
-                const loader = document.createElement('script');
-                loader.src = PRISM_AUTO_LOADER;
-                document.head.appendChild(loader);
-            };
-            document.head.appendChild(script);
-        }
-    }, []);
-
-    // 2. Decode content
-    const content = useMemo(() => {
-        if (!activeFile?.content) return "";
+    // 1. Decode content using the utility function
+    const rawContent = useMemo(() => {
+        if (!activeFile?.content) return ""
         return decodeFileContent(activeFile.content, activeFile.encoding)
-    }, [activeFile]);
+    }, [activeFile])
 
-    // 3. Trigger Highlighting
-    useEffect(() => {
-        if (window.Prism && codeRef.current) {
-            window.Prism.highlightElement(codeRef.current);
-        }
-    }, [content, activeFile]);
+    // 2. Detect language based on extension
+    const extension = activeFile?.name?.split('.').pop()?.toLowerCase() || 'none'
+
+    // 3. Use our new hook for syntax highlighting
+    const highlightedHtml = useSyntaxHighlighting(rawContent, extension)
 
     if (!activeFile) {
         return (
             <div className="flex items-center justify-center bg-(--dark-bg) h-64 rounded-2xl border border-(--main-border-color) text-(--secondary-text-color) italic">
                 Select a file to preview
             </div>
-        );
+        )
     }
 
     const encoding = activeFile.encoding || ''
-    const extension = activeFile.name?.split('.').pop()?.toLowerCase() || 'none';
-    const langClass = `language-${extension}`;
+    const langClass = `language-${extension}`
 
     return (
         <div className="code-viewer-container flex flex-col w-full bg-(--code-viewer-container) border border-(--main-border-color) rounded-2xl overflow-hidden shadow-2xl">
@@ -85,24 +57,25 @@ export default function CodeViewer() {
 
             {/* Code Body */}
             <div className="grow overflow-auto custom-scrollbar relative">
-                <pre className={`!m-0 !p-6 !bg-transparent !text-[13px] line-numbers ${langClass}`}>
-                    <code ref={codeRef} className={langClass}>
-                        {content}
-                    </code>
+                <pre className={`!m-0 !p-6 !bg-transparent !text-[13px] ${langClass}`}>
+                    <code 
+                        className={langClass}
+                        dangerouslySetInnerHTML={{ __html: highlightedHtml }} 
+                    />
                 </pre>
             </div>
 
             {/* Footer Stats */}
             <div className="px-6 py-2 bg-(--code-upper-bg) border-t border-(--main-border-color) flex justify-between items-center">
                 <div className="text-[10px] text-(--secondary-text-color) font-mono opacity-60">
-                    {content.split('\n').length} lines • {activeFile.size || 0} bytes
+                    {rawContent.split('\n').length} lines • {activeFile.size || 0} bytes
                 </div>
                 <div className="text-[10px] text-(--secondary-text-color) opacity-60 font-mono uppercase">
                     UTF-8
                 </div>
             </div>
 
-            {/* Prism Token Overrides (Using GitHub-Dark-inspired colors) */}
+            {/* Prism Token Overrides (Maintaining your custom theme) */}
             <style dangerouslySetInnerHTML={{ __html: `
                 pre[class*="language-"] {
                     text-shadow: none !important;
@@ -122,5 +95,5 @@ export default function CodeViewer() {
                 .token.tag { color: #7ee787 !important; }
             `}} />
         </div>
-    );
+    )
 }

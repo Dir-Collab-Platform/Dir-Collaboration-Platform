@@ -9,6 +9,15 @@ repoRouter.use(authMiddleware);
 repoRouter.get("/discovery", repoController.getGithubRepos); 
 repoRouter.post('/import', repoController.importRepo);
 
+
+// explore pubilc repos globally
+
+repoRouter.get('/explore', authMiddleware, repoController.explorePublicRepos)
+repoRouter.get('/topics', authMiddleware, repoController.getPopularTopics);
+repoRouter.post('/topics', authMiddleware, repoController.createTag); 
+repoRouter.delete('/topics/:id', authMiddleware, repoController.deleteTag); 
+
+
 //CRUD functinoalities 
 repoRouter.get('/', repoController.getActiveRepos); 
 repoRouter.get('/:id', repoController.getActiveRepo); 

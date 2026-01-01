@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve-workspace": "json-server --watch ./public/data/workspace.json --port 4000"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
@@ -18,7 +19,7 @@
     "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.1",  
+    "@eslint/js": "^9.39.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
@@ -26,6 +27,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "json-server": "^1.0.0-beta.3",
     "vite": "^7.2.4"
   }
 }

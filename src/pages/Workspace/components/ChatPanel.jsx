@@ -5,7 +5,7 @@ import Collaborators from "./Chat/Collaborators";
 
 export default function ChatPanel() {
     return (
-        <div className="chat-panel overflow-hidden bg-(--card-bg) border border-(--main-border-color) rounded-2xl">
+        <div className="chat-panel overflow-hidden bg-(--card-bg) border border-(--main-border-color) rounded-2xl h-[calc(100vh-180px)]">
             <ChannelList />
 
             <div className="chat-container">

@@ -460,11 +460,10 @@ export const createRemoteRepo = async (req, res) => {
     });
   } catch (error) {
     await session.abortTransaction();
-    res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: error.message });
     //here handle github specific errors like if the user name already exists
     const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
+
+    let message = error.message;
     if (error.status === 422) {
       message =
         "A repository with this name already exists on your GitHub account";
@@ -475,5 +474,74 @@ export const createRemoteRepo = async (req, res) => {
     session.endSession();
   }
 };
+
+//@desc 11. list the repo files and open them both with the same end point for both workspaces and github repos
+//@route GET /api/repos/contents
+//how to use it: if path is provided in query param then list files in that path else list files in root directory
+export const getContents = async (req, res)=>{
+  try{
+    const {workspaceId, owner, repo, path=""} = req.query;
+
+    let targetOwner = owner;
+    let targetRepo = repo;
+
+    //if workspaceId is provided then fetch the repo details from database
+    if(workspaceId){
+      const workspace = await Repository.findById(workspaceId);
+      if(!workspace){
+        return res.status(StatusCodes.NOT_FOUND).json({status:"error", message:"Workspace not found in Dir"});
+      }
+      targetOwner = workspace.githubOwner;
+      targetRepo = workspace.githubRepoName;
+    } 
+
+    //check if owner and repo are provided 
+    if(!targetOwner || !targetRepo){
+      return res.status(StatusCodes.BAD_REQUEST).json({status:"error", message:"Owner and Repo name are required"});
+    }
+
+    const octokit = createGitHubClient(req.user.accessToken);
+
+    //we use the getContent api of github to list files and folders
+    const {data} = await octokit.rest.repos.getContent({
+      owner: targetOwner,
+      repo: targetRepo,
+      path: path,
+    });
+
+    //here comes the logic to check if we need to return files or folders(folder structure)
+    if(Array.isArray(data)){
+      //if data is an array then it's a folder containing files and subfolders
+      const sidebarItems = data.map(item=>({
+        name: item.name,  
+        path: item.path,
+        type: item.type, //file or dir(directory)
+        sha: item.sha,
+        url: item.html_url,
+      }));
+      return res.status(StatusCodes.OK).json({status:"success", type: "directory", data: sidebarItems});
+    } else {
+      //if it's not a list then it's a single file
+      //github returns file content in base64 encoding, so we need to decode it
+      const decodedContent = Buffer.from(data.content, 'base64').toString('utf-8');
+
+      return res.status(StatusCodes.OK).json({status:"success", type: "file", data:{
+        name: data.name,
+        path: data.path,
+        content: decodedContent,
+        size: data.size,
+        sha: data.sha,
+        downloadUrl: data.download_url,
+      }});
+    } 
+  } catch(error){
+    const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
+    res.status(status).json({status:"error", message: error.message || "Failed to fetch repository contents"});
+
+  }
+};
+
+
+
 
 //@todo: also a controller to delete directly from dir to github

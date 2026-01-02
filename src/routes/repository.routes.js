@@ -1,5 +1,7 @@
 import express from "express"; 
 import * as repoController from "../controllers/repository.controller.js"; 
+import * as activityController from "../controllers/activity.controller.js"; 
+import * as exploreController from "../controllers/explore.controller.js"; 
 import {authMiddleware} from "../middlewares/auth.middleware.js"; 
 
 const repoRouter = express.Router(); 
@@ -12,10 +14,10 @@ repoRouter.post('/import', repoController.importRepo);
 
 // explore pubilc repos globally
 
-repoRouter.get('/explore', authMiddleware, repoController.explorePublicRepos)
-repoRouter.get('/topics', authMiddleware, repoController.getPopularTopics);
-repoRouter.post('/topics', authMiddleware, repoController.createTag); 
-repoRouter.delete('/topics/:id', authMiddleware, repoController.deleteTag); 
+repoRouter.get('/explore', authMiddleware, exploreController.explorePublicRepos)
+repoRouter.get('/topics', authMiddleware, exploreController.getPopularTopics);
+repoRouter.post('/topics', authMiddleware, exploreController.createTag); 
+repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag); 
 
 
 //CRUD functinoalities 
@@ -27,5 +29,8 @@ repoRouter.delete('/:id', repoController.deleteRepo);
 //sync with github 
 repoRouter.post('/:id/sync', repoController.manualSync); 
 repoRouter.post('/:id/tags', repoController.addTags); 
+
+// getting a specific repo history
+repoRouter.get('/:id/activity',activityController.getRepoActivity )
 
 export default repoRouter;  

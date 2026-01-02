@@ -2,33 +2,33 @@ import mongoose from "mongoose";
 
 export const activityLogSchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required:true,
+        required: true,
     },
-    repoId:{
+    repoId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Repository",
-        required:true,
+        required: false,
     },
-    action:{
-        type:String,
-        required:true,
+    action: {
+        type: String,
+        required: true,
     },
-    targetType:{
-            type:String,
-            enum:[ "repository", "pull_request", "issue", "message", "comment"],
-            required:true,
-        },
-    targetId:{
-            type:mongoose.Schema.Types.ObjectId,
-            required:true,
-    
+    targetType: {
+        type: String,
+        enum: ["repository", "pull_request", "issue", "message", "comment", "tag", "user", "workspace"],
+        required: true,
     },
-    details:{
+    targetId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+
+    },
+    details: {
         type: mongoose.Schema.Types.Mixed,
     }
-}, {timestamps: true});
+}, { timestamps: true });
 
 activityLogSchema.index({ userId: 1 });
 activityLogSchema.index({ repoId: 1 });

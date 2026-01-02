@@ -9,7 +9,8 @@ import authRouter from "./routes/auth.routes.js";
 import "./auth/passport.js"; //serialization and deserliazation logic
 import "./auth/jwt.strategy.js"; //jwt strategy
 import userRouter from "./routes/user.routes.js";
-import repoRouter from './routes/repository.routes.js'; 
+import repoRouter from './routes/repository.routes.js';
+import activityRouter from "./routes/activity.routes.js"; 
 
 //configure dotenv 
 dotenv.config();
@@ -46,6 +47,7 @@ app.use(passport.session());
 app.use("/auth", authRouter);
 app.use("/api/repos", repoRouter); 
 app.use("/api", userRouter);
+app.use("/api/activity", activityRouter);
 
 
 //routes

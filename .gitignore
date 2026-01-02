@@ -1,3 +1,4 @@
 .env
 node_modules
 redis-caching-implementation.md 
+API_DOCUMENTATION.md

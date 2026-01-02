@@ -99,6 +99,9 @@ export const updatedProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select("-__v");
 
+    //@todo: logging
+    
+
     // cache invalidation
     await redisClient.del(getUserKey(req.user._id))
 

@@ -54,7 +54,15 @@ export const importRepo = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { githubId, githubRepoName, githubOwner, githubFullName, description, url, language } = req.body;
+    const {
+      githubId,
+      githubRepoName,
+      githubOwner,
+      githubFullName,
+      description,
+      url,
+      language,
+    } = req.body;
 
     //check if repo already imported
     const existingRepo = await Repository.findOne({ githubId });
@@ -236,7 +244,7 @@ export const updateRepo = async (req, res) => {
 
     //update the repo in github also
     const githubUpdate = {
-      owner: repo.githubOwner, 
+      owner: repo.githubOwner,
       repo: repo.githubRepoName,
     };
 
@@ -299,7 +307,7 @@ export const deleteRepo = async (req, res) => {
   }
 };
 
-//@desc Create a new workspace by providing a GitHub repo name and a custom Dir name
+//@desc 9. Create a new workspace by providing a GitHub repo name and a custom Dir name
 //@route POST /api/repos/create-workspace
 export const createWorkspace = async (req, res) => {
   const session = await mongoose.startSession();
@@ -386,5 +394,86 @@ export const createWorkspace = async (req, res) => {
   }
 };
 
-//@todo: add a controller to create repo in github from dir directly
+//@desc 10. create a repo directly from dir to github and a workspace for that repo direclt in dir
+//@route POST /api/repos/create-remote
+export const createRemoteRepo = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { name, description, isPrivate, auto_init, gitignore_template } =
+      req.body;
+    if (!name) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Repository name is required" });
+    }
+
+    const octokit = createGitHubClient(req.user.accessToken);
+
+    //first create the remote repo in github
+    const { data: githubRepo } =
+      await octokit.rest.repos.createForAuthenticatedUser({
+        name,
+        description: description || "",
+        private: isPrivate === "private",
+        auto_init: auto_init === "Yes",
+        gitignore_template: gitignore_template == "Yes" ? "Node" : undefined,
+      });
+
+    //then create the workspace in dir for that repo
+    const newRepo = await Repository.create(
+      [
+        {
+          githubId: githubRepo.id.toString(),
+          githubRepoName: githubRepo.name,
+          githubOwner: githubRepo.owner.login,
+          githubFullName: githubRepo.full_name,
+          workspaceName: githubRepo.name, //default to the remote name when creating
+          description: githubRepo.description,
+          ownerId: req.user._id,
+          url: githubRepo.html_url,
+          isPrivate: githubRepo.private,
+          language: githubRepo.language,
+          members: [{ userId: req.user._id, role: "owner" }],
+          channels: [
+            { name: "general", channel_id: new mongoose.Types.ObjectId() },
+          ],
+        },
+      ],
+      { session }
+    );
+
+    //update user's worksplace(by default it's called reposOwned)
+    await User.findByIdAndUpdate(
+      req.user._id,
+      { $push: { reposOwned: newRepo[0]._id } },
+      { session }
+    );
+
+    await session.commitTransaction();
+
+    res.status(StatusCodes.CREATED).json({
+      status: "success",
+      message: "Repository created successfully",
+      data: newRepo[0],
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: error.message });
+    //here handle github specific errors like if the user name already exists
+    const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
+    if (error.status === 422) {
+      message =
+        "A repository with this name already exists on your GitHub account";
+    }
+
+    res.status(status).json({ status: "error", message });
+  } finally {
+    session.endSession();
+  }
+};
+
 //@todo: also a controller to delete directly from dir to github

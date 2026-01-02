@@ -124,7 +124,7 @@ export const importRepo = async (req, res) => {
       "imported repository",
       "repository",
       newRepo[0]._id,
-      `Initialized workspace for ${name}`
+      `Initialized workspace for ${githubRepoName}`
     )
 
     //update user's reposOwned list
@@ -364,7 +364,7 @@ export const addTags = async (req, res) => {
       "tagged workspace",
       "workspace",
       repo._id,
-      `Added tag #${tag} to ${repo.name}`
+      `Added tag #${tag} to ${repo.workspaceName}`
     );
 
     // cache invalidation
@@ -387,7 +387,7 @@ export const deleteRepo = async (req, res) => {
   try {
     // first need to get the name
     const repo = await Repository.findById(req.params.id);
-    const repoName = repo.name;
+    const repoName = repo.workspaceName;
 
     await Repository.findByIdAndDelete(req.params.id);
     await User.findByIdAndUpdate(req.user._id, {

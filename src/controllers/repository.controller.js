@@ -318,6 +318,7 @@ export const createWorkspace = async (req, res) => {
   try {
     const { workspaceName, description, githubRepoName } = req.body;
 
+    // we can leave out the workspace
     if (!githubRepoName || !workspaceName) {
       return res
         .status(StatusCodes.BAD_REQUEST)
@@ -522,7 +523,7 @@ export const getContents = async (req, res)=>{
         sha: item.sha,
         url: item.html_url,
       }));
-      return res.status(StatusCodes.OK).json({status:"success", type: "directory", data: sidebarItems});
+      return res.status(StatusCodes.OK).json({status:"success", type: "dir", data: sidebarItems});
     } else {
       //if it's not a list then it's a single file
       //github returns file content in base64 encoding, so we need to decode it

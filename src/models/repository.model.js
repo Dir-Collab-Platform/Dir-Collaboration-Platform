@@ -8,15 +8,35 @@ import { membershipSchema } from "./membership.model.js";
 const repositorySchema = new mongoose.Schema(
   {
     //github profile fields
-    githubId: { 
+    githubId: {
       type: String,
       required: true,
-      unique: true 
+      unique: true,
     },
-    name: {
+
+    //github repo name to separate it from workspace names
+    githubRepoName: {
       type: String,
       required: true,
       trim: true,
+    },
+
+    githubOwner: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    //dir workspace name
+    workspaceName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    githubFullName: {
+      type: String,
+      required: true,
       unique: true,
     },
     description: {

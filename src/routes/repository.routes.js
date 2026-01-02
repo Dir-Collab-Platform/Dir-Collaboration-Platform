@@ -20,6 +20,21 @@ repoRouter.post('/topics', authMiddleware, exploreController.createTag);
 repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag); 
 
 
+
+// explore pubilc repos globally
+
+repoRouter.get('/explore', authMiddleware, exploreController.explorePublicRepos)
+repoRouter.get('/topics', authMiddleware, exploreController.getPopularTopics);
+repoRouter.post('/topics', authMiddleware, exploreController.createTag); 
+repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag); 
+
+
+//creating repos and workspaces
+repoRouter.post('/create-workspace', repoController.createWorkspace);
+repoRouter.post('/create-remote', repoController.createRemoteRepo);
+
+//repository file management 
+repoRouter.get('/contents', repoController.getContents);
 //CRUD functinoalities 
 repoRouter.get('/', repoController.getActiveRepos); 
 repoRouter.get('/:id', repoController.getActiveRepo); 

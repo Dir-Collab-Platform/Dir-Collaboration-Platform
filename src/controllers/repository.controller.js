@@ -250,8 +250,10 @@ export const updateRepo = async (req, res) => {
       repo: repo.githubRepoName,
     };
 
-    if (description !== undefined && description !== null)
+    if (description !== undefined && description !== null){
       githubUpdate.description = description;
+    }
+      
 
     await okctokit.rest.repos.update(githubUpdate);
 
@@ -261,7 +263,6 @@ export const updateRepo = async (req, res) => {
       { new: true }
     );
 
-    //@todo: after update also try to update the githbub repo via api if name/description changed
     res.status(StatusCodes.OK).json({
       status: "success",
       message: "Updated locally and on GitHub",

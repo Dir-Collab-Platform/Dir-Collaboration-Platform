@@ -2,14 +2,13 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
+    
     //github profile fields
-    githubUserName: {
+    githubUsername: {
       type: String,
-      required: true,
       trim: true,
-      unique: true,
     },
-    gitHubID: {
+    githubId: {
       type: String,
       required: true,
       unique: true,
@@ -31,17 +30,6 @@ const userSchema = new mongoose.Schema(
     bio: {
       type: String,
       trim: true,
-    },
-
-    //OAuth tokens
-    accessToken: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    refreshToken: {
-      type: String,
-      select: false,
     },
 
     //system control fields
@@ -73,6 +61,10 @@ const userSchema = new mongoose.Schema(
         enum: ["light", "dark", "system"],
         default: "system",
       },
+    },
+    githubRepoCount: { //Store total count for UI
+        type: Number,
+        default: 0
     },
     //relations
     reposOwned: [

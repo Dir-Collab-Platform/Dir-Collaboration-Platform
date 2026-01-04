@@ -299,6 +299,69 @@ Response (Directory):
 }
 ```
 
+#### Explore & Topics
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | **/api/repos/explore** | Explore public repos by tag. Query params: `page`, `q`, `tag`. | ✅ Yes |
+| `GET` | **/api/repos/topics** | Get popular/curated topics. | ✅ Yes |
+| `POST` | **/api/repos/topics** | Create a custom tag. | ✅ Yes |
+| `DELETE` | **/api/repos/topics/:id** | Delete a custom tag. | ✅ Yes |
+
+#### GET `/api/repos/explore` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "total": 100,
+    "repos": [
+      {
+        "githubId": "123",
+        "name": "react",
+        "owner": "facebook",
+        "tags": ["javascript", "library"]
+      }
+    ],
+    "hasNextPage": true
+  }
+}
+```
+
+#### File Operations
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `POST` | **/api/repos/:id/contents** | Create a new file in the repository. | ✅ Yes |
+| `PUT` | **/api/repos/:id/contents** | Update file content and commit to GitHub. | ✅ Yes |
+| `DELETE` | **/api/repos/:id/contents** | Delete a file from the repository. | ✅ Yes |
+| `GET` | **/api/repos/languages** | Get languages/repo stats. Query: `workspaceId` OR (`owner` & `repo`). | ✅ Yes |
+
+#### POST `/api/repos/:id/contents` Request Body (Create File)
+```json
+{
+  "path": "src/newfile.js",
+  "content": "console.log('Hello World');",
+  "commitMessage": "Added new file"
+}
+```
+
+#### PUT `/api/repos/:id/contents` Request Body (Update File)
+```json
+{
+  "path": "src/existing.js",
+  "content": "console.log('Updated');",
+  "sha": "existing_file_sha",
+  "commitMessage": "Updated file content"
+}
+```
+
+#### DELETE `/api/repos/:id/contents` Request Body
+```json
+{
+  "path": "src/todelete.js",
+  "sha": "file_sha",
+  "commitMessage": "Deleted file"
+}
+```
+
 ---
 
 

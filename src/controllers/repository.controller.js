@@ -670,7 +670,7 @@ export const getContents = async (req, res) => {
 };
 
 //@todo: 12. get all languages(or just get repo stats)
-// @route GET /api/ropos/languages
+// @route GET /api/repos/languages
 
 export const getRepoLanguages = async (req, res) => {
   try {
@@ -768,7 +768,7 @@ export const updateFile = async (req, res) => {
     await createLog(
       req.user._id,
       repo._id,
-      "committed chanegs",
+      "committed changes",
       "file",
       repo._id,
       `Updated file: ${path}`

@@ -6,18 +6,67 @@ import { Repository } from "../models/repository.model.js";
 import { getOrSetCache } from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
 import { getLanguageColor } from "../utils/githubColors.js";
-import {Tag} from "../models/tag.model.js";
+import { Tag } from "../models/tag.model.js";
 import { createLog } from "../utils/activity.util.js";
 
 
 
 
+
+// @desc: default list of tags to check if they are in the database or not
+const CURATED_TOPICS = [
+  { name: "health", label: "Health", color: "#4c7abcff" },
+  { name: "agriculture", label: "Agriculture", color: "#50634bff" },
+  { name: "government", label: "Government", color: "#4b5563" },
+  { name: "system-programming", label: "System programming", color: "#4b5563" },
+  { name: "web-development", label: "Web development", color: "#4b5563" },
+  { name: "front-end", label: "Front-end", color: "#4b5563" },
+  { name: "full-stack", label: "Full-stack", color: "#4b5563" },
+  { name: "back-end", label: "Back-end", color: "#4b5563" },
+  { name: "aerospace", label: "Aerospace", color: "#4b5563" },
+  { name: "java", label: "Java", color: "#4b5563" },
+  { name: "php", label: "PHP", color: "#4b5563" },
+  { name: "ui-ux", label: "UI/UX", color: "#4b5563" },
+  { name: "javascript", label: "JavaScript", color: "#4b5563" },
+  { name: "cpp", label: "C++", color: "#4b5563" },
+  { name: "rust", label: "Rust", color: "#4b5563" },
+  { name: "linux", label: "Linux", color: "#4b5563" },
+  { name: "kernel", label: "Kernel", color: "#4b5563" }
+];
+
+export const seedCuratedTags = async () => {
+  try {
+    const operations = CURATED_TOPICS.map(topic => ({
+      updateOne: {
+        filter: { name: topic.name },
+        update: {
+          $setOnInsert: {
+            name: topic.name,
+            description: `Official curated topic: ${topic.label}`,
+            color: topic.color,
+            // createdBy: null // System created
+          }
+        },
+        upsert: true
+      }
+    }));
+
+    if (operations.length > 0) {
+      await Tag.bulkWrite(operations);
+    }
+    console.log("Curated tags seeded successfully.");
+  } catch (error) {
+    console.error("Failed to seed tags:", error);
+  }
+}
+
+
 //@desc 9. Explore pubilc repos by tag
 //@route GET /api/repos/explore
 
-export const explorePublicRepos = async (req,res) => {
+export const explorePublicRepos = async (req, res) => {
   try {
-    const {page = 1, q , tag} = req.query;
+    const { page = 1, q, tag } = req.query;
     const perPage = 6;
     const pageNum = parseInt(page);
     const cacheKey = `explore:v5:q=${q || 'all'}:tag=${tag || 'none'}:page=${pageNum}`
@@ -30,11 +79,11 @@ export const explorePublicRepos = async (req,res) => {
       if (q) query += ` ${q}`;
       if (tag) query += ` topic:${tag}`;
 
-      const {data:searchResults} = await octokit.rest.search.repos({
-        q:query,
+      const { data: searchResults } = await octokit.rest.search.repos({
+        q: query,
         sort: "updated",
         per_page: perPage,
-        page:pageNum,
+        page: pageNum,
       });
 
 
@@ -51,21 +100,21 @@ export const explorePublicRepos = async (req,res) => {
       const repos = await Promise.all(
         searchResults.items.map(async (repo) => {
           try {
-            const {data: langData} = await octokit.rest.repos.listLanguages({
+            const { data: langData } = await octokit.rest.repos.listLanguages({
               owner: repo.owner.login,
-              repo:repo.name,
+              repo: repo.name,
             });
 
-            const total = Object.values(langData).reduce((a,b) => a + b, 0);
+            const total = Object.values(langData).reduce((a, b) => a + b, 0);
             const languages = Object.entries(langData).map(([label, bytes]) => ({
-                label, 
-                value: parseFloat(((bytes/total)* 100).toFixed(1)),
-                color: getLanguageColor(label)
-            })).filter(l => l.value > 1.0).sort((a,b)=> b.value - a.value);
+              label,
+              value: parseFloat(((bytes / total) * 100).toFixed(1)),
+              color: getLanguageColor(label)
+            })).filter(l => l.value > 1.0).sort((a, b) => b.value - a.value);
 
 
             return {
-              githubId:repo.id.toString(),
+              githubId: repo.id.toString(),
               name: repo.name,
               owner: repo.owner.login,
               avatar: repo.owner.avatar_url,
@@ -79,16 +128,16 @@ export const explorePublicRepos = async (req,res) => {
             }
 
           } catch (error) {
-            
+
             return {}
           }
         })
       );
 
       return {
-        total: searchResults.total_count, 
+        total: searchResults.total_count,
         repos,
-        hasNextPage :searchResults.total_count > (pageNum * perPage)
+        hasNextPage: searchResults.total_count > (pageNum * perPage)
       };
     }, 3600)
 
@@ -101,14 +150,14 @@ export const explorePublicRepos = async (req,res) => {
       status: "error",
       message: error.message,
     });
-  
+
   }
 }
 
 // @desc 10. Tag Topic Cloud - curated top industry topics for the discovery page
 // @route GET /api/repos/topics
 
-export const getPopularTopics = async (req,res)=>{
+export const getPopularTopics = async (req, res) => {
   try {
     // Manually curated list - //@todo: color can be changed later
     const curatedTopics = [
@@ -132,7 +181,7 @@ export const getPopularTopics = async (req,res)=>{
     ];
     const cacheKey = "explore:db_tags";
 
-    const dbTags = await getOrSetCache(cacheKey, async()=> {
+    const dbTags = await getOrSetCache(cacheKey, async () => {
       // optional implementation
       // const octokit = createGitHubClient(req.user.accessToken);
 
@@ -152,7 +201,7 @@ export const getPopularTopics = async (req,res)=>{
       //   (repo.topics || []).forEach(topic => {
       //     topicCounts[topic] = (topicCounts[topic] || 0) + 1;
       //   })
-      
+
       // })
 
       // // converting to array and sorting by freq and formating
@@ -164,7 +213,7 @@ export const getPopularTopics = async (req,res)=>{
       // .slice(0,15) // top 15 trending topics
 
       return await Tag.find({}).select("name description color -_id").lean();
-    
+
     }, 3600)
 
     const topicMap = new Map();
@@ -172,14 +221,14 @@ export const getPopularTopics = async (req,res)=>{
     // curated topics take priority 
     dbTags.forEach(tag => {
       topicMap.set(tag.name, {
-        name:tag.name,
+        name: tag.name,
         label: tag.name.charAt(0).toUpperCase() + tag.name.slice(1).replace(/-/g, ' '),
-        color:tag.color
+        color: tag.color
       });
     });
 
     //overwrite with curated topics
-    curatedTopics.forEach(topic=> topicMap.set(topic.name, topic));
+    curatedTopics.forEach(topic => topicMap.set(topic.name, topic));
 
     res.status(StatusCodes.OK).json({
       status: "success",
@@ -187,7 +236,7 @@ export const getPopularTopics = async (req,res)=>{
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      status:"error",
+      status: "error",
       message: error.message
     })
   }
@@ -195,14 +244,14 @@ export const getPopularTopics = async (req,res)=>{
 
 // @desc saving custom tag
 // @route POST /api/repos/topics
-export const createTag = async (req,res)=> {
+export const createTag = async (req, res) => {
   try {
-    const {name, description, color} = req.body;
+    const { name, description, color } = req.body;
 
     const formattedName = name.toLowerCase().trim().replace(/\s+/g, '-');
 
     const newTag = await Tag.create({
-      name:formattedName,
+      name: formattedName,
       description,
       color: color || "#4f46e5",
       createdBy: req.user._id
@@ -211,9 +260,9 @@ export const createTag = async (req,res)=> {
     // log global tag creation
     await createLog(
       req.user._id,
-      null, 
+      null,
       "created global tag",
-      "tag", 
+      "tag",
       newTag._id,
       `Added new topic: ${formattedName} to the discovery topics`
     )
@@ -227,7 +276,7 @@ export const createTag = async (req,res)=> {
     });
   } catch (error) {
     if (error.code === 11000) {
-        return res.status(StatusCodes.BAD_REQUEST).json({ message: "Tag already exists" });
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: "Tag already exists" });
     }
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
   }
@@ -235,14 +284,14 @@ export const createTag = async (req,res)=> {
 
 // @desc remove custom tag 
 // @route DELETE /api/repos/topics/:id
-export const deleteTag = async (req,res)=> {
+export const deleteTag = async (req, res) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const userId = req.user._id;
 
     // finding tag
     const tag = await Tag.findById(id);
-    if(!tag) return res.status(StatusCodes.NOT_FOUND).json({
+    if (!tag) return res.status(StatusCodes.NOT_FOUND).json({
       status: "error",
       message: "Tag not found"
     })
@@ -250,26 +299,44 @@ export const deleteTag = async (req,res)=> {
     const name = tag.name;
 
     // only tag creator can delete his/her custom tag
-    if(!tag.createdBy ||tag.createdBy.toString() !== userId.toString() ){
+    if (!tag.createdBy || tag.createdBy.toString() !== userId.toString()) {
       return res.status(StatusCodes.UNAUTHORIZED).json({
         status: "error",
         message: "Unauthorized"
 
-    });
-  }
+      });
+    }
+
+
+    // Remove the tag from all repositories that use it
+    await Repository.updateMany(
+      { tags: id },
+      { $pull: { tags: id } }
+    );
+
     await Tag.findByIdAndDelete(id);
+
+    // logging deleting tag
+    await createLog(
+      userId,
+      null,
+      "deleted global tag",
+      "tag",
+      id,
+      `Deleted tag: ${name}`
+    );
 
     // invalidating cache
     await redisClient.del("explore:db_tags");
 
-    res.status(StatusCodes.OK).json({ 
-      status: "success", 
+    res.status(StatusCodes.OK).json({
+      status: "success",
       message: `${name} tag removed successfully and cache cleared`
     });
   } catch (error) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
-      status: "error", 
-      message: error.message 
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "error",
+      message: error.message
     });
   }
 };

@@ -126,6 +126,9 @@ export const importRepo = async (req, res) => {
       `Initialized workspace for ${githubRepoName}`
     );
 
+    // cache invalidation
+    await redisClient.del(`user:stats:${req.user._id}`);
+
     //update user's reposOwned list
     await User.findByIdAndUpdate(
       req.user._id,
@@ -286,14 +289,10 @@ export const manualSync = async (req, res) => {
 //@route PATCH /api/repos/:id
 export const updateRepo = async (req, res) => {
   try {
-    if (!req.body) {
-      return res.status(StatusCodes.BAD_REQUEST).json({
-        message: "Request body is missing. Check your JSON format.",
-      });
-    }
     const { id } = req.params;
     const { workspaceName, description } = req.body;
 
+    // 1. Validation
     if (workspaceName !== undefined && workspaceName.trim() === "") {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: "error",
@@ -301,46 +300,60 @@ export const updateRepo = async (req, res) => {
       });
     }
 
-    //repo inside of the database
     const repo = await Repository.findById(id);
     if (!repo) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "workspace not found" });
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Workspace not found" });
     }
 
+    // 2. Prepare GitHub Update
     const octokit = createGitHubClient(req.user.accessToken);
-
-    //update the repo in github also
+    let isGithubUpdate = false;
     const githubUpdate = {
       owner: repo.githubOwner,
       repo: repo.githubRepoName,
-      description: description
     };
 
-    if (description !== undefined && description !== null) {
+    if (description !== undefined) {
       githubUpdate.description = description;
+      isGithubUpdate = true;
     }
 
-    await okctokit.rest.repos.update(githubUpdate);
+    // OPTIONAL: If workspaceName should sync with GitHub name:
+    // if (workspaceName !== undefined) {
+    //   githubUpdate.name = workspaceName; 
+    //   isGithubUpdate = true;
+    // }
+
+    if (isGithubUpdate) {
+      await octokit.rest.repos.update(githubUpdate);
+    }
+
+    // 3. Update Local DB (Safely)
+    const updateData = {};
+    if (workspaceName !== undefined) updateData.workspaceName = workspaceName;
+    if (description !== undefined) updateData.description = description;
 
     const updatedRepo = await Repository.findByIdAndUpdate(
-      req.params.id,
-      { $set: req.body },
+      id,
+      { $set: updateData },
       { new: true }
     );
 
-    // cache invalidation
-    await redisClient.del(getRepoDetailKey(req.params.id));
-    await redisClient.del(getActiveListKey(req.user._id));
+    // 4. Cache Invalidation
+    if (redisClient) {
+      await redisClient.del(getRepoDetailKey(id));
+      await redisClient.del(getActiveListKey(req.user._id));
+    }
 
     res.status(StatusCodes.OK).json({
       status: "success",
-      message: "Updated locally and on GitHub",
+      message: isGithubUpdate ? "Updated locally and on GitHub" : "Updated locally",
       data: updatedRepo,
     });
   } catch (error) {
-    res.status(StatusCodes.BAD_REQUEST).json({ message: error.message });
+    // Check for specific GitHub errors (like repo name already taken)
+    const status = error.status || StatusCodes.BAD_REQUEST;
+    res.status(status).json({ status: "error", message: error.message });
   }
 };
 
@@ -349,11 +362,39 @@ export const updateRepo = async (req, res) => {
 export const addTags = async (req, res) => {
   try {
     const { tag } = req.body;
+
+    // standardize formatting 
+    const formattedTag = tag.trim().toLowerCase().replace(/\s+/g, "-");
+
+    // ensuring the tag exists in the global tag list if not creating it
+    const tagResult = await Tag.findOneAndUpdate(
+      {name: formattedTag},
+      {
+        $setOnInsert: {
+          name: formattedTag,
+          description: `Custom Tag - ${formattedTag} created via workspace`,
+          color: "#4f46e5",
+          createdBy: req.user._id,
+        }
+      },
+      {upsert: true, new: true, includeResultMetadata: true}
+    )
+
+    const isNewTag = tagResult.upsertedId !== null;
+
+    // tagging the workspace
     const repo = await Repository.findByIdAndUpdate(
       req.params.id,
-      { $addToSet: { tags: tag } },
+      { $addToSet: { tags: formattedTag } },
       { new: true }
     );
+
+    // Safety Check: If repo doesn't exist, don't try to log or delete cache
+    if (!repo) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: "Workspace not found" });
+    }
+
+    
 
     // log tagging a repo
     await createLog(
@@ -362,16 +403,17 @@ export const addTags = async (req, res) => {
       "tagged workspace",
       "workspace",
       repo._id,
-      `Added tag #${tag} to ${repo.workspaceName}`
+      `Added tag #${formattedTag} to ${repo.workspaceName}`
     );
 
     // cache invalidation
     await Promise.all([
       redisClient.del(getRepoDetailKey(req.params.id)),
       redisClient.del(getActiveListKey(req.user._id)),
+      isNewTag && redisClient.del("explore:db_tags"),
     ]);
 
-    res.status(StatusCodes.OK).json({ status: "success", data: repo });
+    res.status(StatusCodes.OK).json({ status: "success", data: repo, newTagCreated: isNewTag });
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -407,6 +449,7 @@ export const deleteRepo = async (req, res) => {
       redisClient.del(getRepoDetailKey(req.params.id)),
       redisClient.del(getActiveListKey(req.user._id)),
       redisClient.del(getDiscoveryKey(req.user._id)),
+      redisClient.del(`user:stats:${req.user._id}`),
     ]);
 
     //@todo: also make the status of the github to be just normal github not workspace
@@ -484,6 +527,21 @@ export const createWorkspace = async (req, res) => {
       { $push: { reposOwned: newRepo[0]._id } }, //this is to add the number of workspaces owned by user
       { session }
     );
+
+    await createLog(
+      req.user._id,
+      newRepo[0]._id,
+      "created workspace",
+      "workspace",
+      newRepo[0]._id,
+      `Created workspace ${newRepo[0].workspaceName}`
+    )
+
+    
+    await Promise.all([
+      redisClient.del(getActiveListKey(req.user._id)),
+      redisClient.del(`user:stats:${req.user._id}`),
+    ])
 
     await session.commitTransaction();
     res
@@ -565,6 +623,19 @@ export const createRemoteRepo = async (req, res) => {
       { session }
     );
 
+    // logging
+    await createLog(
+      req.user._id,
+      newRepo[0]._id,
+      "created remote repository",
+      "repository",
+      newRepo[0]._id,
+      `Created new GitHub remote repository ${newRepo[0].githubRepoName} and workspace ${newRepo[0].workspaceName}`
+    )
+
+    //cache invalidation
+    await redisClient.del(`user:stats:${req.user._id}`);
+
     await session.commitTransaction();
 
     res.status(StatusCodes.CREATED).json({
@@ -618,48 +689,51 @@ export const getContents = async (req, res) => {
         .json({ status: "error", message: "Owner and Repo name are required" });
     }
 
+    const cacheKey = `repo:content:${targetOwner.toLowerCase()}:${targetRepo.toLowerCase()}:${path}`;
+
+    // caching 
+const results = await getOrSetCache(cacheKey, async () => {
     const octokit = createGitHubClient(req.user.accessToken);
 
-    //we use the getContent api of github to list files and folders
     const { data } = await octokit.rest.repos.getContent({
-      owner: targetOwner,
-      repo: targetRepo,
-      path: path,
+        owner: targetOwner,
+        repo: targetRepo,
+        path: path,
     });
 
-    //here comes the logic to check if we need to return files or folders(folder structure)
     if (Array.isArray(data)) {
-      //if data is an array then it's a folder containing files and subfolders
-      const sidebarItems = data.map((item) => ({
-        name: item.name,
-        path: item.path,
-        type: item.type, //file or dir(directory)
-        sha: item.sha,
-        url: item.html_url,
-      }));
-      return res
-        .status(StatusCodes.OK)
-        .json({ status: "success", type: "dir", data: sidebarItems });
+        // Return a clean object for "directory" type
+        return {
+            type: "dir",
+            files: data.map((item) => ({
+                name: item.name,
+                path: item.path,
+                type: item.type,
+                sha: item.sha,
+                url: item.html_url,
+            })),
+        };
     } else {
-      //if it's not a list then it's a single file
-      //github returns file content in base64 encoding, so we need to decode it
-      const decodedContent = Buffer.from(data.content, "base64").toString(
-        "utf-8"
-      );
-
-      return res.status(StatusCodes.OK).json({
-        status: "success",
-        type: "file",
-        data: {
-          name: data.name,
-          path: data.path,
-          content: decodedContent,
-          size: data.size,
-          sha: data.sha,
-          downloadUrl: data.download_url,
-        },
-      });
+        // Return a clean object for "file" type
+        const decodedContent = Buffer.from(data.content, "base64").toString("utf-8");
+        return {
+            type: "file",
+            fileData: {
+                name: data.name,
+                path: data.path,
+                content: decodedContent,
+                size: data.size,
+                sha: data.sha,
+                downloadUrl: data.download_url,
+            },
+        };
     }
+}, 120);
+
+    return res.status(StatusCodes.OK).json({
+      status: "success",
+      ...results,
+    });
   } catch (error) {
     const status = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
     res.status(status).json({
@@ -675,10 +749,10 @@ export const getContents = async (req, res) => {
 export const getRepoLanguages = async (req, res) => {
   try {
     const { workspaceId, owner, repo } = req.query;
-
+    
     let targetOwner = owner;
     let targetRepo = repo;
-
+    
     //same logic with get content for a workspace or a repo
     if (workspaceId) {
       const workspace = await Repository.findById(workspaceId);
@@ -697,9 +771,16 @@ export const getRepoLanguages = async (req, res) => {
         .json({ status: "error", message: "Owner and Repo name are required" });
     }
 
-    const octokit = createGitHubClient(req.user.accessToken);
+    const cacheKey = `repo:languages:${targetOwner.toLowerCase()}:${targetRepo.toLowerCase()}`;
 
-    //fetch languages from github
+    
+
+    //caching 
+
+    const stats = await getOrSetCache(cacheKey,async ()=> {
+      const octokit = createGitHubClient(req.user.accessToken);
+
+      //fetch languages from github
     const { data: languages } = await octokit.rest.repos.listLanguages({
       owner: targetOwner,
       repo: targetRepo,
@@ -710,13 +791,16 @@ export const getRepoLanguages = async (req, res) => {
       (acc, curr) => acc + curr,
       0
     );
-
-    const stats = Object.keys(languages).map((lang) => ({
+    return Object.keys(languages).map((lang) => ({
       label: lang,
       value:
         totalBytes > 0 ? ((languages[lang] / totalBytes) * 100).toFixed(1) : 0,
       color: getLanguageColor(lang),
     }));
+    }, 3600)
+    
+
+    
 
     res.status(StatusCodes.OK).json({ status: "success", data: stats });
   } catch (error) {
@@ -773,6 +857,9 @@ export const updateFile = async (req, res) => {
       repo._id,
       `Updated file: ${path}`
     );
+
+    // invalidating cache
+    await redisClient.del(`repo:content:${repo.githubOwner.toLowerCase()}:${repo.githubRepoName.toLowerCase()}:${path}`);
 
     res.status(StatusCodes.OK).json({
       status: "success",

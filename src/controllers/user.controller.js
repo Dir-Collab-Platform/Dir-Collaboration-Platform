@@ -4,7 +4,7 @@ import { Repository } from "../models/repository.model.js";
 import { Notification } from "../models/notification.model.js";
 import { getOrSetCache } from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
-
+import {createLog} from "../utils/activity.util.js"
 
 // cache keys
 const getUserKey = (userId) => `user:profile:${userId}`;
@@ -99,8 +99,15 @@ export const updatedProfile = async (req, res) => {
       { new: true, runValidators: true }
     ).select("-__v");
 
-    //@todo: logging
-
+    // logging
+    await createLog(
+        req.user._id,
+        null,
+        "updated profile",
+        "user",
+        req.user._id,
+        "Updated profile settings successfully"
+    )
 
     // cache invalidation
     await redisClient.del(getUserKey(req.user._id))

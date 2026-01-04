@@ -660,9 +660,52 @@ export const getContents = async (req, res)=>{
 };
 
 //@todo: 12. get all languages(or just get repo stats)
+// @route GET /api/ropos/languages
 
+export const getRepoLanguages = async (req, res) => {
+  try {
+    const {workspaceId, owner, repo} = req.query;
 
-//@todo: also a controller to delete directly from dir to github
+    let targetOwner = owner;
+    let targetRepo = repo;
+
+    //same logic with get content for a workspace or a repo
+    if(workspaceId){
+      const workspace = await Repository.findById(workspaceId);
+      if(!workspace){
+        return res.status(StatusCodes.NOT_FOUND).json({status:"error", message:"Workspace not found in Dir"});
+      }
+      targetOwner = workspace.githubOwner;
+      targetRepo = workspace.githubRepoName;
+    }
+
+    if(!targetOwner || !targetRepo){
+      return res.status(StatusCodes.BAD_REQUEST).json({status:"error", message:"Owner and Repo name are required"});
+    }
+
+    const octokit = createGitHubClient(req.user.accessToken);
+
+    //fetch languages from github
+    const {data: languages} = await octokit.rest.repos.listLanguages({
+      owner: targetOwner,
+      repo: targetRepo,
+    });
+
+    //calculate the percentage from each language 
+    const totalBytes = Object.values(languages).reduce((acc, curr)=> acc + curr, 0);
+
+    const stats = Object.keys(languages).map((lang) => ({
+      label: lang,
+      value: totalBytes > 0 ? ((languages[lang] / totalBytes) * 100).toFixed(1) : 0,
+      color: getLanguageColor(lang),
+    }));
+
+    res.status(StatusCodes.OK).json({status:"success", data: stats});
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({status:"error", message: error.message});
+  }
+};
+
 
 
 

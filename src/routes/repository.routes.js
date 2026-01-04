@@ -36,6 +36,7 @@ repoRouter.post('/create-remote', repoController.createRemoteRepo);
 //repository file management 
 repoRouter.get('/contents', repoController.getContents);
 repoRouter.put('/:id/contents', repoController.updateFile);
+repoRouter.delete('/:id/contents', repoController.deleteFile);
 
 //language
 repoRouter.get('/languages', repoController.getRepoLanguages);

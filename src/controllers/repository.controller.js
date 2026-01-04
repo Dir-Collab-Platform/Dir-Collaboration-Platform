@@ -800,5 +800,68 @@ export const updateFile = async (req, res) => {
   }
 };
 
+//@desc 14 Delete a file from the repository
+//@route DELETE /api/repos/:id/contents
+export const deleteFile = async (req, res) => {
+  try {
+    const workspaceId = req.params.id;
+    const { path, sha, commitMessage } = req.body;
 
-//@todo if necessary do creation and deletion of files direclty from dir
+    if (!path || !sha) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        message: "File path and the current SHA are required to delete a file.",
+      });
+    }
+
+    const repo = await Repository.findById(workspaceId);
+    if (!repo) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "Workspace not found in Dir Database",
+      });
+    }
+
+    const octokit = createGitHubClient(req.user.accessToken);
+
+    //delete the file
+    const { data: deletedData } = await octokit.rest.repos.deleteFile({
+      owner: repo.githubOwner,
+      repo: repo.githubRepoName,
+      path: path,
+      message: commitMessage || `Deleted ${path} via Dir`,
+      sha: sha,
+    });
+
+    //log activity
+    await createLog(
+      req.user._id,
+      repo._id,
+      "deleted file",
+      "file",
+      repo._id,
+      `Removed file: ${path}`
+    );
+
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      message: "File successfully deleted from Github",
+      data: {
+        commit: deletedData.commit.html_url,
+      },
+    });
+  } catch (err) {
+    if (err.status === 409) {
+      return res.status(StatusCodes.CONFLICT).json({
+        message:
+          "Conflict: The file SHA is outdated. Someone else may have edited it.",
+      });
+    }
+    if (err.status === 404) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        message: "File not found on GitHub. It may have already been deleted.",
+      });
+    }
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      message: err.message,
+    });
+  }
+};

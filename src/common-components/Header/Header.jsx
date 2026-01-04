@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Header.css';
+
 import {
   Bell,
   MessageSquare,
@@ -14,6 +14,7 @@ import {
   CheckCheck,
   LogOut,
   LayoutDashboard,
+  GitPullRequestArrow,
   Search,
   Folder,
   Briefcase,
@@ -31,6 +32,9 @@ function Header() {
   const [readme, setReadme] = useState('no');
   const [gitignore, setGitignore] = useState('no');
   
+  // State for toggling full messages in notifications
+  const [expandedMessages, setExpandedMessages] = useState({});
+  
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -40,7 +44,8 @@ function Header() {
       channel: '#Front-end team',
       userImg: '/assets/images/person.jpg',
       userName: 'Efrata',
-      message: 'Have you finished designing the header component for the repository page? We need it by tomorrow...',
+      shortMessage: 'Efrata: Have you finished designing...',
+      fullMessage: 'Efrata: Have you finished designing the header component for the repository page? We need it by tomorrow for the upcoming sprint review. Could you also add the dark mode toggle functionality?',
       hasMore: true
     },
     {
@@ -50,7 +55,8 @@ function Header() {
       time: '2hrs ago',
       repo: 'My-repository',
       user: 'Abrsh123',
-      prDescription: 'I implemented the file browsing features with drag-and-drop support and improved the UI...',
+      shortPR: 'I implemented the file browsing features...',
+      fullPR: 'I implemented the file browsing features with drag-and-drop support and improved the UI for better user experience. Added file type icons, keyboard shortcuts, and bulk selection capabilities. Also optimized the performance for handling large repositories.',
       hasMore: true
     },
     {
@@ -59,7 +65,8 @@ function Header() {
       label: 'Alert',
       time: '2hrs ago',
       repo: 'My-repository',
-      message: 'Someone logged in with your GitHub account from a new device in London, UK. If this wasn\'t you, please secure your account...',
+      shortAlert: 'Someone logged in with your GitHub account on device...',
+      fullAlert: 'Someone logged in with your GitHub account from a new device in London, UK. If this wasn\'t you, please secure your account immediately. Check your account activity and consider changing your password and enabling two-factor authentication.',
       hasMore: true
     }
   ]);
@@ -126,7 +133,6 @@ function Header() {
       'Dashboard': '/',
       'Repositories': '/repositories',
       'Workspaces': '/workspaces'
-      // No 'Create Repository' here
     };
     
     const route = routeMap[itemName];
@@ -172,7 +178,8 @@ function Header() {
           channel: '#Design-team',
           userImg: '/assets/images/person.jpg',
           userName: 'Sarah',
-          message: 'Can you review the new UI mockups for the dashboard? I\'ve uploaded them to Figma...',
+          shortMessage: 'Sarah: Can you review the new UI mockups...',
+          fullMessage: 'Sarah: Can you review the new UI mockups for the dashboard? I\'ve uploaded them to Figma. Let me know if you have any feedback on the color scheme and layout.',
           hasMore: true,
           past: true
         },
@@ -183,7 +190,8 @@ function Header() {
           time: '1 day ago',
           repo: 'Design-system',
           user: 'DesignLead',
-          prDescription: 'Added new color variables and typography scale to the design system...',
+          shortPR: 'Added new color variables and typography...',
+          fullPR: 'Added new color variables and typography scale to the design system. This includes new tokens for spacing, shadows, and component-specific styling improvements.',
           hasMore: true,
           past: true
         }
@@ -221,7 +229,14 @@ function Header() {
     }
   };
 
-  // Close notification panel when clicking outside
+  const toggleMessageExpansion = (notificationId) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [notificationId]: !prev[notificationId]
+    }));
+  };
+
+  // Close panels when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -235,12 +250,17 @@ function Header() {
     };
 
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape' && isNotificationOpen) {
-        closeNotificationPanel();
+      if (event.key === 'Escape') {
+        if (isNotificationOpen) {
+          closeNotificationPanel();
+        }
+        if (isCreateRepoOpen) {
+          handleCloseCreateRepo();
+        }
       }
     };
 
-    if (isNotificationOpen) {
+    if (isNotificationOpen || isCreateRepoOpen) {
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscapeKey);
     }
@@ -249,44 +269,97 @@ function Header() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isNotificationOpen]);
+  }, [isNotificationOpen, isCreateRepoOpen]);
 
   const renderNotificationItem = (notification, isPast = false) => {
+    const isExpanded = expandedMessages[notification.id] || false;
+    
     if (notification.type === 'message') {
       return (
-        <div className={`notification-item ${notification.read ? 'read' : ''}`} key={notification.id}>
-          <div className="notification-header-row">
-            <div className="notification-type">
-              <MessageSquare size={16} className="notification-icon" />
-              <span className="notification-label">{notification.label}</span>
-              <span className="notification-time">{notification.time}</span>
+        <div 
+          key={notification.id} 
+          className={`rounded-lg p-3 mb-2 transition-all ${notification.read ? 'opacity-70' : ''}`}
+          style={{
+            backgroundColor: 'var(--dimmer-dark-bg)', 
+            border: '1px solid var(--main-border-color)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'} 
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'} 
+        >
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: '#673255' }}>
+                <MessageSquare size={14} style={{ color: 'var(--primary-text-color)' }} />
+              </div>
+              <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
+              <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
             </div>
             <button 
-              className="close-notification-btn"
+              className="p-0.5 rounded hover:bg-gray-800"
+              style={{ color: 'var(--secondary-text-color)' }}
               onClick={() => handleCloseNotification(notification.id)}
             >
               <X size={12} />
             </button>
           </div>
-          <h4 className="notification-channel">{notification.channel}</h4>
-          <div className="notification-content">
-            <div className="user-avatar">
-              <img src={notification.userImg} alt={notification.userName} />
+          <h4 className="text-sm font-semibold mb-2 ml-8" style={{ color: 'var(--secondary-text-color)' }}>
+            {notification.channel}
+          </h4>
+          
+          <div className="flex gap-2.5 mb-3 ml-4">
+            <div className="flex-shrink-0 ml-2">
+              <img src={notification.userImg} alt={notification.userName} className="w-6 h-6 rounded-full" style={{ border: '1px solid rgba(239, 238, 238, 0.2)' }} />
             </div>
-            <div className="message-preview">
-              <p><strong>{notification.userName}:</strong> {notification.message}</p>
-              {notification.hasMore && <button className="view-more-btn">more</button>}
+            <div className="flex-1">
+              <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
+                {isExpanded ? notification.fullMessage : notification.shortMessage}
+              </p>
+              {notification.hasMore && (
+                <button 
+                  className="text-xs mt-1 hover:underline" 
+                  style={{ color: 'var(--secondary-text-color)' }}
+                  onClick={() => toggleMessageExpansion(notification.id)}
+                >
+                  {isExpanded ? 'see less' : 'more'}
+                </button>
+              )}
             </div>
           </div>
-          <div className="notification-actions-row">
+          <div className="flex gap-2 justify-center"> 
             <button 
-              className="action-btn reply-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Reply', notification.id)}
             >
               Reply
             </button>
             <button 
-              className="action-btn mark-read-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Mark as read', notification.id)}
             >
               Mark as read
@@ -296,84 +369,184 @@ function Header() {
       );
     } else if (notification.type === 'github') {
       return (
-        <div className={`notification-item ${notification.read ? 'read' : ''}`} key={notification.id}>
-          <div className="notification-header-row">
-            <div className="notification-type">
-              <Github size={16} className="notification-icon" />
-              <span className="notification-label">{notification.label}</span>
-              <ExternalLink size={12} className="external-link" />
-              <span className="notification-time">{notification.time}</span>
+        <div 
+          key={notification.id} 
+          className={`rounded-lg p-3 mb-2 transition-all ${notification.read ? 'opacity-70' : ''}`}
+          style={{
+            backgroundColor: 'var(--dimmer-dark-bg)', 
+            border: '1px solid var(--main-border-color)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'} 
+        >
+          <div className="flex justify-between items-center mb-2 ">
+            <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: '#673255' }}>
+                <Github size={14} style={{ color: 'var(--primary-text-color)' }} />
+              </div>
+              <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
+              <ExternalLink size={12} className="ml-1" style={{ color: 'var(--secondary-text-color)', opacity: 0.6 }} />
+              <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
             </div>
             <button 
-              className="close-notification-btn"
+              className="p-0.5 rounded hover:bg-gray-800"
+              style={{ color: 'var(--secondary-text-color)' }}
               onClick={() => handleCloseNotification(notification.id)}
             >
               <X size={12} />
             </button>
           </div>
-          <h4 className="notification-repo">{notification.repo}</h4>
-          <div className="notification-content">
-            <div className="github-icon">
-              <GitBranchPlus size={32} />
+          <h4 className="text-sm font-semibold mb-2 ml-6" style={{ color: 'var(--secondary-text-color)' }}>
+            {notification.repo}
+          </h4>
+          <div className="mb-3 ml-6">
+            <div className="flex items-center gap-2 mb-2">
+              <GitPullRequestArrow size={14} style={{ color: 'var(--secondary-text-color)' }} />
+              <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
+                <strong style={{ color: 'var(--primary-text-color)' }}>{notification.user}</strong> created a pull request
+              </p>
             </div>
-            <div className="pr-details">
-              <p><strong>{notification.user}</strong> created a pull request</p>
-              <p className="pr-description">{notification.prDescription}</p>
-              {notification.hasMore && <button className="view-more-btn">more</button>}
+            <div className="flex items-start gap-2 ">
+              <div className="flex-1">
+                <p className="text-xs" style={{ color: 'var(--mid-dim-font-color)' }}>
+                  {isExpanded ? notification.fullPR : notification.shortPR}
+                </p>
+                {notification.hasMore && (
+                  <button 
+                    className="text-xs mt-1 hover:underline" 
+                    style={{ color: 'var(--secondary-text-color)' }}
+                    onClick={() => toggleMessageExpansion(notification.id)}
+                  >
+                    {isExpanded ? 'see less' : 'more'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-          <div className="notification-actions-row">
+          <div className="flex gap-2 justify-center"> 
             <button 
-              className="action-btn review-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Review', notification.id)}
             >
               Review
             </button>
             <button 
-              className="action-btn reject-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Reject', notification.id)}
             >
               Reject
             </button>
           </div>
         </div>
-      );
+      ); 
     } else if (notification.type === 'alert') {
       return (
-        <div className={`notification-item ${notification.read ? 'read' : ''}`} key={notification.id}>
-          <div className="notification-header-row">
-            <div className="notification-type">
-              <span className="notification-label">{notification.label}</span>
-              <AlertCircle size={16} className="notification-icon" />
-              <span className="notification-time">{notification.time}</span>
+        <div 
+          key={notification.id} 
+          className={`rounded-lg p-3 mb-2 transition-all ${notification.read ? 'opacity-70' : ''}`}
+          style={{
+            backgroundColor: 'var(--dimmer-dark-bg)', 
+            border: '1px solid main-border-color'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'} 
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'} 
+        >
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-1.5 text-sm">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: 'var(--dark-bg)' }}>
+                <Github size={14} style={{ color: 'var(--primary-text-color)' }} />
+              </div>
+              <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
+              <AlertCircle size={16} style={{ color: '#ff4757' }} />
+              <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
             </div>
             <button 
-              className="close-notification-btn"
+              className="p-0.5 rounded hover:bg-gray-800"
+              style={{ color: 'var(--secondary-text-color)' }}
               onClick={() => handleCloseNotification(notification.id)}
             >
               <X size={12} />
             </button>
           </div>
-          <div className="alert-repo">
-            <Github size={16} />
-            <h4>{notification.repo}</h4>
-            <ExternalLink size={12} className="external-link" />
+          <div className="flex items-center gap-1.5 mb-2">
+            <h4 className="text-sm font-semibold" style={{ color: 'var(--secondary-text-color)' }}>{notification.repo}</h4>
+            <ExternalLink size={12} style={{ color: 'var(--secondary-text-color)', opacity: 0.6 }} />
           </div>
-          <div className="notification-content">
-            <div className="alert-message">
-              <p>{notification.message}</p>
-              {notification.hasMore && <button className="view-more-btn">more</button>}
-            </div>
+          <div className="mb-3">
+            <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
+              {isExpanded ? notification.fullAlert : notification.shortAlert}
+            </p>
+            {notification.hasMore && (
+              <button 
+                className="text-xs mt-1 hover:underline" 
+                style={{ color: 'var(--secondary-text-color)' }}
+                onClick={() => toggleMessageExpansion(notification.id)}
+              >
+                {isExpanded ? 'see less' : 'more'}
+              </button>
+            )}
           </div>
-          <div className="notification-actions-row">
+          <div className="flex gap-2 justify-center">
             <button 
-              className="action-btn checkout-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Checkout', notification.id)}
             >
               Checkout
             </button>
             <button 
-              className="action-btn ignore-btn"
+              className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
+              style={{ 
+                backgroundColor: 'var(--secondary-button)',
+                color: 'var(--secondary-text-color)',
+                borderColor: 'rgba(239, 238, 238, 0.2)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
+                e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
+              }}
               onClick={() => handleActionButton('Ignore', notification.id)}
             >
               Ignore
@@ -387,90 +560,184 @@ function Header() {
   return (
     <>
       {/* Main Navigation */}
-      <nav className="nav">
-        <div className="nav-container">
+      <nav 
+        className="p-4 fixed top-0 left-0 right-0 z-50"
+        style={{
+          backgroundColor: 'var(--dark-bg)',
+          borderBottom: '1px solid var(--main-border-color)'
+        }}
+      >
+        <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto flex justify-between items-center">
           {/* Left: Logo */}
-          <div className="left-section">
-            <div className="logo-div" onClick={() => navigate('/')}>
+          <div className="flex items-center gap-8">
+            <div className="cursor-pointer" onClick={() => navigate('/')}>
               <img 
                 src="/assets/images/Dir logo.png" 
                 alt="logo" 
+                className="h-10 w-auto"
               />
             </div>
           </div>
 
           {/* Right: Button + Bell + Hamburger */}
-          <div className="right-section">
-            {/* New Repository Button - Opens Create Repository Modal */}
+          <div className="flex items-center gap-6">
+            {/* New Repository Button */}
             <button
               onClick={handleNewRepoClick}
-              className="new-repo-btn"
+              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all hover:-translate-y-0.5"
+              style={{
+                backgroundColor: 'var(--primary-button)',
+                color: 'var(--primary-text-color)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
             >
               <Plus size={16} />
               <span>New Repository</span>
             </button>
 
             {/* Bell Icon with Notification Panel */}
-            <div className="bell-container">
+            <div className="relative">
               <button
                 ref={bellBtnRef}
                 onClick={toggleNotificationPanel}
-                className="bell-btn"
+                className="p-2 rounded-md transition-colors relative"
+                style={{ color: 'var(--secondary-text-color)' }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                  e.currentTarget.style.color = 'var(--primary-text-color)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.color = 'var(--secondary-text-color)';
+                }}
               >
                 <Bell size={24} />
                 {notifications.length > 0 && (
-                  <span className="notification-badge">{notifications.length}</span>
+                  <span 
+                    className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--notification-count-bg)' }}
+                  >
+                    {notifications.length}
+                  </span>
                 )}
               </button>
 
               {/* Notification Panel */}
-              <div 
-                ref={notificationPanelRef}
-                className={`notification-panel ${isNotificationOpen ? 'active' : ''}`}
-              >
-                <div className="notification-header">
-                  <div className="notification-title">
-                    <Bell size={20} />
-                    <h3>Notifications ({notifications.length})</h3>
-                  </div>
-                  <div className="notification-actions">
-                    <button 
-                      className="mark-all-btn"
-                      onClick={handleMarkAllAsRead}
-                    >
-                      <span>Mark all as read</span>
-                      <CheckCheck size={12} />
-                    </button>
-                    <button 
-                      className="close-panel-btn"
-                      onClick={closeNotificationPanel}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="notifications-list">
-                  {notifications.map(notification => renderNotificationItem(notification))}
-                  {pastNotifications.map(notification => renderNotificationItem(notification, true))}
-                </div>
-
-                <div className="notification-footer">
-                  <button 
-                    className="load-past-btn"
-                    onClick={handleLoadPastNotifications}
-                    disabled={isLoadingPast}
+              {isNotificationOpen && (
+                <div 
+                  ref={notificationPanelRef}
+                  className="absolute top-12 right-0 w-96 max-h-[500px] rounded-lg shadow-xl z-50 overflow-hidden flex flex-col"
+                  style={{
+                    backgroundColor: 'var(--dark-bg)',
+                    border: '1px solid rgba(239, 238, 238, 0.2)'
+                  }}
+                >
+                  <div 
+                    className="p-4 border-b flex justify-between items-center"
+                    style={{ 
+                      backgroundColor: 'var(--dark-bg)',
+                      borderColor: 'rgba(239, 238, 238, 0.2)'
+                    }}
                   >
-                    {isLoadingPast ? 'Loading...' : 'Load past notifications'}
-                  </button>
+                    <div className="flex items-center gap-2">
+                      <Bell size={20} style={{ color: 'var(--secondary-text-color)' }} />
+                      <h3 className="font-semibold" style={{ color: 'var(--secondary-text-color)' }}>Notifications ({notifications.length})</h3>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        className="flex items-center gap-1 px-3 py-1.5 rounded text-xs transition-colors"
+                        style={{ 
+                          backgroundColor: 'var(--primary-button)',
+                          color: 'var(--primary-text-color)'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
+                        onClick={handleMarkAllAsRead}
+                      >
+                        <span>Mark all as read</span>
+                        <CheckCheck size={12} />
+                      </button>
+                      <button 
+                        className="p-1 rounded"
+                        style={{ color: 'var(--secondary-text-color)' }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                          e.currentTarget.style.color = 'var(--primary-text-color)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = 'var(--secondary-text-color)';
+                        }}
+                        onClick={closeNotificationPanel}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable notifications */}
+                  <div className="flex-1 flex flex-col max-h-[432px]"> {/* 500px - 68px header */}
+                    <div className="flex-1 overflow-y-auto p-2">
+                      {notifications.map(notification => renderNotificationItem(notification))}
+                      {pastNotifications.map(notification => renderNotificationItem(notification, true))}
+                      
+                      {/* Show empty state if no notifications */}
+                      {notifications.length === 0 && pastNotifications.length === 0 && (
+                        <div className="text-center py-8">
+                          <p style={{ color: 'var(--secondary-text-color)' }}>No notifications</p>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Load past button */}
+                    <div 
+                      className="p-4 border-t flex justify-end shrink-0"
+                      style={{ 
+                        backgroundColor: 'var(--dark-bg)',
+                        borderColor: 'rgba(220, 219, 219, 0.2)'
+                      }}
+                    >
+                      <button 
+                        className="px-6 py-2.5 rounded-md text-sm font-medium transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ 
+                          backgroundColor: 'var(--primary-button)',
+                          color: 'var(--primary-text-color)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isLoadingPast) {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isLoadingPast) {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-button)';
+                          }
+                        }}
+                        onClick={handleLoadPastNotifications}
+                        disabled={isLoadingPast}
+                      >
+                        {isLoadingPast ? 'Loading...' : 'Load past notifications'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Hamburger Button */}
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="hamburger"
+              className="p-2 rounded-md transition-colors"
+              style={{ color: 'var(--secondary-text-color)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+                e.currentTarget.style.color = 'var(--primary-text-color)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'var(--secondary-text-color)';
+              }}
             >
               <Menu size={24} />
             </button>
@@ -479,122 +746,271 @@ function Header() {
       </nav>
 
       {/* Sidebar Menu */}
-      <div className={`sidebar-menu ${isMenuOpen ? 'open' : ''}`}>
+      <div 
+        className={`fixed top-0 right-0 w-80 h-screen z-50 transition-transform duration-300 overflow-y-auto ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        style={{
+          backgroundColor: 'var(--dark-bg)',
+          borderLeft: '1px solid rgba(239, 238, 238, 0.28)'
+        }}
+      >
         <button
           onClick={() => setIsMenuOpen(false)}
-          className="close-btn"
+          className="absolute top-4 left-4 p-2 rounded-md"
+          style={{ color: 'var(--secondary-text-color)' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+            e.currentTarget.style.color = 'var(--primary-text-color)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = 'var(--secondary-text-color)';
+          }}
         >
           <X size={20} />
         </button>
 
         {/* User Profile */}
-        <div className="user-profile">
-          <img src="/assets/images/person.jpg" alt="person" className="profile-pic" />
-          <div className="user-info">
-            <p className="user-name">Efrata</p>
-            <p className="user-handle">@zeamanuel</p>
+        <div 
+          className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4"
+          style={{ backgroundColor: 'var(--card-bg)' }}
+        >
+          <img src="/assets/images/person.jpg" alt="person" className="w-12 h-12 rounded-full object-cover" />
+          <div>
+            <p className="font-semibold" style={{ color: 'var(--primary-text-color)' }}>Efrata</p>
+            <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>@zeamanuel</p>
           </div>
         </div>
 
-        <hr className="menu-divider" />
+        <hr className="my-4 mx-4" style={{ borderColor: 'rgba(239, 238, 238, 0.2)' }} />
 
-        {/* Menu Items - NO CREATE REPOSITORY HERE */}
-        <div className="menu-item" onClick={() => handleMenuItemClick('Dashboard')}>
-          <LayoutDashboard size={20} />
-          <span>Dashboard</span>
+        {/* Menu Items */}
+        <div className="px-4 space-y-1">
+          <button 
+            onClick={() => handleMenuItemClick('Dashboard')}
+            className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+            style={{ color: 'var(--secondary-text-color)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+              e.currentTarget.style.color = 'var(--primary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--primary-text-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--secondary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--secondary-text-color)';
+            }}
+          >
+            <LayoutDashboard size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <span>Dashboard</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/repositories')}
+            className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+            style={{ color: 'var(--secondary-text-color)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+              e.currentTarget.style.color = 'var(--primary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--primary-text-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--secondary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--secondary-text-color)';
+            }}
+          >
+            <Folder size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <span>Repositories</span>
+          </button>
+
+          <button 
+            onClick={() => navigate('/workspaces')}
+            className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+            style={{ color: 'var(--secondary-text-color)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+              e.currentTarget.style.color = 'var(--primary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--primary-text-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--secondary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--secondary-text-color)';
+            }}
+          >
+            <Briefcase size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <span>Workspaces</span>
+          </button>
+
+          <button 
+            onClick={() => {
+              setIsMenuOpen(false);
+              
+            }}
+            className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+            style={{ color: 'var(--secondary-text-color)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+              e.currentTarget.style.color = 'var(--primary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--primary-text-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--secondary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--secondary-text-color)';
+            }}
+          >
+            <Settings size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <span>Settings</span>
+          </button>
+
+          <button 
+            onClick={() => handleMenuItemClick('Explore')}
+            className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+            style={{ color: 'var(--secondary-text-color)' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
+              e.currentTarget.style.color = 'var(--primary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--primary-text-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent';
+              e.currentTarget.style.color = 'var(--secondary-text-color)';
+              e.currentTarget.querySelector('svg').style.color = 'var(--secondary-text-color)';
+            }}
+          >
+            <Search size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <span>Explore</span>
+          </button>
         </div>
 
-        <div className="menu-item" onClick={() => navigate('/repositories')}>
-          <Folder size={20} />
-          <span>Repositories</span>
-        </div>
-
-        <div className="menu-item" onClick={() => navigate('/workspaces')}>
-          <Briefcase size={20} />
-          <span>Workspaces</span>
-        </div>
-
-        <div className="menu-item" onClick={() => {
-          // Settings - you might need to create this page
-          setIsMenuOpen(false);
-        }}>
-          <Settings size={20} />
-          <span>Settings</span>
-        </div>
-
-        <hr className="menu-divider" />
+        <hr className="my-4 mx-4" style={{ borderColor: 'rgba(239, 238, 238, 0.2)' }} />
 
         {/* Logout */}
-        <div className="menu-item logout-item" onClick={() => {
-          const confirmLogout = window.confirm('Are you sure you want to log out?');
-          if (confirmLogout) {
-            // Handle logout logic here
-          }
-          setIsMenuOpen(false);
-        }}>
-          <LogOut size={20} />
+        <button 
+          onClick={() => {
+            const confirmLogout = window.confirm('Are you sure you want to log out?');
+            if (confirmLogout) {
+              // Handle logout logic here
+            }
+            setIsMenuOpen(false);
+          }}
+          className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors mx-4"
+          style={{ color: '#ff4757' }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(248, 81, 73, 0.1)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
+          <LogOut size={20} style={{ color: '#ff4757' }} />
           <span>Log out</span>
-        </div>
+        </button>
       </div>
 
-      {/* Create Repository Modal - Only opens from header button */}
+      {/* Create Repository Modal */}
       {isCreateRepoOpen && (
-        <div className="modal-overlay" onClick={handleCloseCreateRepo}>
+        <div 
+          className="fixed inset-0 flex justify-center items-center z-50 backdrop-blur-sm"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
+          onClick={handleCloseCreateRepo}
+        >
           <div 
-            className="modal-content create-repo-modal"
+            className="rounded-xl w-full max-w-md overflow-hidden"
+            style={{
+              backgroundColor: 'var(--dark-bg)',
+              border: '1px solid var(--main-border-color)'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="modal-header">
-              <h2>Create New Repository</h2>
+            {/* Modal Header */}
+            <div 
+              className="p-6 border-b flex justify-between items-center"
+              style={{ borderColor: 'var(--main-border-color)' }}
+            >
+              {/* Empty div to balance the space on left */}
+              <div className="w-6"></div>
+              
+              {/* Centered title */}
+              <h2 className="text-lg font-semibold flex-1 text-center" style={{ color: 'var(--primary-text-color)' }}>
+                Create New Repository
+              </h2>
+              
+              {/* Close button on right */}
               <button 
-                className="close-modal-btn"
+                className="p-1 rounded w-6 flex items-center justify-center"
+                style={{ color: 'var(--secondary-text-color)' }}
                 onClick={handleCloseCreateRepo}
               >
                 <X size={20} />
               </button>
             </div>
 
-            <div className="modal-body">
+            {/* Modal Body */}
+            <div className="p-6">
               <form onSubmit={handleCreateRepository}>
-                <div className="form-group">
-                  <label htmlFor="repoName">Repository name</label>
+                {/* Repository Name */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--primary-text-color)' }}>
+                    Repository name
+                  </label>
                   <input 
                     type="text" 
                     placeholder="my-repository" 
-                    id="repoName"
                     value={repoName}
                     onChange={(e) => setRepoName(e.target.value)}
                     required
+                    className="w-full px-3 py-2 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--active-text-color)] focus:border-transparent"
+                    style={{
+                      backgroundColor: '#303036',
+                      border: '1px solid var(--main-border-color)'
+                    }}
                   />
                 </div>
                 
-                <div className="form-group">
-                  <label htmlFor="description">Description</label>
+                {/* Description */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'var(--primary-text-color)' }}>
+                    Description
+                  </label>
                   <input 
                     type="text" 
-                    id="description" 
-                    placeholder="A brief description of your repository..."
+                    placeholder="A brief description of your repository..." 
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3 py-2 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--active-text-color)] focus:border-transparent"
+                    style={{
+                      backgroundColor: '#303036',
+                      border: '1px solid var(--main-border-color)'
+                    }}
                   />
                 </div>
                 
-                {/* All options in one flex container */}
-                <div className="options-container">
+                {/* Options Container */}
+                <div className="space-y-6 mb-8">
                   {/* Visibility */}
-                  <div className="option-item">
-                    <label className="option-question">Visibility</label>
-                    <div className="toggle-buttons">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
+                      Visibility
+                    </label>
+                    <div className="flex gap-2">
                       <button 
                         type="button"
-                        className={`toggle-btn ${visibility === 'public' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${visibility === 'public' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: visibility === 'public' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('visibility', 'public')}
                       >
                         Public
                       </button>
                       <button 
                         type="button"
-                        className={`toggle-btn ${visibility === 'private' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${visibility === 'private' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: visibility === 'private' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('visibility', 'private')}
                       >
                         Private
@@ -603,19 +1019,27 @@ function Header() {
                   </div>
                   
                   {/* README */}
-                  <div className="option-item">
-                    <label className="option-question">Add README</label>
-                    <div className="toggle-buttons">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
+                      Add README
+                    </label>
+                    <div className="flex gap-2">
                       <button 
                         type="button"
-                        className={`toggle-btn ${readme === 'yes' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${readme === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: readme === 'yes' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('readme', 'yes')}
                       >
                         Yes
                       </button>
                       <button 
                         type="button"
-                        className={`toggle-btn ${readme === 'no' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${readme === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: readme === 'no' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('readme', 'no')}
                       >
                         No
@@ -624,19 +1048,27 @@ function Header() {
                   </div>
                   
                   {/* .gitignore */}
-                  <div className="option-item">
-                    <label className="option-question">Add .gitignore</label>
-                    <div className="toggle-buttons">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
+                      Add .gitignore
+                    </label>
+                    <div className="flex gap-2">
                       <button 
                         type="button"
-                        className={`toggle-btn ${gitignore === 'yes' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${gitignore === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: gitignore === 'yes' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('gitignore', 'yes')}
                       >
                         Yes
                       </button>
                       <button 
                         type="button"
-                        className={`toggle-btn ${gitignore === 'no' ? 'active' : ''}`}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${gitignore === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                        style={{
+                          backgroundColor: gitignore === 'no' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                        }}
                         onClick={() => handleOptionChange('gitignore', 'no')}
                       >
                         No
@@ -645,12 +1077,20 @@ function Header() {
                   </div>
                 </div>
                 
-                <div className="modal-actions">
-                  <div className="action-row">
-                    <button type="submit" className="primary-btn">
-                      Create Repository
-                    </button>
-                  </div>
+                {/* Submit Button */}
+                <div>
+                  <button 
+                    type="submit" 
+                    className="w-full py-3 rounded-lg font-semibold transition-colors hover:-translate-y-0.5"
+                    style={{
+                      backgroundColor: 'var(--primary-button)',
+                      color: 'var(--primary-text-color)'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
+                  >
+                    Create Repository
+                  </button>
                 </div>
               </form>
             </div>
@@ -659,10 +1099,15 @@ function Header() {
       )}
 
       {/* Menu Overlay */}
-      <div 
-        className={`menu-overlay ${isMenuOpen ? 'active' : ''}`}
-        onClick={() => setIsMenuOpen(false)}
-      />
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40"
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
+      <div className="pt-16"></div>
     </>
   );
 }

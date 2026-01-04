@@ -1,4 +1,4 @@
-import './App.css'
+﻿import './App.css'
 import { Routes, Route } from 'react-router'
 import Dashboard from './pages/Dashboard/Dashboard/Dashboard'
 import Repositories from './pages/Repositories/Repositories'
@@ -17,6 +17,7 @@ function App() {
         <Route path='/workspace' element={<Workspace />} />
         <Route path='/workspaces' element={<Workspaces />} />
       </Routes>
+      
     </>
   )
 }

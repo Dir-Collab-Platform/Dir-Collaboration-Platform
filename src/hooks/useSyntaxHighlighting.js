@@ -27,8 +27,23 @@ export function useSyntaxHighlighting(code, language = 'none') {
       script.id = 'prism-core'
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js'
       script.async = true
-      script.onload = () => setIsPrismReady(true)
+
+      script.onload = () => {
+        setIsPrismReady(true)
+        // Load Prism Line Numbers plugin JS
+        const lineNumScript = document.createElement("script");
+        lineNumScript.src = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js";
+        document.body.appendChild(lineNumScript);
+      }
+
       document.body.appendChild(script)
+
+
+      // Load Prism Line Numbers plugin CSS
+      const lineNumCSS = document.createElement("link");
+      lineNumCSS.rel = "stylesheet";
+      lineNumCSS.href = "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css";
+      document.head.appendChild(lineNumCSS);
     } else {
       // If script exists but onload hasn't fired yet for this hook instance
       const checkInterval = setInterval(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import { WorkspaceContext } from './WorkspaceContext';
 
 export default function WorkspaceProvider({ children }) {
@@ -7,6 +7,7 @@ export default function WorkspaceProvider({ children }) {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isEditingFile, setIsEditingFile] = useState(false);
 
     useEffect(() => {
         const fetchWorkspaceData = async () => {
@@ -22,10 +23,10 @@ export default function WorkspaceProvider({ children }) {
                 setData(json);
                 
                 // Default active file logic
-                if (json.contents && json.contents.length > 0) {
-                    const readme = json.contents.find(f => f.name.toLowerCase() === 'readme.md');
-                    setActiveFile(readme || json.contents[0]);
-                }
+                // if (json.contents && json.contents.length > 0) {
+                //     const readme = json.contents.find(f => f.name.toLowerCase() === 'readme.md');
+                //     setActiveFile(readme || json.contents[0]);
+                // }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -47,7 +48,9 @@ export default function WorkspaceProvider({ children }) {
         isLoading,
         error,
         isSidebarOpen,
-        setIsSidebarOpen
+        setIsSidebarOpen,
+        isEditingFile,
+        setIsEditingFile
     };
 
     return (
@@ -56,4 +59,3 @@ export default function WorkspaceProvider({ children }) {
         </WorkspaceContext.Provider>
     );
 };
-

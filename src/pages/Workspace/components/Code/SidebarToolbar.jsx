@@ -33,9 +33,23 @@ function AddFileBtn({ isOpen  }) {
     )
 }
 
-function EditFileBtn({ isOpen }) {
+function EditFileBtn({ isOpen, activeFile=null }) {
+    
+    const context = useContext(WorkspaceContext)
+    if (!context) return null
+    const { isEditingFile, setIsEditingFile } = context
+    
+    function handleClick() {
+        // should have some kind of popup letting the user know
+        if (!activeFile) return null
+        setIsEditingFile(!isEditingFile)
+    }
+
     return (
-        <button className={`svg-btn icon-btn transition-all duration-300 delay-150 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-36 pointer-events-none'}`}>
+        <button 
+            onClick={handleClick}
+            className={`svg-btn icon-btn transition-all duration-300 delay-150 ${isOpen ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-36 pointer-events-none'} ${isEditingFile ? 'text-blue-500 font-bold' : ''}`}
+        >
             <Pencil />
         </button>
     )
@@ -43,7 +57,10 @@ function EditFileBtn({ isOpen }) {
 
 export default function SidebarToolbar() {
     const context = useContext(WorkspaceContext)
-    const isSidebarOpen = context?.isSidebarOpen
+
+    if (!context) return null
+
+    const { isSidebarOpen, activeFile } = context
 
     return (
         <div className={`flex items-center bg-(--card-bg-lighter) border border-(--main-border-color) px-6 py-3 transition-all duration-500 ease-in-out relative overflow-hidden
@@ -57,7 +74,7 @@ export default function SidebarToolbar() {
                 <div className="flex items-center gap-10">
                     <SettingsBtn isOpen={isSidebarOpen} />
                     <AddFileBtn isOpen={isSidebarOpen} />
-                    <EditFileBtn isOpen={isSidebarOpen} />
+                    <EditFileBtn isOpen={isSidebarOpen} activeFile={activeFile} />
                 </div>
             </div>
         </div>

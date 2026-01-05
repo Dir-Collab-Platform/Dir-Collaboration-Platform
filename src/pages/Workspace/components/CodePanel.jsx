@@ -4,12 +4,6 @@ import CodeBody from "./Code/CodeBody";
 import { WorkspaceContext } from '../../../context/WorkspaceContext/WorkspaceContext';
 import SidebarToolbar from './Code/SidebarToolbar';
 
-/**
- * CodePanel Component
- * - Manages the horizontal split between the Sidebar and the Code Viewer.
- * - Uses useContext(WorkspaceContext) for state.
- * - Applies modern Tailwind v4 variable syntax border-(--main-border-color).
- */
 export default function CodePanel() {
     const context = useContext(WorkspaceContext)
     

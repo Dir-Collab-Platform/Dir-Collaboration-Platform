@@ -1,6 +1,6 @@
 import { Star } from 'lucide-react';
-import { FaGithub } from "react-icons/fa";
-import languageColors from '../../../styles/languageColors';
+import languageColors from '../api/languageColors';
+import { GithubIcon } from '../../../../public/assets/icons/icons';
 
 const ProjectCard = ({ project }) => {
   return (
@@ -15,7 +15,7 @@ const ProjectCard = ({ project }) => {
         <span className="text-xs text-(--secondary-text-color) flex items-center gap-1">
           <Star size={16} />
           {project.stars}
-          <FaGithub size={16}/>
+          <GithubIcon/>
         </span>
       </div>
 

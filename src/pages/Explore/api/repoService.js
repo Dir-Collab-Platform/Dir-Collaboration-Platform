@@ -1,3 +1,5 @@
+import languageColors from './languageColors';
+
 // Mocking the backend responses provided in the requirements
 export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // eslint-disable-line no-unused-vars
   // Simulate a slight network delay
@@ -9,14 +11,15 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       githubId: "1",
       name: "Dir-Platform",
       owner: "boanergase",
+      isWorkspace: true,
       avatar: "https://avatars.githubusercontent.com/u/1",
       description: "A developer-focused platform designed to help users discover software repositories.",
       stars: 300,
       tags: ["javascript", "web-development"],
       languages: [
-        { label: "JavaScript", value: 50, color: "#f1e05a" },
-        { label: "HTML", value: 18, color: "#e34c26" },
-        { label: "CSS", value: 32, color: "#563d7c" }
+        { label: "JavaScript", value: 50 },
+        { label: "HTML", value: 18 },
+        { label: "CSS", value: 32 }
       ],
       visibility: "public"
     },
@@ -24,14 +27,15 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       githubId: "2",
       name: "Traffic-Management",
       owner: "EfrataHabte",
+      isWorkspace: true,
       avatar: "https://avatars.githubusercontent.com/u/2",
       description: "Traffic system management dashboard for urban infrastructure.",
       stars: 140,
       tags: ["rust", "system-programming"],
       languages: [
-        { label: "Rust", value: 50.3, color: "#dea584" },
-        { label: "C", value: 16.3, color: "#555555" },
-        { label: "Zig", value: 33.4, color: "#ec915c" }
+        { label: "Rust", value: 50.3 },
+        { label: "C", value: 16.3 },
+        { label: "Zig", value: 33.4 }
       ],
       visibility: "public"
     },
@@ -40,13 +44,14 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       githubId: "3",
       name: "AI-Assistant",
       owner: "johndoe",
+      isWorkspace: false,
       avatar: "https://avatars.githubusercontent.com/u/3",
       description: "An AI-powered assistant for developers.",
       stars: 450,
       tags: ["python", "ai"],
       languages: [
-        { label: "Python", value: 70, color: "#3572A5" },
-        { label: "JavaScript", value: 30, color: "#f1e05a" }
+        { label: "Python", value: 70 },
+        { label: "JavaScript", value: 30 }
       ],
       visibility: "public"
     },
@@ -54,13 +59,14 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       githubId: "4",
       name: "Blockchain-Explorer",
       owner: "cryptodev",
+      isWorkspace: true,
       avatar: "https://avatars.githubusercontent.com/u/4",
       description: "Explore blockchain transactions and data.",
       stars: 200,
       tags: ["blockchain", "javascript"],
       languages: [
-        { label: "JavaScript", value: 60, color: "#f1e05a" },
-        { label: "Solidity", value: 40, color: "#AA6746" }
+        { label: "JavaScript", value: 60 },
+        { label: "Solidity", value: 40 }
       ],
       visibility: "public"
     },
@@ -75,8 +81,8 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       stars: 95,
       tags: ["agriculture", "iot"],
       languages: [
-        { label: "Python", value: 80, color: "#3572A5" },
-        { label: "C++", value: 20, color: "#f34b7d" }
+        { label: "Python", value: 80 },
+        { label: "C++", value: 20 }
       ],
       visibility: "public"
     },
@@ -90,7 +96,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       stars: 310,
       tags: ["health", "web-development"],
       languages: [
-        { label: "TypeScript", value: 100, color: "#3178c6" }
+        { label: "TypeScript", value: 100 }
       ],
       visibility: "public"
     },
@@ -105,8 +111,8 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       stars: 520,
       tags: ["go", "cloud"],
       languages: [
-        { label: "Go", value: 90, color: "#00ADD8" },
-        { label: "Shell", value: 10, color: "#89e051" }
+        { label: "Go", value: 90 },
+        { label: "Shell", value: 10 }
       ],
       visibility: "public"
     },
@@ -120,8 +126,8 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
       stars: 180,
       tags: ["php", "fintech"],
       languages: [
-        { label: "PHP", value: 70, color: "#4F5D95" },
-        { label: "JavaScript", value: 30, color: "#f1e05a" }
+        { label: "PHP", value: 70 },
+        { label: "JavaScript", value: 30 }
       ],
       visibility: "public"
     }
@@ -133,16 +139,24 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => { // 
   } else if (query === "workspace") {
     baseRepos = baseRepos.filter(repo => repo.isWorkspace);
   }
-  // for "all" or empty, show all
 
   const startIndex = (page - 1) * 2;
-  const endIndex = startIndex + 3;
-  const repos = baseRepos.slice(startIndex, endIndex);
+  const endIndex = startIndex + 2; // Fixed to 2 per page for consistent pagination
+  const rawRepos = baseRepos.slice(startIndex, endIndex);
+
+  // Map through repos to add the color from languageColors.js
+  const repos = rawRepos.map(repo => ({
+    ...repo,
+    languages: repo.languages.map(lang => ({
+      ...lang,
+      color: languageColors[lang.label] || "#6b7280" // Fallback to gray if not found
+    }))
+  }));
 
   return {
     status: "success",
     data: {
-      total: 100,
+      total: baseRepos.length,
       repos: repos,
       hasNextPage: endIndex < baseRepos.length
     }
@@ -155,58 +169,38 @@ export const fetchTopics = async () => {
     data: [
       { name: "health", label: "Health", color: "#10b981" },
       { name: "agriculture", label: "Agriculture", color: "#059669" },
-      { name: "javascript", label: "JavaScript", color: "#f1e05a" },
+      { name: "javascript", label: "JavaScript", color: languageColors.JavaScript },
       { name: "web-development", label: "Web Development", color: "#4b5563" },
-      { name: "rust", label: "Rust", color: "#dea584" },
-      { name: "python", label: "Python", color: "#3572A5" },
+      { name: "rust", label: "Rust", color: languageColors.Rust },
+      { name: "python", label: "Python", color: languageColors.Python },
       { name: "ai", label: "AI", color: "#8b5cf6" },
       { name: "blockchain", label: "Blockchain", color: "#f59e0b" }
     ]
   };
 };
 
-// Mock storage for custom tags (in a real app, this would be in a database)
+// ... Rest of your create/delete custom tag code remains the same ...
 let customTags = [];
 
 export const createCustomTag = async (tagName) => {
-  await new Promise(resolve => setTimeout(resolve, 400)); // Simulate delay
-
-  // Mocking POST /api/repos/topics response
+  await new Promise(resolve => setTimeout(resolve, 400));
   const newTag = {
-    _id: Math.random().toString(36).substr(2, 9), // Generate fake Mongo-like ID
+    _id: Math.random().toString(36).substr(2, 9),
     name: tagName.toLowerCase().replace(/\s+/g, '-'),
     label: tagName,
-    color: "#4f46e5", // Default theme color
+    color: "#4f46e5",
     createdBy: "current-user-id"
   };
-
   customTags.push(newTag);
-
-  return {
-    status: "success",
-    data: newTag
-  };
+  return { status: "success", data: newTag };
 };
 
 export const deleteCustomTag = async (tagId) => {
   await new Promise(resolve => setTimeout(resolve, 400));
-
-  // Find the tag in custom tags
   const tagIndex = customTags.findIndex(tag => tag._id === tagId);
-
   if (tagIndex === -1) {
-    return {
-      status: "error",
-      message: "Tag not found or cannot be deleted"
-    };
+    return { status: "error", message: "Tag not found or cannot be deleted" };
   }
-
-  // Remove the tag
   customTags.splice(tagIndex, 1);
-
-  // Mocking DELETE /api/repos/topics/:id response
-  return {
-    status: "success",
-    message: "tag removed successfully"
-  };
+  return { status: "success", message: "tag removed successfully" };
 };

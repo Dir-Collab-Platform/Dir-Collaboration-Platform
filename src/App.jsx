@@ -6,6 +6,7 @@ import Workspace from './pages/Workspace/Workspace'
 import Repository from './pages/Repository/Repository'
 import Workspaces from './pages/Workspaces/Workspaces/Workspaces'
 import ExploreContainer from './pages/Explore/ExploreContainer'
+import CreateWorkspace from './pages/CreateWorkspace/CreateWorkspace/CreateWorkspace' 
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
         <Route path='/workspace' element={<Workspace />} />
         <Route path='/workspaces' element={<Workspaces />} />
         <Route path='/explore' element={<ExploreContainer />} />
+        <Route path='/createWorkspace' element={<CreateWorkspace />} />
+
       </Routes>
       
     </>

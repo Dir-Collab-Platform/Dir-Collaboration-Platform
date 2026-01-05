@@ -5,160 +5,167 @@ import { StatusCodes } from "http-status-codes";
 import { getOrSetCache } from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
 
-
 // cache keys
 const getRepoKey = (repoId, page) => `activity:repo:${repoId}:${page}`;
-const getFeedKey = (userId, page, limit) => `activity:feed:${userId}:${page}:${limit}`;
+const getFeedKey = (userId, page, limit) =>
+  `activity:feed:${userId}:${page}:${limit}`;
 
 //@desc: global activity feed - dashboard timeline
 // @route : GET /api/activity/feed
 
 export const getActivityFeed = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1;
-const limit = parseInt(req.query.limit) || 10;
-        const userId = req.user._id;
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const userId = req.user._id;
 
-        // CACHE key
-        const cacheKey = getFeedKey(userId, page, limit);
+    // CACHE key
+    const cacheKey = getFeedKey(userId, page, limit);
 
-        const results = await getOrSetCache(cacheKey, async()=> {
-
+    const results = await getOrSetCache(
+      cacheKey,
+      async () => {
         // getting ids of all workspaces
-        const userWorkspaces = await Repository.find({ "members.user": userId }).select("_id");
-        const workspaceIds = userWorkspaces.map(repo => repo._id);
+        const userWorkspaces = await Repository.find({
+          "members.user": userId,
+        }).select("_id");
+        const workspaceIds = userWorkspaces.map((repo) => repo._id);
 
         const logs = await ActivityLog.find({
-            $or: [
-                { repoId: { $in: workspaceIds } },
-                { userId: userId }
-            ]
-        }).populate("userId", "githubUsername avatarUrl")
-            .populate("repoId", "name")
-            .sort({ createdAt: -1 })
-            .limit(parseInt(limit))
-            .skip((page - 1) * limit)
-            .lean(); // for caching
+          $or: [{ repoId: { $in: workspaceIds } }, { userId: userId }],
+        })
+          .populate("userId", "githubUsername avatarUrl")
+          .populate("repoId", "name")
+          .sort({ createdAt: -1 })
+          .limit(parseInt(limit))
+          .skip((page - 1) * limit)
+          .lean(); // for caching
 
         const totalLogs = await ActivityLog.countDocuments({
-                $or: [
-                    { repoId: { $in: workspaceIds } },
-                    { userId: userId }
-                ]
-            })
+          $or: [{ repoId: { $in: workspaceIds } }, { userId: userId }],
+        });
         // response
-        const formattedLogs = logs.map(log => ({
-            id: log._id,
-            user: log.userId?.githubUsername || "Unknown User",
-            action: log.action,
-            targetName: log.repoId?.name || "repository",
-            targetType: log.targetType,
-            message: log.details?.message || "",
-            timestamp: log.createdAt,
-            iconType: log.targetType,
-        }))
+        const formattedLogs = logs.map((log) => ({
+          id: log._id,
+          user: log.userId?.githubUsername || "Unknown User",
+          action: log.action,
+          targetName: log.repoId?.name || "repository",
+          targetType: log.targetType,
+          message: log.details?.message || "",
+          timestamp: log.createdAt,
+          iconType: log.targetType,
+        }));
 
         return {
-            data: formattedLogs,
-            pagination: {
-                currentPage: parseInt(page),
-                hasNextPage: ((page - 1) * limit) + logs.length < totalLogs,
-                totalPages: Math.ceil(totalLogs / limit)
-            }
-        }
-        }, 300)
-        
+          data: formattedLogs,
+          pagination: {
+            currentPage: parseInt(page),
+            hasNextPage: (page - 1) * limit + logs.length < totalLogs,
+            totalPages: Math.ceil(totalLogs / limit),
+          },
+        };
+      },
+      300
+    );
 
-        res.status(StatusCodes.OK).json({
-            status: "success",
-            ...results
-        })
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: "error", message: error.message });
-    }
-}
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      ...results,
+    });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "error", message: error.message });
+  }
+};
 //@desc: global activity feed
 // @route : GET /api/repos/:repoId/activity
 
 export const getRepoActivity = async (req, res) => {
-    try {
-        const { id: repoId } = req.params;
-        const page = parseInt(req.query.page) || 1;
+  try {
+    const { id: repoId } = req.params;
+    const page = parseInt(req.query.page) || 1;
 
-        const logs = await ActivityLog.find({ repoId })
-            .populate("userId", "githubUsername")
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .skip((page - 1) * 10);
+    const logs = await ActivityLog.find({ repoId })
+      .populate("userId", "githubUsername")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .skip((page - 1) * 10);
 
-        res.status(StatusCodes.OK).json({ status: "success", data: logs });
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: "error", message: error.message });
-    }
-}
+    res.status(StatusCodes.OK).json({ status: "success", data: logs });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "error", message: error.message });
+  }
+};
 
 //@desc: clear activity
 // @route : DELETE /api/activity/logs
 
 export const clearActivity = async (req, res) => {
-    try {
-        await ActivityLog.deleteMany({ userId: req.user._id });
+  try {
+    await ActivityLog.deleteMany({ userId: req.user._id });
 
-        // cache invalidation
-        await Promise.all([
-            redisClient.del(getFeedKey(req.user._id, 1, 10)),
-            redisClient.del(getFeedKey(req.user._id, 1, 20))
-        ])
-        res.status(StatusCodes.OK).json({ status: "success", message: "History cleared" });
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ status: "error", message: error.message });
-    }
+    // cache invalidation
+    await Promise.all([
+      redisClient.del(getFeedKey(req.user._id, 1, 10)),
+      redisClient.del(getFeedKey(req.user._id, 1, 20)),
+    ]);
+    res
+      .status(StatusCodes.OK)
+      .json({ status: "success", message: "History cleared" });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "error", message: error.message });
+  }
 };
 
 //@desc: geting contribution heatmap
 // @route : GET /api/activity/heatmap
 
 export const getContributionHeatmap = async (req, res) => {
-    try {
-        const userId = req.user._id;
+  try {
+    const userId = req.user._id;
 
-        //calculating the date for one year ago today - mirroring github
-        const oneYearAgo = new Date();
-        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+    //calculating the date for one year ago today - mirroring github
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
 
-        const heatmapData = await ActivityLog.aggregate([
-            {
-                //filtering logs only from past year
-                $match: {
-                    userId: userId,
-                    createdAt: { $gte: oneYearAgo }
-                }
-            },
-            {
-                // group by date
-                $group: {
-                    _id: {
-                        $dateToString: { format: "%Y-%m-%d", date: "$createdAt" }
-                    },
-                    count: { $sum: 1 }
+    const heatmapData = await ActivityLog.aggregate([
+      {
+        //filtering logs only from past year
+        $match: {
+          userId: userId,
+          createdAt: { $gte: oneYearAgo },
+        },
+      },
+      {
+        // group by date
+        $group: {
+          _id: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
+          count: { $sum: 1 },
+        },
+      },
+      {
+        //sorting chronologically
+        $sort: {
+          _id: 1,
+        },
+      },
+    ]);
 
-                }
-            }, {
-                //sorting chronologically
-                $sort: {
-                    "_id": 1
-                }
-            }
-        ]);
-
-        res.status(StatusCodes.OK).json({
-            status: "success",
-            data: heatmapData
-        })
-    } catch (error) {
-        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-            status: "error",
-            message: error.message
-        });
-    }
-}
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      data: heatmapData,
+    });
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};

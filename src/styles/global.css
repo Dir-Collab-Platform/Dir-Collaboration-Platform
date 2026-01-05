@@ -80,9 +80,36 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-
+  
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
+  .invisible-scrollbar {
+    scrollbar-color: hsl(0, 0%, 30%) transparent;
+  }
+
+  /* Chrome/Edge/Opera scrollbar styling */
+  .scroll-bar::-webkit-scrollbar {
+    width: 8px;           /* thickness */
+  }
+
+  .scroll-bar::-webkit-scrollbar-track {
+    background: hsl(0, 0%, 18%);  /* track color */
+  }
+
+  .scroll-bar::-webkit-scrollbar-thumb {
+    background: hsl(0, 0%, 30%);  /* thumb color */
+    border-radius: 10px;
+  }
+
+  .scroll-bar::-webkit-scrollbar-thumb:hover {
+    background: hsl(0, 0%, 10%);  /* darker on hover */
+  }
+
+  /* for firefox */
+  .scroll-bar {
+    scrollbar-width: thin;           /* auto, thin */
+    scrollbar-color: hsl(0, 0%, 30%) hsl(0, 0%, 18%); /* thumb, track */
+  }
 }

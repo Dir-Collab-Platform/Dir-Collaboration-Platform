@@ -7,12 +7,20 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve-workspace": "json-server --watch ./public/data/workspace.json --port 4000"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
+<<<<<<< HEAD
     "autoprefixer": "^10.4.23",
+=======
+    "axios": "^1.13.2",
+    "dompurify": "^3.3.1",
+>>>>>>> 914eff4e1c1adf0eb9f457e394859f6dea512f33
     "lucide-react": "^0.562.0",
+    "marked": "^17.0.1",
+    "prismjs": "^1.30.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router": "^7.11.0",
@@ -28,6 +36,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "json-server": "^1.0.0-beta.3",
     "vite": "^7.2.4"
   }
 }

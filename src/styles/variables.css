@@ -21,20 +21,24 @@
     --active-tab-bg: #1F1F31;
     --received-message: #213370;
     --sent-message: #1A295B;
+
+    --code-viewer-container: #161b22;
+    --code-upper-bg: #0d1117;
     
     /* font color */
     --primary-text-color: #FFFFFF;
     --secondary-text-color: #9CA3AF;
     --active-text-color: #5B5EDE;
-    --code-keyword: #4255C2;
-    --code-string: #E06666;
-    --code-function: #AEC4AB;
     --channel-hash-color: #806346;
     --mid-dim-font-color: #C4C4C4;
     
+    --code-function: #AEC4AB;
+    --code-string: #E06666;
+    --code-keyword: #4255C2;
+    
     /* border color */
     --main-border-color: hsla(0, 3%, 90%, .13);
-    --popup-border: #EFEEEE; /* opacity supposed to be - 28%*/
+    --popup-border: #EFEEEE47; /* opacity supposed to be - 28%*/
 
     /* shadow color */
     --card-shadow-color: #8B4A4A;

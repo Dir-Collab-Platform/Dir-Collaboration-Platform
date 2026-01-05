@@ -1,10 +1,24 @@
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import languageColors from '../api/languageColors';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 
 const ProjectCard = ({ project }) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (project.isWorkspace) {
+      navigate('/workspace');
+    } else {
+      navigate('/repository');
+    }
+  };
+
   return (
-    <div className="bg-(--card-bg) p-5 rounded-xl border border-(--main-border-color) hover:border-(--primary-button-active) transition">
+    <div
+      className="bg-(--card-bg) p-5 rounded-xl border border-(--main-border-color) hover:border-(--primary-button-active) transition cursor-pointer"
+      onClick={handleClick}
+    >
       <div className="flex items-center justify-between mb-2">
         <div className='flex gap-2 justify-center items-center'>
           <h3 className="font-bold text-[22px]">{project.name}</h3>

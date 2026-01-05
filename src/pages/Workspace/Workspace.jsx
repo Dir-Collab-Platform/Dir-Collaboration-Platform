@@ -14,7 +14,7 @@ function WorkspaceContent({ isRepositoryView }) {
     const { isLoading, error } = useContext(WorkspaceContext);
 
     if (isLoading) return <PageLoader msg="Syncing repository" />;
-
+    
     if (error) return (
         // refactor this to have a common Error Component
         <div className="h-full flex flex-col items-center justify-center p-6 text-center bg-(--dark-bg)">

@@ -1,7 +1,8 @@
 import { Notification } from "../models/notification.model.js";
 import { getIO } from "../sockets/socket.js";
+import { createLog } from "../utils/activity.util.js";
 
-export const createNotification = async ({userId, message, type, repoId, targetType, targetId}) => {
+export const createNotification = async ({ userId, message, type, repoId, targetType, targetId }) => {
     try {
         const notification = await Notification.create({
             userId,
@@ -14,6 +15,16 @@ export const createNotification = async ({userId, message, type, repoId, targetT
 
         // emmitting to the user's private socket room
         getIO().to(`user:${userId}`).emit("new_notification", notification);
+
+        // logging (as requested: new_notification activity)
+        await createLog(
+            userId,
+            repoId,
+            "received notification",
+            "notification",
+            notification._id,
+            `Received notification: ${message}`
+        );
 
         return notification;
     } catch (error) {

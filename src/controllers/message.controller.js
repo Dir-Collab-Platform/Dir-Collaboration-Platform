@@ -3,7 +3,8 @@ import { User } from "../models/user.model.js"; // Added for mention lookup
 import { StatusCodes } from "http-status-codes";
 import { getIO } from "../sockets/socket.js";
 import { createNotification } from "../services/notification.service.js";
-import {Repository} from "../models/repository.model.js";
+import { Repository } from "../models/repository.model.js";
+import { createLog } from "../utils/activity.util.js";
 
 
 
@@ -35,18 +36,28 @@ export const sendMessage = async (req, res) => {
             // Find the actual User documents to get their IDs
             const mentionedUsers = await User.find({ githubUsername: { $in: mentionedUsernames } }).select("_id");
             mentionedUserIds = mentionedUsers.map(u => u._id.toString());
-            
+
             // Persistent Notifications for found users
-            await Promise.all(mentionedUsers.map(targetUser => 
+            await Promise.all(mentionedUsers.map(targetUser =>
                 createNotification({
                     userId: targetUser._id, // Now using the real ID
                     message: `${req.user.githubUsername} mentioned you in a message`,
                     type: "mention",
                     repoId: repoId,
                     targetType: "message",
-                    targetId: newMessage._id 
+                    targetId: newMessage._id
                 })
             ));
+
+            // Log the mention activity
+            await createLog(
+                userId,
+                repoId,
+                "mentioned user",
+                "message",
+                newMessage._id,
+                `Mentioned ${mentionedUsernames.join(", ")} in a message`
+            );
         }
 
         // Handle General Participant Notifications
@@ -56,19 +67,19 @@ export const sendMessage = async (req, res) => {
 
         if (channel && channel.participants.length > 0) {
             // Notify participants who WERE NOT already mentioned and are NOT the sender
-            const usersToNotify = channel.participants.filter(pId => 
-                pId.toString() !== userId.toString() && 
+            const usersToNotify = channel.participants.filter(pId =>
+                pId.toString() !== userId.toString() &&
                 !mentionedUserIds.includes(pId.toString())
             );
 
-            await Promise.all(usersToNotify.map(pId => 
+            await Promise.all(usersToNotify.map(pId =>
                 createNotification({
                     userId: pId,
                     message: `New message in #${channel.name}`,
                     type: "message",
                     repoId: repoId,
                     targetType: "message",
-                    targetId: newMessage._id 
+                    targetId: newMessage._id
                 })
             ));
         }
@@ -101,11 +112,11 @@ export const getMessages = async (req, res) => {
 
         // Return in chronological order (Oldest -> Newest)
         const chronologicalMessages = messages.reverse();
-        
-        res.status(StatusCodes.OK).json({ 
-            status: "success", 
+
+        res.status(StatusCodes.OK).json({
+            status: "success",
             data: chronologicalMessages,
-            count: chronologicalMessages.length 
+            count: chronologicalMessages.length
         });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
@@ -117,8 +128,8 @@ export const getMessages = async (req, res) => {
 // @route PUT /api/messages/:id/reactions
 export const addReaction = async (req, res) => {
     try {
-        const { id } = req.params; 
-        const { emoji, repoId } = req.body; 
+        const { id } = req.params;
+        const { emoji, repoId } = req.body;
         const userId = req.user._id;
 
         // 1. Check if user already reacted with this emoji
@@ -152,7 +163,7 @@ export const addReaction = async (req, res) => {
         // 2. Broadcast Update
         // Use repoId from body and channelId from the message document
         const roomName = `workspace:${repoId}:channel:${updatedMessage.channelId}`;
-        
+
         // Strategy: Emit the whole message OR just the reactions array
         // Here we emit a "reaction_update" event so the frontend knows exactly what changed
         getIO().to(roomName).emit("reaction_update", {
@@ -160,9 +171,9 @@ export const addReaction = async (req, res) => {
             reactions: updatedMessage.reactions
         });
 
-        res.status(StatusCodes.OK).json({ 
-            status: "success", 
-            data: updatedMessage.reactions 
+        res.status(StatusCodes.OK).json({
+            status: "success",
+            data: updatedMessage.reactions
         });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
@@ -185,7 +196,7 @@ export const deleteMessage = async (req, res) => {
         // Authorization: Only sender can delete (or you could add admin check logic here)
         // Ensure to turn ObjectId to string for comparison
         if (message.senderId.toString() !== userId.toString()) {
-             return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not authorized to delete this message" });
+            return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not authorized to delete this message" });
         }
 
         // Hard Delete
@@ -196,7 +207,7 @@ export const deleteMessage = async (req, res) => {
         // or we usually might need to look it up if this is a flat route.
         // Assuming your Repository model structure or if you pass repoId in params:
         const { repoId } = req.params; // If route is nested /repos/:repoId/...
-        
+
         if (repoId) {
             const roomName = `workspace:${repoId}:channel:${message.channelId}`;
             getIO().to(roomName).emit("message_deleted", { messageId: id });

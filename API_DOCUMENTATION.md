@@ -584,9 +584,265 @@ Response (Directory):
 
 ---
 
-## ⚠️ Notes
-- **Empty Routes**: The following route modules exist but currently have no endpoints:
-    - `/api/channels` (Channels)
-    - `/api/memberships` (Memberships)
-    - `/api/messages` (Messages)
-    - `/api/notifications` (Notifications)
+### 💬 Channels (`/api/repos/:repoId/channels`)
+*Mounted at `/api/repos/:repoId/channels`*
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | **/api/repos/:repoId/channels** | List all channels in a workspace. | ✅ Yes |
+| `POST` | **/api/repos/:repoId/channels** | Create a new channel. | ✅ Yes |
+| `PATCH` | **/api/repos/:repoId/channels/:id** | Rename a channel. | ✅ Yes |
+| `DELETE` | **/api/repos/:repoId/channels/:id** | Delete a channel and its messages. | ✅ Yes |
+| `POST` | **/api/repos/:repoId/channels/:id/join** | Join a channel (subscribes to socket room). | ✅ Yes |
+| `POST` | **/api/repos/:repoId/channels/:id/leave** | Leave a channel. | ✅ Yes |
+
+#### GET `/api/repos/:repoId/channels` Response
+```json
+{
+  "status": "success",
+  "data": [
+    {
+       "channel_id": "65e...",
+       "name": "general",
+       "participants": ["..."]
+    }
+  ]
+}
+```
+
+#### POST `/api/repos/:repoId/channels` Request
+```json
+{
+  "name": "random"
+}
+```
+
+#### POST `/api/repos/:repoId/channels` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "channel_id": "65e123...",
+    "name": "random",
+    "participants": []
+  }
+}
+```
+
+#### PATCH `/api/repos/:repoId/channels/:id` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "channel_id": "65e...",
+    "name": "new-name"
+  }
+}
+```
+
+#### DELETE `/api/repos/:repoId/channels/:id` Response
+```json
+{
+  "status": "success",
+  "message": "Channel random and messages in random deleted"
+}
+```
+
+#### POST `/api/repos/:repoId/channels/:id/join` Response
+```json
+{
+    "status": "success",
+    "message": "Successfully joined random (and general)"
+}
+```
+
+---
+
+### 📨 Messages (`/api/repos/:repoId/channels/:channelId/messages`)
+*Mounted at `/api/repos/:repoId/channels/:channelId/messages`*
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | **.../messages** | Get paginated messages for a channel. | ✅ Yes |
+| `POST` | **.../messages** | Send a new message (supports mentions `@user`). | ✅ Yes |
+| `DELETE` | **.../messages/:id** | Delete a message (Sender or Admin only). | ✅ Yes |
+| `PUT` | **.../messages/:id/reactions** | Add or toggle a reaction on a message. | ✅ Yes |
+
+#### GET `.../messages` Response
+```json
+{
+  "status": "success",
+  "results": 50,
+  "data": [
+    {
+      "_id": "MSG_ID",
+      "content": "Hello world",
+      "senderId": { "username": "octocat", "avatarUrl": "..." },
+      "reactions": [],
+      "createdAt": "..."
+    }
+  ]
+}
+```
+
+#### POST `.../messages` Request
+```json
+{
+  "content": "Hello @octocat!",
+  "attachments": [] 
+}
+```
+
+#### POST `.../messages` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "_id": "MSG_ID",
+    "content": "Hello @octocat!",
+    "senderId": "USER_ID",
+    "channelId": "CHANNEL_ID"
+  }
+}
+```
+
+#### PUT `.../messages/:id/reactions` Request
+```json
+{
+  "emoji": "👍",
+  "repoId": "65e..." 
+}
+```
+
+#### PUT `.../messages/:id/reactions` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "_id": "MSG_ID",
+    "reactions": [ { "emoji": "👍", "users": ["USER_ID"] } ]
+  }
+}
+```
+
+---
+
+### 👥 Memberships (`/api/repos/:repoId/members`)
+*Mounted at `/api/repos/:repoId/members`*
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | **/api/repos/:repoId/members** | List all members of a workspace. | ✅ Yes |
+| `POST` | **/api/repos/:repoId/members** | Invite a GitHub user to the workspace. | ✅ Core+ |
+| `PATCH` | **/api/repos/:repoId/members/:userId** | Update a member's role. | ✅ Core+ |
+| `DELETE` | **/api/repos/:repoId/members/:userId** | Remove a member from the workspace. | ✅ Core+ |
+
+#### GET `/api/repos/:repoId/members` Response
+```json
+{
+  "status": "success",
+  "data": [
+    { "userId": { "githubUsername": "octocat" }, "role": "owner" }
+  ]
+}
+```
+
+#### POST `/api/repos/:repoId/members` Request
+```json
+{
+  "githubUsername": "octocat",
+  "role": "viewer"
+}
+```
+
+#### POST `/api/repos/:repoId/members` Response
+```json
+{
+  "status": "success",
+  "message": "User octocat has been invited successfully",
+  "data": [ ...updated member list... ]
+}
+```
+
+#### PATCH `/api/repos/:repoId/members/:userId` Response
+```json
+{
+  "status": "success",
+  "data": [ ...updated member list... ]
+}
+```
+
+#### DELETE `/api/repos/:repoId/members/:userId` Response
+```json
+{
+  "status": "success",
+  "message": "Member removed",
+  "data": [ ...updated member list... ]
+}
+```
+
+---
+
+### 🔔 Notifications (`/api/notifications`)
+*Mounted at `/api/notifications`*
+
+| Method | Endpoint | Description | Auth Required |
+| :--- | :--- | :--- | :--- |
+| `GET` | **/api/notifications** | Get authenticated user's notifications. | ✅ Yes |
+| `PUT` | **/api/notifications/preferences** | Update notification preferences. | ✅ Yes |
+| `PATCH` | **/api/notifications/:id/read** | Mark a notification as read. | ✅ Yes |
+| `DELETE` | **/api/notifications/:id** | Delete a notification. | ✅ Yes |
+
+#### GET `/api/notifications` Response
+```json
+{
+  "status": "success",
+  "data": [
+    {
+      "_id": "NOTIF_ID",
+      "message": "You were added to specific-channel",
+      "isRead": false,
+      "type": "message",
+      "createdAt": "..."
+    }
+  ]
+}
+```
+
+#### PUT `/api/notifications/preferences` Request
+```json
+{
+  "notificationsEnabled": true,
+  "emailNotifications": false,
+  "theme": "dark"
+}
+```
+
+#### PUT `/api/notifications/preferences` Response
+```json
+{
+  "status": "success",
+  "data": {
+    "notificationsEnabled": true,
+    "emailNotifications": false,
+    "theme": "dark"
+  }
+}
+```
+
+---
+
+### 🪝 Webhooks
+*Endpoint exposed for GitHub events*
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `POST` | **/api/webhooks/github** | Receives and processes GitHub events. |
+
+#### POST `/api/webhooks/github` Response
+```text
+Webhook processed successfully.
+```
+
+---
+

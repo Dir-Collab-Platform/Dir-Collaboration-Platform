@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Workspace Creation */
+.workspaceCreation {
+  background-color: var(--dark-bg);
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.workspaceCreation h1 {
+  font-size: 1.4rem;
+  text-align: center;
+  margin-bottom: 0.2rem;
+}
+
+.divider {
+  width: 80%;
+  margin: 0 auto 1.5rem auto;
+  border: 1px solid var(--main-border-color);
+}
+
+.workspace {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.workspace label {
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.workspace input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--main-border-color);
+  border-radius: 6px;
+  background-color: #303036;
+  color: var(--primary-text-color);
+  font-size: 0.95rem;
+  font-family: var(--main-font-family);
+}
+
+.workspace input:focus {
+  outline: none;
+  border-color: var(--active-text-color);
+}
+
+#descriptionWorkspace {
+  height: 80px;
+}
+
+/* Buttons */
+.newRepoButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.repoButton {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  background-color: var(--secondary-button);
+  color: var(--primary-text-color);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  font-family: var(--main-font-family);
+  transition: background-color 0.2s;
+}
+
+.repoButton:hover {
+  background-color: var(--secondary-button-hover);
+}
+
+.repoButton img {
+  width: 16px;
+  height: 16px;
+}
+
+.create {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.createWorkspace {
+  padding: 0.7rem 2rem;
+  background-color: var(--primary-button);
+  color: var(--primary-text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: var(--main-font-family);
+  transition: background-color 0.2s;
+}
+
+.createWorkspace:hover {
+  background-color: var(--primary-button-hover);
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Content */
+.modal-content {
+  background-color: var(--dark-bg);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 480px;
+  overflow: hidden;
+  border: 1px solid var(--main-border-color);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--main-border-color);
+  text-align: center;
+}
+
+.modal-header h2 {
+  font-size: 1.2rem;
+  color: var(--primary-text-color);
+  margin-bottom: 0.5rem;
+}
+
+.modal-header p {
+  font-size: 0.9rem;
+  color: var(--secondary-text-color);
+  margin: 0;
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Search Input */
+.search-input {
+  width: 100%;
+}
+
+.search-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #303036;
+  border: 1px solid var(--main-border-color);
+  border-radius: 8px;
+  color: var(--primary-text-color);
+  font-family: var(--main-font-family);
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.search-field:focus {
+  outline: none;
+  border-color: var(--active-text-color);
+}
+
+/* Role Section */
+.role-section h3 {
+  font-size: 1rem;
+  color: var(--primary-text-color);
+  margin-bottom: 0.75rem;
+}
+
+.modal-divider {
+  border: none;
+  border-top: 1px solid var(--main-border-color);
+  margin: 0 0 1rem 0;
+}
+
+.role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #303036;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.role-option:hover {
+  background-color: #3a3a40;
+}
+
+.role-option input[type="radio"] {
+  accent-color: var(--active-text-color);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.role-option span {
+  color: var(--primary-text-color);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* Invite Buttons */
+.invite-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.invite-action-btn {
+  padding: 0.85rem;
+  background-color: var(--primary-button);
+  color: var(--primary-text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: var(--main-font-family);
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.invite-action-btn:hover {
+  background-color: var(--primary-button-hover);
+}
+
+.cancel-action-btn {
+  padding: 0.85rem;
+  background-color: var(--secondary-button);
+  color: var(--primary-text-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.95rem;
+  font-family: var(--main-font-family);
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.cancel-action-btn:hover {
+  background-color: var(--secondary-button-hover);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .workspaceCreation {
+    padding: 1.5rem 1.5rem;
+    width: 95%;
+  }
+  
+  .newRepoButtons {
+    flex-direction: column;
+  }
+  
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+  
+  .modal-header {
+    padding: 1.25rem;
+  }
+  
+  .modal-body {
+    padding: 1.25rem;
+  }
+  
+  .invite-buttons {
+    gap: 0.5rem;
+  }
+}

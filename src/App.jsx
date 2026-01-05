@@ -7,6 +7,7 @@ import Repository from "./pages/Repository/Repository";
 import Profile from "./pages/Profile/Profile/Profile";
 import CreateRepo from "./pages/CreateRepository/CreateRepo";
 import Workspaces from "./pages/Workspaces/Workspaces";
+import ExploreContainer from "./pages/Explore/ExploreContainer";
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/workspace" element={<Workspace />} />
         <Route path="/workspaces" element={<Workspaces />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/explore" element={<ExploreContainer />} />
       </Routes>
     </>
   );

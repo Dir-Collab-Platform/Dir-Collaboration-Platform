@@ -1,73 +1,109 @@
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Paperclip, Send } from "lucide-react"
-import DummyImg from "./DummyImg"
+import { ChatContext } from '../../../../context/WorkspaceContext/WorkspaceContext'
+import MessageBubble from './MessageBubble'
 
-function MessageLeft({ text, time }) {
-  return (
-    <div className="flex items-start gap-2">
+/**
+ * Chat Input Component
+ */
+function ChatInput({ onSendMessage }) {
+    const [inputValue, setInputValue] = useState("")
 
-      <DummyImg />
+    const handleSend = () => {
+        if (inputValue.trim()) {
+            onSendMessage(inputValue)
+            setInputValue("")
+        }
+    }
 
-      <div className="max-w-[70%] bg-(--received-message) px-4 py-2 rounded-2xl rounded-bl-none text-sm">
-        {text}
-        <div className="text-xs opacity-60 text-right mt-1">{time}</div>
-      </div>
+    function handleKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            handleSend()
+        }
+    }
 
-    </div>
-  )
-}
-
-function MessageRight({ text, time }) {
-  return (
-    <div className="flex items-start gap-2 justify-end">
-      <div className="max-w-[70%] bg-(--sent-message) px-4 py-2 rounded-2xl rounded-br-none text-sm">
-        {text}
-        <div className="text-xs opacity-60 text-right mt-1">{time}</div>
-      </div>
-    </div>
-  )
-}
-
-function SendFileBtn() {
     return (
-        <button className="svg-btn icon-btn">
-            <Paperclip color="var(--secondary-text-color)" />
-        </button>
-    )
-}
-
-function SendMessageBtn() {
-    return (
-        <button className="svg-btn icon-btn">
-            <Send color="var(--secondary-text-color)" />
-        </button>
-    )
-}
-
-function TypeMessage() {
-    return (
-        <div className="type-message grid grid-cols-[min-content_1fr_min-content] gap-4 border border-(--main-border-color) rounded-2xl px-4 py-1">
-            <SendFileBtn />
-            <input type="text" className="bg-(--card-bg-lighter2) px-4 py-2 focus:outline-none" placeholder="Type a message..." />
-            <SendMessageBtn /> 
+        <div className="p-4 pt-0">
+            <div className="grid grid-cols-[auto_1fr_auto] gap-3 items-end bg-(--card-bg-lighter2) border border-(--main-border-color) rounded-xl px-3 py-2 focus-within:border-(--active-text-color) transition-colors shadow-inner">
+                <button className="p-2 text-(--secondary-text-color) hover:text-(--active-text-color) transition-colors">
+                    <Paperclip size={20} />
+                </button>
+                
+                <textarea 
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Type a message..." 
+                    className="bg-transparent text-sm text-(--primary-text-color) placeholder:text-(--secondary-text-color) placeholder:opacity-50 outline-none resize-none py-2 max-h-32 custom-scrollbar"
+                    rows={1}
+                    style={{ minHeight: '40px' }}
+                />
+                
+                <button 
+                    onClick={handleSend}
+                    disabled={!inputValue.trim()}
+                    className="p-2 text-(--active-text-color) hover:scale-110 disabled:opacity-50 disabled:hover:scale-100 transition-all"
+                >
+                    <Send size={20} />
+                </button> 
+            </div>
         </div>
     )
 }
 
+/**
+ * Main Chat Container
+ * Uses strict context filtering to fix channel message persistence issues
+ */
 export default function Chat() {
-    return (
-        <div className="chat-container bg-(--card-bg-lighter) flex flex-col gap-4 border border-(--main-border-color) rounded-2xl p-2.5 pt-4">
+    const chatContext = useContext(ChatContext)
+    const scrollRef = useRef(null)
 
-            <div className="chat flex flex-col gap-4 overflow-y-scroll no-scrollbar h-150">
-                <MessageLeft text="Hello! How can I help you today?" time="10:15 AM" />
-                <MessageRight text="Hi how are you" time="20:30" />
-                <MessageLeft text="Fine how’s the task going" time="20:30" />
-                <MessageRight text="it's going well" time="20:30" />
-                <MessageLeft text="Have you heard about the new spec?" time="20:30" />
-                <MessageLeft text="The product manager is saying mr Gustoii wants a bunch of new set of features to be implemented as fast as possible." time="20:30" />
-                <MessageRight text="Ok we'll try our best" time="20:30" />
+    // Ensure scroll to bottom on mount and message updates
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+        }
+    }, [chatContext?.activeMessages])
+
+    if (!chatContext) return (
+        <div className="flex grow items-center justify-center bg-(--card-bg)">
+            <div className="flex flex-col items-center gap-3">
+                <div className="w-6 h-6 border-2 border-(--active-text-color) border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-xs text-(--secondary-text-color) animate-pulse">Syncing chat...</p>
+            </div>
+        </div>
+    )
+
+    const { activeMessages, sendMessage, activeChannel } = chatContext
+    // replace this with the user id of the authenticated user
+    const CURRENT_USER_ID = "658af5c2f1a2b3c4d5e6f001" 
+
+    return (
+        <div className="chat grid grid-rows-[1fr_auto] h-155 bg-(--card-bg-lighter) border border-(--main-border-color) rounded-2xl">
+            <div
+                ref={scrollRef}
+                className="overflow-y-auto invisible-scrollbar px-6 min-h-0"
+            >
+                <div className="flex flex-col gap-6 justify-end min-h-full py-4">
+                    {activeMessages?.length ? (
+                        activeMessages.map(msg => (
+                            <MessageBubble
+                                key={msg._id}
+                                message={msg}
+                                isCurrentUser={msg.senderId === CURRENT_USER_ID}
+                            />
+                        ))
+                    ) : (
+                        <div className="flex flex-col items-center justify-center h-full opacity-40 gap-3">
+                            ...
+                        </div>
+                    )}
+                </div>
             </div>
 
-            <TypeMessage />
+            <ChatInput onSendMessage={(text) => sendMessage(text, CURRENT_USER_ID)} />
         </div>
     )
 }

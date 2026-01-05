@@ -5,6 +5,7 @@ import Repositories from './pages/Repositories/Repositories'
 import Workspace from './pages/Workspace/Workspace'
 import Repository from './pages/Repository/Repository'
 import Workspaces from './pages/Workspaces/Workspaces/Workspaces'
+import ExploreContainer from './pages/Explore/ExploreContainer'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path='/repository' element={<Repository />} />
         <Route path='/workspace' element={<Workspace />} />
         <Route path='/workspaces' element={<Workspaces />} />
+        <Route path='/explore' element={<ExploreContainer />} />
       </Routes>
     </>
   )

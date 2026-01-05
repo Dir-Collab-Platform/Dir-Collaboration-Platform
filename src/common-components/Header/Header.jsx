@@ -305,7 +305,7 @@ function Header() {
         />
       )}
 
-      <div className="pt-16"></div>
+      <div className="pt-8"></div>
     </>
   );
 }

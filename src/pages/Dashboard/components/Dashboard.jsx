@@ -37,7 +37,7 @@ const Dashboard = () => {
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
 
   return (
-    <div className="flex h-screen w-full bg-[#0D0D12] overflow-hidden">
+    <div className="flex h-screen w-full bg-[#0D0D12] overflow-hidden -mt-20 scroll-bar">
       {/* Sidebar - Fixed Width */}
       <div className="w-64 flex-shrink-0">
         <Sidebar />

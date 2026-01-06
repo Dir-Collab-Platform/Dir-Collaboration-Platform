@@ -1,6 +1,6 @@
 import "./App.css";
 import { Routes, Route } from "react-router";
-import Dashboard from "./pages/Dashboard/Dashboard/Dashboard";
+import Dashboard from "./pages/Dashboard/components/Dashboard";
 import Repositories from "./pages/Repositories/Repositories";
 import Workspace from "./pages/Workspace/Workspace";
 import Repository from "./pages/Repository/Repository";

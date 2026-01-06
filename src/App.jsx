@@ -14,7 +14,6 @@ import CreateWorkspace from "./pages/CreateWorkspace/CreateWorkspace/CreateWorks
 function App() {
   return (
     <>
-      <Header/>
       {/* This is temporary routing to let everyone see the page they are building */}
       <Routes>
         <Route path="/" element={<Dashboard />} />

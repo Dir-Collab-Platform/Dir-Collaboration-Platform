@@ -94,7 +94,7 @@ function CreateRepoModal({ onClose }) {
               </label>
               <input 
                 type="text" 
-                placeholder="my-repository" 
+                placeholder="My repository..." 
                 value={repoName}
                 onChange={(e) => setRepoName(e.target.value)}
                 required
@@ -112,7 +112,7 @@ function CreateRepoModal({ onClose }) {
               </label>
               <input 
                 type="text" 
-                placeholder="A brief description of your repository..." 
+                placeholder="The repo is..." 
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="w-full px-3 py-2 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--active-text-color)] focus:border-transparent"
@@ -126,24 +126,24 @@ function CreateRepoModal({ onClose }) {
             <div className="space-y-6 mb-8">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
-                  Visibility
+                  Choose Visibility
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${visibility === 'public' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${visibility === 'public' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: visibility === 'public' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
-                    }}
+  backgroundColor: visibility === 'public' ? '#1D1D29' : 'var(--secondary-button)',
+}}
                     onClick={() => handleOptionChange('visibility', 'public')}
                   >
                     Public
                   </button>
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${visibility === 'private' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${visibility === 'private' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: visibility === 'private' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                      backgroundColor: visibility === 'private' ? '#1D1D29' : 'var(--secondary-button)',
                     }}
                     onClick={() => handleOptionChange('visibility', 'private')}
                   >
@@ -156,12 +156,12 @@ function CreateRepoModal({ onClose }) {
                 <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
                   Add README
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${readme === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${readme === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: readme === 'yes' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                      backgroundColor: readme === 'yes' ? '#1D1D29' : 'var(--secondary-button)',
                     }}
                     onClick={() => handleOptionChange('readme', 'yes')}
                   >
@@ -169,9 +169,9 @@ function CreateRepoModal({ onClose }) {
                   </button>
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${readme === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${readme === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: readme === 'no' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                      backgroundColor: readme === 'no' ? '#1D1D29' : 'var(--secondary-button)',
                     }}
                     onClick={() => handleOptionChange('readme', 'no')}
                   >
@@ -184,12 +184,12 @@ function CreateRepoModal({ onClose }) {
                 <label className="text-sm font-medium" style={{ color: 'var(--primary-text-color)' }}>
                   Add .gitignore
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${gitignore === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${gitignore === 'yes' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: gitignore === 'yes' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                      backgroundColor: gitignore === 'yes' ? '#1D1D29' : 'var(--secondary-button)',
                     }}
                     onClick={() => handleOptionChange('gitignore', 'yes')}
                   >
@@ -197,9 +197,9 @@ function CreateRepoModal({ onClose }) {
                   </button>
                   <button 
                     type="button"
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${gitignore === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors w-20 mr-8 ${gitignore === 'no' ? 'text-white' : 'text-gray-400 hover:text-white'}`}
                     style={{
-                      backgroundColor: gitignore === 'no' ? 'var(--secondary-button-hover)' : 'var(--secondary-button)'
+                      backgroundColor: gitignore === 'no' ? '#1D1D29' : 'var(--secondary-button)',
                     }}
                     onClick={() => handleOptionChange('gitignore', 'no')}
                   >

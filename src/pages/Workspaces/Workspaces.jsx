@@ -3,7 +3,7 @@ import Header from "../../common-components/Header/Header";
 import WorkSpaceList from "./WorkSpaceList";
 import WorkSpacesHeader from "./WorkSpacesHeader";
 
-export default function () {
+export default function Workspaces () {
   return (
     <>
       <Header />

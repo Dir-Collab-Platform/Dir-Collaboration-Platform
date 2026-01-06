@@ -12,19 +12,20 @@ const ExploreContainer = () => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState("all"); // 'all', 'repository', or 'workspace'
+  const [selectedTag, setSelectedTag] = useState(""); // selected tag for filtering
   const [hasNextPage, setHasNextPage] = useState(true);
 
   // Fetch data function
-  const loadData = useCallback(async (pageNum, currentFilter, append = false) => {
+  const loadData = useCallback(async (pageNum, currentFilter, currentTag, append = false) => {
     setLoading(true);
-    const res = await fetchExploreRepos(pageNum, currentFilter);
-    
+    const res = await fetchExploreRepos(pageNum, currentFilter, currentTag);
+
     if (append) {
       setRepos(prev => [...prev, ...res.data.repos]);
     } else {
       setRepos(res.data.repos);
     }
-    
+
     setHasNextPage(res.data.hasNextPage);
     setLoading(false);
   }, []);
@@ -34,25 +35,25 @@ const ExploreContainer = () => {
     const init = async () => {
       const tagRes = await fetchTopics();
       setTags(tagRes.data);
-      loadData(1, filter, false);
+      loadData(1, filter, selectedTag, false);
       setPage(1);
     };
     init();
-  }, [filter, loadData]);
+  }, [filter, selectedTag, loadData]);
 
   const handleLoadMore = () => {
     const nextPage = page + 1;
-    loadData(nextPage, filter, true);
+    loadData(nextPage, filter, selectedTag, true);
     setPage(nextPage);
   };
 
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-dark-bg text-white px-8 py-8">
+      <div className="min-h-screen bg-dark-bg text-white px-8 ">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6"><ExploreHero /></div>
-          <div className="mb-10"><TagList tags={tags} setTags={setTags} /></div>
+          <div className="mb-10"><TagList tags={tags} setTags={setTags} selectedTag={selectedTag} setSelectedTag={setSelectedTag} /></div>
           <ProjectGrid 
             repos={repos} 
             onLoadMore={handleLoadMore} 

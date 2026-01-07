@@ -1,5 +1,4 @@
-﻿import "./App.css";
-import { Routes, Route } from "react-router";
+﻿import { Routes, Route } from "react-router";
 import Dashboard from "./pages/Dashboard/components/Dashboard";
 import Repositories from "./pages/Repositories/Repositories";
 import Workspace from "./pages/Workspace/Workspace";
@@ -8,7 +7,7 @@ import Profile from "./pages/Profile/Profile/Profile";
 import CreateRepo from "./pages/CreateRepository/CreateRepo";
 import Workspaces from "./pages/Workspaces/Workspaces";
 import ExploreContainer from "./pages/Explore/ExploreContainer";
-import CreateWorkspace from "./pages/CreateWorkspace/CreateWorkspace/CreateWorkspace"
+import CreateWorkspace from "./pages/CreateWorkspace/CreateWorkspace"
 
 
 function App() {

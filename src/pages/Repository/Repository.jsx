@@ -2,7 +2,6 @@ import Footer from "../../common-components/Footer/Footer"
 import Header from "../../common-components/Header/Header"
 import CodePanel from "../Workspace/components/CodePanel"
 import WorkspaceHeader from "../Workspace/components/WorkspaceHeader"
-import "./Repository.css"
 
 export default function Repository() {
     return (

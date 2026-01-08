@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 import { ChatContext } from './WorkspaceContext'
+import { mockWorkspaces, mockMessages, mockUsers } from '../../data/mockData';
 
 export default function ChatProvider({ children }) {
+    const { id: workspaceId } = useParams();
     const [users, setUsers] = useState([])
     const [channels, setChannels] = useState([])
     const [messages, setMessages] = useState([])
@@ -11,23 +15,52 @@ export default function ChatProvider({ children }) {
 
     useEffect(() => {
         async function fetchChatData() {
+            if (!workspaceId) {
+                setIsLoading(false);
+                return;
+            }
+
             setIsLoading(true)
             try {
-                const response = await fetch('/data/chat-db.json')
+                // TODO: Replace with real API calls when integrating backend
+                // const [channelsRes, messagesRes, membersRes] = await Promise.all([
+                //     axios.get(`/api/repos/${workspaceId}/channels`),
+                //     axios.get(`/api/repos/${workspaceId}/channels/${channelId}/messages`),
+                //     axios.get(`/api/repos/${workspaceId}/members`)
+                // ]);
+                // setChannels(channelsRes.data.data);
+                // setMessages(messagesRes.data.data);
+                // setUsers(membersRes.data.data.map(m => m.userId));
                 
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch chat data: ${response.statusText}`)
+                // Mock implementation
+                await new Promise(resolve => setTimeout(resolve, 400));
+                
+                const workspace = mockWorkspaces.find(ws => ws._id === workspaceId);
+                if (!workspace) {
+                    throw new Error("Workspace not found");
                 }
 
-                const data = await response.json()
+                // Get all members as users
+                const workspaceUsers = workspace.members.map(mem => {
+                    const user = mockUsers.find(u => u._id === mem.userId);
+                    return user || { _id: mem.userId, githubUsername: "Unknown", avatarUrl: "" };
+                });
+                setUsers(workspaceUsers);
 
-                setUsers(data.users || [])
-                setChannels(data.channels || [])
-                setMessages(data.messages || [])
+                // Get channels for this workspace
+                const workspaceChannels = workspace.channels || [];
+                setChannels(workspaceChannels);
 
-                // Use _id to set the default active channel
-                if (data.channels && data.channels.length > 0) {
-                    setActiveChannelId(data.channels[0]._id)
+                // Get messages for all channels in this workspace
+                const channelIds = workspaceChannels.map(ch => ch._id);
+                const workspaceMessages = mockMessages.filter(msg => 
+                    channelIds.includes(msg.channelId)
+                );
+                setMessages(workspaceMessages);
+
+                // Set default active channel
+                if (workspaceChannels.length > 0) {
+                    setActiveChannelId(workspaceChannels[0]._id);
                 }
 
             } catch (err) {
@@ -39,7 +72,7 @@ export default function ChatProvider({ children }) {
         }
 
         fetchChatData()
-    }, [])
+    }, [workspaceId])
 
     /**
      * Helper to get the currently active channel object using _id
@@ -51,18 +84,23 @@ export default function ChatProvider({ children }) {
      */
     const activeMessages = messages.filter(m => m.channelId === activeChannelId)
 
-    activeMessages.forEach(msg => {
-        msg.senderAvatar = users?.find(u => u._id === msg.senderId)?.avatarUrl
-        msg.senderName = users.find(u => u._id === msg.senderId).githubUsername
-    })
+    // Enrich messages with sender info
+    const enrichedMessages = activeMessages.map(msg => {
+        const sender = users.find(u => u._id === msg.senderId);
+        return {
+            ...msg,
+            senderAvatar: sender?.avatarUrl,
+            senderName: sender?.githubUsername || "Unknown"
+        };
+    });
 
     /**
-     * Mock function to add a new message
+     * Send a new message
      */
     function sendMessage(content, senderId) {
         const newMessage = {
             _id: `msg_${Date.now()}`,
-            channelId: activeChannelId, // Linking the message to the active channel's _id
+            channelId: activeChannelId,
             senderId: senderId,
             content: content,
             createdAt: new Date().toISOString(),
@@ -72,15 +110,16 @@ export default function ChatProvider({ children }) {
             comments: []
         }
         setMessages(prev => [...prev, newMessage])
+        return newMessage;
     }
 
     const value = {
         users,
         channels,
-        messages,
+        messages: enrichedMessages,
         activeChannelId,
         activeChannel,
-        activeMessages,
+        activeMessages: enrichedMessages,
         isLoading,
         error,
         setActiveChannelId,

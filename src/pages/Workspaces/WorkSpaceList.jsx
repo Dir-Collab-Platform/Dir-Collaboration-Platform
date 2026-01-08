@@ -1,56 +1,52 @@
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Search } from "lucide-react";
 import Button from "../../common-components/button";
 import WorkSpacesSlot from "./WorkSpacesSlot";
-
-const MockData = [
-  {
-    projectName: "E-Commerce",
-    visibility: "public",
-    description:
-      "A simple e-commerce frontend with cart, filters and checkout UI",
-    stars: 7,
-    updatedAt: "updated yesterday",
-    contributors: [
-      "https://randomuser.me/api/portraits/men/32.jpg",
-      "https://randomuser.me/api/portraits/women/44.jpg",
-      "https://randomuser.me/api/portraits/women/68.jpg",
-      "https://randomuser.me/api/portraits/men/75.jpg",
-    ],
-  },
-  {
-    projectName: "Mini-Git",
-    visibility: "public",
-    description:
-      "A simple e-commerce frontend with cart, filters and checkout UI",
-    stars: 7,
-    updatedAt: "updated yesterday",
-    contributors: [
-      "https://randomuser.me/api/portraits/men/32.jpg",
-      "https://randomuser.me/api/portraits/women/44.jpg",
-    ],
-  },
-  {
-    projectName: "Database",
-    visibility: "public",
-    description:
-      "A simple e-commerce frontend with cart, filters and checkout UI",
-    stars: 7,
-    updatedAt: "updated yesterday",
-    contributors: ["https://randomuser.me/api/portraits/men/32.jpg"],
-  },
-];
+import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
+import { UserContext } from '../../context/UserContext/UserContext';
+import { mockLanguages, mockUsers } from '../../data/mockData';
 
 export default function WorkSpaceList() {
+  const { workspaces, isLoading } = useContext(WorkspacesContext);
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredWorkspaces = workspaces.filter((ws) =>
+    ws.workspaceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    ws.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleWorkspaceClick = (workspaceId) => {
+    navigate(`/workspace/${workspaceId}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-6" style={{ color: 'var(--secondary-text-color)' }}>
+        Loading workspaces...
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="flex w-full items-center gap-5">
         <div className="flex w-5/6 items-center">
           <div className="relative flex flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={20} style={{ color: 'var(--secondary-text-color)' }} />
             <input
               type="text"
               placeholder="Search for repositories..."
-              className="flex-1 bg-(--secondary-button-hover) border border-(--main-border-color) pl-12 py-2.5 rounded-l-xl"
+              className="flex-1 pl-12 py-2.5 rounded-l-xl focus:outline-none focus:ring-2"
+              style={{
+                backgroundColor: 'var(--secondary-button-hover)',
+                border: '1px solid var(--main-border-color)',
+                color: 'var(--primary-text-color)'
+              }}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
@@ -70,18 +66,31 @@ export default function WorkSpaceList() {
         </div>
       </div>
 
-      <div className="rounded-xl bg-(--dimmer-dark-bg) my-4 flex flex-col items-center justify-center border border-(--main-border-color)">
-        {MockData.map((project, index) => (
-          <WorkSpacesSlot
-            key={index}
-            projectName={project.projectName}
-            visibility={project.visibility}
-            description={project.description}
-            stars={project.stars}
-            contributors={project.contributors}
-            updatedAt={project.updatedAt}
-          />
-        ))}
+      <div className="rounded-xl my-4 flex flex-col items-center justify-center border" style={{ 
+        backgroundColor: 'var(--dimmer-dark-bg)',
+        borderColor: 'var(--main-border-color)'
+      }}>
+        {filteredWorkspaces.map((workspace) => {
+          const languages = mockLanguages[workspace._id] || [];
+          const contributors = workspace.members?.slice(0, 4).map(mem => {
+            const user = mockUsers.find(u => u._id === mem.userId);
+            return user?.avatarUrl || "https://via.placeholder.com/40";
+          }) || [];
+          
+          return (
+            <div key={workspace._id} onClick={() => handleWorkspaceClick(workspace._id)} className="w-full cursor-pointer">
+              <WorkSpacesSlot
+                projectName={workspace.workspaceName}
+                visibility={workspace.isPrivate ? "private" : "public"}
+                description={workspace.description}
+                stars={workspace.stars || Math.floor(Math.random() * 300)}
+                contributors={contributors}
+                updatedAt={new Date(workspace.updatedAt).toLocaleDateString()}
+                languages={languages}
+              />
+            </div>
+          );
+        })}
         <Button variant="primary" className={"px-12 py-2 rounded-lg my-2"}>
           Load More
         </Button>

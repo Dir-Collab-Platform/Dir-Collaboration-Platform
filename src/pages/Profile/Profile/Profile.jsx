@@ -4,21 +4,23 @@ import ProfileForm from "../ProfileForm/ProfileForm";
 import Sidebar from "../Sidebar/Sidebar";
 import Button from "../../../common-components/button";
 import Footer from "../../../common-components/Footer/Footer";
+import { ProfileContext } from '../../../context/ProfileContext/ProfileContext';
+import ProfileProvider from '../../../context/ProfileContext/ProfileProvider';
 
-export default function Profile() {
+function ProfileContent() {
   return (
     <>
       <Header />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between py-6">
-          <h1 className="text-lg font-semibold">Public Profile</h1>
+          <h1 className="text-lg font-semibold" style={{ color: 'var(--primary-text-color)' }}>Public Profile</h1>
           <Button
             variant="outline"
             className="rounded-2xl flex justify-center items-center gap-3 py-3 px-3"
           >
             <LogOut />
-            <span className="text-(--secondary-text-color)">Log out</span>
+            <span style={{ color: 'var(--secondary-text-color)' }}>Log out</span>
           </Button>
         </div>
 
@@ -34,5 +36,13 @@ export default function Profile() {
       </div>
       <Footer />
     </>
+  );
+}
+
+export default function Profile() {
+  return (
+    <ProfileProvider>
+      <ProfileContent />
+    </ProfileProvider>
   );
 }

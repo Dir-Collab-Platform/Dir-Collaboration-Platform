@@ -1,5 +1,5 @@
-import React from "react"
-import { Link } from "react-router-dom"
+import React, { useContext } from "react"
+import { NavLink } from "react-router-dom"
 import {
     LayoutDashboard,
     Folder,
@@ -9,12 +9,17 @@ import {
     X,
     Workflow
 } from "lucide-react"
+import { UserContext } from "../../../context/UserContext/UserContext"
 
 export default function SidebarMenu({ isMenuOpen, onClose }) {
+    const { user } = useContext(UserContext);
+
     function handleLogout() {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
-            // Handle logout logic here
+            // TODO: Handle logout logic here
+            // await logout();
+            // navigate('/login');
         }
         onClose()
     }
@@ -32,65 +37,106 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                 <X size={20} />
             </button>
 
-            <div className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4 bg-(--card-bg)">
+            <div className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4" style={{ backgroundColor: 'var(--card-bg)' }}>
                 <img 
-                    src="/assets/images/person.jpg" 
+                    src={user?.avatarUrl || "/assets/images/person.jpg"} 
                     alt="person" 
                     className="w-12 h-12 rounded-full object-cover" 
                 />
                 <div>
-                    <p className="font-semibold text-(--primary-text-color)">Efrata</p>
-                    <p className="text-sm text-(--secondary-text-color)">@zeamanuel</p>
+                    <p className="font-semibold" style={{ color: 'var(--primary-text-color)' }}>{user?.githubUsername || "Efrata"}</p>
+                    <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>@{user?.githubUsername?.toLowerCase() || "zeamanuel"}</p>
                 </div>
             </div>
 
-            <hr className="my-4 mx-4 border-(--main-border-color)" />
+            <hr className="my-4 mx-4" style={{ borderColor: 'var(--main-border-color)' }} />
 
             <div className="px-4 space-y-1">
-                <Link 
+                <NavLink 
                     to="/"
+                    end
                     onClick={onClose}
-                    className="group flex items-center gap-3 w-full p-3 rounded-lg text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors"
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${
+                            isActive ? '' : 'hover:opacity-80'
+                        }`
+                    }
+                    style={({ isActive }) => ({
+                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
+                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
+                    })}
                 >
-                    <LayoutDashboard size={20} className="text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors" />
+                    <LayoutDashboard size={20} />
                     <span>Dashboard</span>
-                </Link>
+                </NavLink>
 
-                <Link 
+                <NavLink 
                     to="/repositories"
                     onClick={onClose}
-                    className="group flex items-center gap-3 w-full p-3 rounded-lg text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors"
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${
+                            isActive ? '' : 'hover:opacity-80'
+                        }`
+                    }
+                    style={({ isActive }) => ({
+                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
+                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
+                    })}
                 >
-                    <Folder size={20} className="text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors" />
+                    <Folder size={20} />
                     <span>Repositories</span>
-                </Link>
+                </NavLink>
 
-                <Link 
+                <NavLink 
                     to="/workspaces"
                     onClick={onClose}
-                    className="group flex items-center gap-3 w-full p-3 rounded-lg text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors"
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${
+                            isActive ? '' : 'hover:opacity-80'
+                        }`
+                    }
+                    style={({ isActive }) => ({
+                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
+                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
+                    })}
                 >
-                    <Workflow size={20} className="text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors" />
+                    <Workflow size={20} />
                     <span>Workspaces</span>
-                </Link>
+                </NavLink>
 
-                <Link 
+                <NavLink 
                     to="/profile"
                     onClick={onClose}
-                    className="group flex items-center gap-3 w-full p-3 rounded-lg text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors"
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${
+                            isActive ? '' : 'hover:opacity-80'
+                        }`
+                    }
+                    style={({ isActive }) => ({
+                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
+                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
+                    })}
                 >
-                    <Settings size={20} className="text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors" />
+                    <Settings size={20} />
                     <span>Settings</span>
-                </Link>
+                </NavLink>
 
-                <Link 
+                <NavLink 
                     to="/explore"
                     onClick={onClose}
-                    className="group flex items-center gap-3 w-full p-3 rounded-lg text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors"
+                    className={({ isActive }) => 
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${
+                            isActive ? '' : 'hover:opacity-80'
+                        }`
+                    }
+                    style={({ isActive }) => ({
+                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
+                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
+                    })}
                 >
-                    <Search size={20} className="text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors" />
+                    <Search size={20} />
                     <span>Explore</span>
-                </Link>
+                </NavLink>
             </div>
 
             <hr className="my-4 mx-4 border-(--main-border-color)" />

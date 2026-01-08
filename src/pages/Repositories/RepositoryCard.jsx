@@ -1,41 +1,72 @@
-import React from 'react';
+import { Star } from "lucide-react";
+import Button from "../../common-components/button";
 
-function RepositoryCard({ name, visibility, description, stars, updatedAt }) {
-    return (
-        // Main card container
-        <div className="border-b border-gray-200 py-4 px-2 hover:bg-gray-50 transition-colors duration-200">
-            
-            {/* Title and visibility row */}
-            <div className="flex items-center gap-2 mb-1">
-                {/* Repository name */}
-                <h3 className="text-lg font-semibold text-blue-600 hover:underline cursor-pointer">
-                    {name}
-                </h3>
-                
-                {/* Visibility badge */}
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${
-                    visibility === 'public'
-                        ? 'text-gray-600 border-gray-300 bg-gray-100'
-                        : 'text-purple-600 border-purple-300 bg-purple-100'
-                }`}>
-                    {visibility}
-                </span>
+function RepositoryCard({ name, visibility, description, stars, updatedAt, languages, contributors }) {
+  return (
+    <div className="w-full px-6 py-5 cursor-pointer hover:bg-[var(--secondary-button-hover)] transition-colors">
+      <div className="flex items-start justify-between gap-8 border-b border-[var(--main-border-color)] p-4">
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold text-[var(--primary-text-color)]">
+              {name}
+            </h2>
+
+            <Button
+              variant="base"
+              className="rounded-full px-3 py-0.5 text-sm text-[var(--secondary-text-color)] border border-[var(--main-border-color)]"
+            >
+              {visibility}
+            </Button>
+          </div>
+
+          {/* Language Stats Bar */}
+          {languages && languages.length > 0 && (
+            <div className="flex h-2 w-56 overflow-hidden rounded-full bg-[var(--main-border-color)]">
+              {languages.map((lang) => (
+                <div
+                  key={lang.label}
+                  className="h-full transition-all hover:opacity-80"
+                  style={{
+                    width: `${lang.value}%`,
+                    backgroundColor: lang.color || '#6b7280',
+                  }}
+                  title={`${lang.label}: ${lang.value.toFixed(1)}%`}
+                />
+              ))}
             </div>
-            
-            {/* Description */}
-            <p className="text-gray-600 text-sm mb-2 line-clamp-2">
-                {description}
-            </p>
-            
-            {/* Footer: stars and updated time */}
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                    ⭐ {stars}
-                </span>
-                <span>Updated {updatedAt}</span>
-            </div>
+          )}
         </div>
-    );
+
+        <div className="flex flex-col gap-4">
+          <p className="text-[var(--mid-dim-font-color)] text-sm max-w-2xl">
+            {description}{" "}
+          </p>
+
+          <div className="flex items-center gap-6 text-sm text-[var(--secondary-text-color)]">
+            <span className="flex items-center gap-1.5">
+              <Star size={16} className="text-yellow-400" />
+              {stars || 0}
+            </span>
+
+            <span>{updatedAt}</span>
+
+            {contributors && contributors.length > 0 && (
+              <div className="flex -space-x-2">
+                {contributors.map((src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    alt="contributor"
+                    className="h-8 w-8 rounded-full border-2 border-[var(--dark-bg)]"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default RepositoryCard;

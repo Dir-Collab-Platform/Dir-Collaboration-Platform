@@ -8,6 +8,7 @@ export default function WorkSpacesSlot({
   stars,
   updatedAt,
   contributors,
+  languages,
 }) {
   return (
     <div className="w-full px-6 py-5">
@@ -26,10 +27,27 @@ export default function WorkSpacesSlot({
             </Button>
           </div>
 
-          <div className="flex h-2 w-56 overflow-hidden rounded-full bg-(--main-border-color)">
-            <span className="w-2/3 bg-green-500" />
-            <span className="w-1/4 bg-purple-600" />
-          </div>
+          {/* Language Stats Bar - will be populated from languages prop */}
+          {languages && languages.length > 0 ? (
+            <div className="flex h-2 w-56 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--main-border-color)' }}>
+              {languages.map((lang) => (
+                <div
+                  key={lang.label}
+                  className="h-full transition-all hover:opacity-80"
+                  style={{
+                    width: `${lang.value}%`,
+                    backgroundColor: lang.color || '#6b7280',
+                  }}
+                  title={`${lang.label}: ${lang.value.toFixed(1)}%`}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex h-2 w-56 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--main-border-color)' }}>
+              <span className="w-2/3 bg-green-500" />
+              <span className="w-1/4 bg-purple-600" />
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-4">

@@ -1,4 +1,5 @@
 import { useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import Header from "../../common-components/Header/Header";
 import WorkspaceHeader from "./components/WorkspaceHeader";
 import CodePanel from "./components/CodePanel";
@@ -17,10 +18,10 @@ function WorkspaceContent({ isRepositoryView }) {
     
     if (error) return (
         // refactor this to have a common Error Component
-        <div className="h-full flex flex-col items-center justify-center p-6 text-center bg-(--dark-bg)">
-            <div className="bg-red-500/10 border border-(--main-border-color) p-6 rounded-2xl max-w-md">
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: 'var(--dark-bg)' }}>
+            <div className="bg-red-500/10 border p-6 rounded-2xl max-w-md" style={{ borderColor: 'var(--main-border-color)' }}>
                 <h3 className="header2 text-red-500 font-bold mb-2">Workspace Error</h3>
-                <p className="paragraph2 text-(--secondary-text-color) mb-4">{error}</p>
+                <p className="paragraph2 mb-4" style={{ color: 'var(--secondary-text-color)' }}>{error}</p>
                 <button 
                     onClick={() => window.location.reload()}
                     className="primary-btn px-6 py-2"
@@ -50,7 +51,6 @@ function WorkspaceContent({ isRepositoryView }) {
                         <CodePanel />
                     </div>
 
-                    {/*  */}
                     {!isRepositoryView && (
                         <div className="hidden lg:flex flex-col min-h-0 h-full overflow-hidden">
                             <ChatPanel />

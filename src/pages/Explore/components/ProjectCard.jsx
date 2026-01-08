@@ -1,6 +1,5 @@
 import { Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import languageColors from '../api/languageColors';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 
 const ProjectCard = ({ project }) => {
@@ -8,71 +7,118 @@ const ProjectCard = ({ project }) => {
 
   const handleClick = () => {
     if (project.isWorkspace) {
-      navigate('/workspace');
+      navigate(`/workspace/${project._id}`);
     } else {
-      navigate('/repository');
+      navigate(`/repository/${project._id}`);
     }
   };
 
   return (
     <div
-      className="bg-(--card-bg) p-5 rounded-xl border border-(--main-border-color) hover:border-(--primary-button-active) transition cursor-pointer"
+      className="p-5 rounded-xl border cursor-pointer transition-all hover:scale-[1.02]"
+      style={{
+        backgroundColor: 'var(--card-bg)',
+        borderColor: 'var(--main-border-color)'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'var(--primary-button-active)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--main-border-color)';
+      }}
       onClick={handleClick}
     >
       <div className="flex items-center justify-between mb-2">
         <div className='flex gap-2 justify-center items-center'>
-          <h3 className="font-bold text-[22px]">{project.name}</h3>
-          <span className='bg-(--meta-tag-color) px-2 py-0.5 rounded-[34px] text-[12px] text-(--secondary-text-color)'>
-            {project.visibility}
+          <h3 className="font-bold text-[22px]" style={{ color: 'var(--primary-text-color)' }}>
+            {project.workspaceName || project.githubRepoName}
+          </h3>
+          <span 
+            className='px-2 py-0.5 rounded-[34px] text-[12px]'
+            style={{
+              backgroundColor: 'var(--meta-tag-color)',
+              color: 'var(--secondary-text-color)'
+            }}
+          >
+            {project.visibility || (project.isPrivate ? "private" : "public")}
           </span>
         </div>
-        <span className="text-xs text-(--secondary-text-color) flex items-center gap-1">
+        <span className="text-xs flex items-center gap-1" style={{ color: 'var(--secondary-text-color)' }}>
           <Star size={16} />
-          {project.stars}
-          <GithubIcon/>
+          {project.stars || 0}
+          <GithubIcon className="w-4 h-4" />
         </span>
       </div>
 
       <div className='flex items-center gap-3 mb-2'>
-        <h4 className='font-semibold text-(--mid-dim-font-color) text-[20px]'>{project.owner}</h4>
-        <button className='bg-(--meta-tag-color) px-2 py-0.5 rounded-[34px] text-[12px] text-(--secondary-text-color)'>
+        <h4 className='font-semibold text-[20px]' style={{ color: 'var(--mid-dim-font-color)' }}>
+          {project.githubOwner}
+        </h4>
+        <button 
+          className='px-2 py-0.5 rounded-[34px] text-[12px]'
+          style={{
+            backgroundColor: 'var(--meta-tag-color)',
+            color: 'var(--secondary-text-color)'
+          }}
+        >
           Owner
         </button>
       </div>
 
-      <p className="text-sm font-light text-(--primary-text-color) mb-4">
-        {project.description}
+      <p className="text-sm font-light mb-4" style={{ color: 'var(--primary-text-color)' }}>
+        {project.description || "No description available"}
       </p>
 
-      <div className="mb-4">
-        <div className="h-2 bg-gray-700 rounded overflow-hidden flex">
-          {project.languages?.map((lang) => (
-            <div
-              key={lang.label}
-              className="h-full"  
-              style={{
-                width: `${lang.value}%`,
-                backgroundColor: lang.color || languageColors[lang.label] || '#6b7280',
-              }}
-              title={`${lang.label}: ${lang.value}%`}
-            />
-          ))}
+      {project.languages && project.languages.length > 0 && (
+        <div className="mb-4">
+          <div className="h-2 rounded overflow-hidden flex" style={{ backgroundColor: 'var(--secondary-button)' }}>
+            {project.languages.map((lang) => (
+              <div
+                key={lang.label}
+                className="h-full transition-all hover:opacity-80"
+                style={{
+                  width: `${lang.value}%`,
+                  backgroundColor: lang.color || '#6b7280',
+                }}
+                title={`${lang.label}: ${lang.value.toFixed(1)}%`}
+              />
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {project.languages.map((lang) => (
+              <div key={lang.label} className="flex items-center gap-2 text-xs">
+                <div 
+                  className="w-2 h-2 rounded" 
+                  style={{ backgroundColor: lang.color || '#6b7280' }} 
+                />
+                <span style={{ color: 'var(--mid-dim-font-color)' }}>{lang.label}</span>
+                <span style={{ color: 'var(--secondary-text-color)' }}>{lang.value.toFixed(1)}%</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {project.languages?.map((lang) => (
-            <div key={lang.label} className="flex items-center gap-2 text-xs">
-              <div className="w-2 h-2 rounded" style={{ backgroundColor: lang.color || '#6b7280' }} />
-              <span className="text-(--mid-dim-text-color)">{lang.label}</span>
-              <span className="text-(--secondary-text-color)">{lang.value}%</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      )}
 
-      <h3 className='font-semibold text-[12px] mb-2'>Collaborators</h3>   
+      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Collaborators</h3>   
       <div className="flex -space-x-2">
-        <img src={project.avatar} className="w-7 h-7 rounded-full bg-gray-600 border border-[#141722]" alt="owner" />
-        <div className="w-7 h-7 rounded-full bg-gray-600 border border-[#141722]" />
+        {project.collaborators && project.collaborators.length > 0 ? (
+          project.collaborators.map((avatar, i) => (
+            <img 
+              key={i}
+              src={avatar} 
+              className="w-7 h-7 rounded-full border-2" 
+              style={{ borderColor: 'var(--dark-bg)' }}
+              alt="collaborator" 
+            />
+          ))
+        ) : (
+          <img 
+            src={project.avatar || "https://via.placeholder.com/40"} 
+            className="w-7 h-7 rounded-full border-2" 
+            style={{ borderColor: 'var(--dark-bg)' }}
+            alt="owner" 
+          />
+        )}
       </div>
     </div>
   );

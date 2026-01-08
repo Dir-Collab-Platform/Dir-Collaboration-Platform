@@ -1,44 +1,41 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import Header from "../../common-components/Header/Header";
 import Footer from "../../common-components/Footer/Footer";
 import ExploreHero from "./components/ExploreHero";
 import TagList from "./components/TagList";
 import ProjectGrid from "./components/ProjectGrid";
-import { fetchExploreRepos, fetchTopics } from "./api/repoService";
+import { ExploreContext } from '../../context/ExploreContext/ExploreContext';
+import ExploreProvider from '../../context/ExploreContext/ExploreProvider';
 
-const ExploreContainer = () => {
-  const [repos, setRepos] = useState([]);
-  const [tags, setTags] = useState([]);
-  const [loading, setLoading] = useState(true);
+function ExploreContainerContent() {
+  const { repos, tags, searchRepos, isLoading } = useContext(ExploreContext);
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState("all"); // 'all', 'repository', or 'workspace'
-  const [selectedTag, setSelectedTag] = useState(""); // selected tag for filtering
-  const [hasNextPage, setHasNextPage] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const [selectedTag, setSelectedTag] = useState("");
+  const [hasNextPage, setHasNextPage] = useState(false);
+  const [displayRepos, setDisplayRepos] = useState([]);
 
   // Fetch data function
   const loadData = useCallback(async (pageNum, currentFilter, currentTag, append = false) => {
-    setLoading(true);
-    const res = await fetchExploreRepos(pageNum, currentFilter, currentTag);
+    try {
+      const res = await searchRepos("", currentFilter, currentTag, pageNum);
+      
+      if (append) {
+        setDisplayRepos(prev => [...prev, ...res.data.repos]);
+      } else {
+        setDisplayRepos(res.data.repos);
+      }
 
-    if (append) {
-      setRepos(prev => [...prev, ...res.data.repos]);
-    } else {
-      setRepos(res.data.repos);
+      setHasNextPage(res.data.hasNextPage);
+    } catch (error) {
+      console.error('Failed to load explore data:', error);
     }
-
-    setHasNextPage(res.data.hasNextPage);
-    setLoading(false);
-  }, []);
+  }, [searchRepos]);
 
   // Initial Load & Filter Changes
   useEffect(() => {
-    const init = async () => {
-      const tagRes = await fetchTopics();
-      setTags(tagRes.data);
-      loadData(1, filter, selectedTag, false);
-      setPage(1);
-    };
-    init();
+    loadData(1, filter, selectedTag, false);
+    setPage(1);
   }, [filter, selectedTag, loadData]);
 
   const handleLoadMore = () => {
@@ -50,14 +47,21 @@ const ExploreContainer = () => {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-dark-bg text-white px-8 ">
+      <div className="min-h-screen px-8" style={{ backgroundColor: 'var(--dark-bg)', color: 'var(--primary-text-color)' }}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-6"><ExploreHero /></div>
-          <div className="mb-10"><TagList tags={tags} setTags={setTags} selectedTag={selectedTag} setSelectedTag={setSelectedTag} /></div>
+          <div className="mb-10">
+            <TagList 
+              tags={tags} 
+              setTags={() => {}} 
+              selectedTag={selectedTag} 
+              setSelectedTag={setSelectedTag} 
+            />
+          </div>
           <ProjectGrid 
-            repos={repos} 
+            repos={displayRepos} 
             onLoadMore={handleLoadMore} 
-            isLoading={loading}
+            isLoading={isLoading}
             showButton={hasNextPage}
             activeFilter={filter}
             onFilterChange={setFilter}
@@ -66,6 +70,14 @@ const ExploreContainer = () => {
       </div>
       <Footer />
     </>
+  );
+}
+
+const ExploreContainer = () => {
+  return (
+    <ExploreProvider>
+      <ExploreContainerContent />
+    </ExploreProvider>
   );
 };
 

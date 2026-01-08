@@ -1,0 +1,35 @@
+[
+  {
+    "_id": "u1",
+    "username": "efrata",
+    "email": "efrata@example.com",
+    "avatar_url": "/assets/images/avatar1.png",
+    "github_id": "gh_efrata",
+    "bio": "Frontend developer",
+    "created_at": "2025-12-01T10:00:00Z",
+    "repos_owned": ["r1", "r2"],
+    "notifications": ["n1", "n2"]
+  },
+  {
+    "_id": "u2",
+    "username": "alex",
+    "email": "alex@example.com",
+    "avatar_url": "/assets/images/avatar2.png",
+    "github_id": "gh_alex",
+    "bio": "Backend developer",
+    "created_at": "2025-12-05T12:00:00Z",
+    "repos_owned": ["r3"],
+    "notifications": ["n3"]
+  },
+  {
+    "_id": "u3",
+    "username": "maria",
+    "email": "maria@example.com",
+    "avatar_url": "/assets/images/avatar3.png",
+    "github_id": "gh_maria",
+    "bio": "UI/UX designer",
+    "created_at": "2025-12-10T09:00:00Z",
+    "repos_owned": [],
+    "notifications": []
+  }
+]

@@ -6,7 +6,12 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
+    "test:verbose": "NODE_OPTIONS=--experimental-vm-modules jest --verbose",
+    "test:integration": "NODE_OPTIONS=--experimental-vm-modules jest __tests__/integration"
   },
   "keywords": [],
   "author": "",
@@ -30,6 +35,7 @@
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
     "passport-jwt": "^4.0.1",
-    "redis": "^5.10.0"
+    "redis": "^5.10.0",
+    "socket.io": "^4.8.3"
   }
 }

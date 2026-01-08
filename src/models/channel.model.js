@@ -10,6 +10,11 @@ const channelSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  participants:{
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "User",
+  }
+  ,
   created_at: {
     type: Date,
     default: Date.now,

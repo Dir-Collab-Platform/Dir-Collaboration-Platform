@@ -69,7 +69,11 @@ const repositorySchema = new mongoose.Schema(
     },
     tasks: [taskSchema],
     files: [fileSchema],
-    webhookEvents: [webhookEventSchema],
+    //this is what I added for webhook
+    webhookSettings: {
+      webhookId: { type: String },
+      secret: { type: String },
+    },
   },
   { timestamps: true }
 );

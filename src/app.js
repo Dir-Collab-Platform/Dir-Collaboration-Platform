@@ -11,6 +11,8 @@ import "./auth/jwt.strategy.js"; //jwt strategy
 import userRouter from "./routes/user.routes.js";
 import repoRouter from './routes/repository.routes.js';
 import activityRouter from "./routes/activity.routes.js"; 
+import webhookRouter from "./routes/webhook.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
 
 //configure dotenv 
 dotenv.config();
@@ -48,6 +50,8 @@ app.use("/auth", authRouter);
 app.use("/api/repos", repoRouter); 
 app.use("/api", userRouter);
 app.use("/api/activity", activityRouter);
+app.use("/api/webhooks/", webhookRouter); 
+app.use("/api/notifications", notificationRouter)
 
 
 //routes

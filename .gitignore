@@ -1,3 +1,13 @@
 .env
 node_modules
 redis-caching-implementation.md 
+docs-server.js
+openapi.json
+swagger-ui.html
+TESTING_SETUP.md
+TESTING_GUIDE.md
+jest.config.js
+__tests__
+SOCKET_IO_SERVER.js
+cacheHelper.js 
+SOCKET_IO_ANALYSIS.md 

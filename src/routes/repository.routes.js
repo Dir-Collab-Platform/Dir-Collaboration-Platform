@@ -3,6 +3,8 @@ import * as repoController from "../controllers/repository.controller.js";
 import * as activityController from "../controllers/activity.controller.js"; 
 import * as exploreController from "../controllers/explore.controller.js"; 
 import {authMiddleware} from "../middlewares/auth.middleware.js"; 
+import channelRouter from "../routes/channel.routes.js"; 
+import memberRouter from "../routes/membership.routes.js";
 
 const repoRouter = express.Router(); 
 
@@ -21,20 +23,18 @@ repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag);
 
 
 
-// explore pubilc repos globally
-
-repoRouter.get('/explore', authMiddleware, exploreController.explorePublicRepos)
-repoRouter.get('/topics', authMiddleware, exploreController.getPopularTopics);
-repoRouter.post('/topics', authMiddleware, exploreController.createTag); 
-repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag); 
-
-
 //creating repos and workspaces
 repoRouter.post('/create-workspace', repoController.createWorkspace);
 repoRouter.post('/create-remote', repoController.createRemoteRepo);
 
 //repository file management 
 repoRouter.get('/contents', repoController.getContents);
+repoRouter.put('/:id/contents', repoController.updateFile);
+repoRouter.delete('/:id/contents', repoController.deleteFile);
+repoRouter.post('/:id/contents', repoController.createFile);
+
+//language
+repoRouter.get('/languages', repoController.getRepoLanguages);
 //CRUD functinoalities 
 repoRouter.get('/', repoController.getActiveRepos); 
 repoRouter.get('/:id', repoController.getActiveRepo); 
@@ -47,5 +47,14 @@ repoRouter.post('/:id/tags', repoController.addTags);
 
 // getting a specific repo history
 repoRouter.get('/:id/activity',activityController.getRepoActivity )
+
+// channel routes /api/repos/:repoId/channels
+repoRouter.use('/:repoId/channels', channelRouter);
+
+// member routes /api/repos/:repoId/members
+repoRouter.use('/:repoId/members', memberRouter);
+
+
+
 
 export default repoRouter;  

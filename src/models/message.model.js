@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { reactionSchema, mentionSchema} from "./task.model";
+import { reactionSchema, mentionSchema} from "./shared.model.js";
 import { commentSchema } from "./comment.model.js";
 export const attachmentSchema = new mongoose.Schema({
     fileId:{

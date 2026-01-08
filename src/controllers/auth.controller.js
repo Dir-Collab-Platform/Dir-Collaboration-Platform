@@ -15,6 +15,7 @@ export const githubAuthCallback = (req, res) => {
       {
         id: user._id,
         accessToken: req.authInfo.accessToken,
+        githubUsername: user.githubUsername
       },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }

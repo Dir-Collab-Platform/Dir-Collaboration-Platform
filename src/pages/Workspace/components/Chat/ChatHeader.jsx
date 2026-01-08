@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { EllipsisVertical, Trash2, CheckCircle2, Eraser } from "lucide-react"
+import { EllipsisVertical, Trash2, CheckCircle2, Eraser, LogOut } from "lucide-react"
 import ConfirmationModal from '../../../../common-components/ConfirmationModal'
 
 
@@ -11,7 +11,7 @@ function MoreBtn({ onClick }) {
     )
 }
 
-function MenuPopup({ isOpen, onClose, onDeleteRequest }) {
+function MenuPopup({ isOpen, onClose, onDeleteRequest, onLeaveRequest }) {
     const menuRef = useRef(null)
 
     useEffect(() => {
@@ -34,7 +34,7 @@ function MenuPopup({ isOpen, onClose, onDeleteRequest }) {
     return (
         <div
             ref={menuRef}
-            className="absolute right-0 top-full mt-2 w-48 bg-(--card-bg) border border-(--main-border-color) rounded-xl shadow-xl overflow-hidden origin-top-right animate-in fade-in zoom-in-95 duration-100"
+            className="absolute z-50 right-0 top-full mt-2 w-48 bg-(--card-bg) border border-(--main-border-color) rounded-xl shadow-xl overflow-hidden origin-top-right animate-in fade-in zoom-in-95 duration-100"
         >
             <div className="flex flex-col py-1">
                 <button
@@ -84,11 +84,18 @@ function MenuPopup({ isOpen, onClose, onDeleteRequest }) {
 export default function ChatHeader({ name, notif_count }) {
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
 
-    // Function to execute when user says YES
+    // Function to execute when user confirms delete
     const handleDeleteChannel = () => {
         console.log(`Channel #${name} deleted`)
         // Future logic: call API to delete channel
+    }
+
+    // Function to execute when user confirms leave
+    const handleLeaveChannel = () => {
+        console.log(`Left channel #${name}`)
+        // Future logic: call API to leave channel
     }
 
     return (
@@ -114,17 +121,26 @@ export default function ChatHeader({ name, notif_count }) {
                             isOpen={isMenuOpen}
                             onClose={() => setIsMenuOpen(false)}
                             onDeleteRequest={() => setIsDeleteModalOpen(true)}
+                            onLeaveRequest={() => setIsLeaveModalOpen(true)}
                         />
                     </div>
                 </div>
             </div>
 
-            {/* Modal portal at root level (visually) */}
+            {/* Delete confirmation modal */}
             <ConfirmationModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteChannel}
                 question={`Are you sure you want to delete the channel #${name}? This action cannot be undone.`}
+            />
+
+            {/* Leave confirmation modal */}
+            <ConfirmationModal
+                isOpen={isLeaveModalOpen}
+                onClose={() => setIsLeaveModalOpen(false)}
+                onConfirm={handleLeaveChannel}
+                question={`Are you sure you want to leave the channel #${name}?`}
             />
         </>
     )

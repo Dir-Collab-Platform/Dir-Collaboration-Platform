@@ -2,12 +2,7 @@ import { useState } from "react"
 import { ChevronDown, Plus } from "lucide-react"
 import Avatar from "./Avatar"
 
-const COLLABORATORS_DATA = [
-    { id: "658af5c2f1a2b3c4d5e6f001", name: "Abe Alefew", avatar: "https://avatars.githubusercontent.com/u/12345678?v=4" },
-    { id: "658af5c2f1a2b3c4d5e6f002", name: "Collab Dev", avatar: "https://avatars.githubusercontent.com/u/87654321?v=4" },
-    { id: "658af5c2f1a2b3c4d5e6f003", name: "Sarah Chen", avatar: null },
-    { id: "658af5c2f1a2b3c4d5e6f004", name: "Jordan Smith", avatar: null }
-]
+
 
 export function InviteBtn() {
     return (
@@ -20,8 +15,8 @@ export function InviteBtn() {
 
 export function DropdownBtn({ isOpen, onClick }) {
     return (
-        <button 
-            onClick={onClick} 
+        <button
+            onClick={onClick}
             className={`svg-btn icon-btn transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         >
             <ChevronDown />
@@ -29,9 +24,8 @@ export function DropdownBtn({ isOpen, onClick }) {
     )
 }
 
-export default function Collaborators() {
+export default function Collaborators({ members = [] }) {
     const [isExpanded, setIsExpanded] = useState(false)
-    const members = COLLABORATORS_DATA
 
     return (
         <div className="collaborators flex flex-col gap-4.5 bg-(--card-bg) border border-(--main-border-color) px-4 py-5 mt-8 rounded-2xl shadow-sm">
@@ -45,10 +39,10 @@ export default function Collaborators() {
                     <div className="flex gap-3 items-center">
                         <div className="profiles flex -space-x-3">
                             {members.slice(0, 3).map((user) => (
-                                <Avatar 
-                                    key={user.id} 
-                                    src={user.avatar} 
-                                    size={34} 
+                                <Avatar
+                                    key={user.id}
+                                    src={user.avatar}
+                                    size={34}
                                     className="border-2 border-(--card-bg) ring-1 ring-(--main-border-color)"
                                 />
                             ))}
@@ -63,9 +57,9 @@ export default function Collaborators() {
                         </p>
                     </div>
 
-                    <DropdownBtn 
-                        isOpen={isExpanded} 
-                        onClick={() => setIsExpanded(!isExpanded)} 
+                    <DropdownBtn
+                        isOpen={isExpanded}
+                        onClick={() => setIsExpanded(!isExpanded)}
                     />
                 </div>
 

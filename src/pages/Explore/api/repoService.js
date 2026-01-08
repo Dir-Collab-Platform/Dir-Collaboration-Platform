@@ -9,7 +9,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "1",
       name: "Dir-Platform",
       owner: "boanergase",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/1",
       description: "A developer-focused platform designed to help users discover software repositories.",
       stars: 300,
@@ -21,7 +21,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "2",
       name: "Traffic-Management",
       owner: "EfrataHabte",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/2",
       description: "Traffic system management dashboard for urban infrastructure.",
       stars: 140,
@@ -33,7 +33,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "3",
       name: "AI-Assistant",
       owner: "johndoe",
-      isWorkspace: false,
+      isImported: false,
       avatar: "https://avatars.githubusercontent.com/u/3",
       description: "An AI-powered assistant for developers.",
       stars: 450,
@@ -45,7 +45,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "4",
       name: "Blockchain-Explorer",
       owner: "cryptodev",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/4",
       description: "Explore blockchain transactions and data.",
       stars: 200,
@@ -57,7 +57,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "5",
       name: "Agri-Tech",
       owner: "GreenThumb",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/5",
       description: "Smart monitoring for agricultural soil and crops.",
       stars: 95,
@@ -69,7 +69,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "6",
       name: "Health-Sync",
       owner: "VitalSigns",
-      isWorkspace: false,
+      isImported: false,
       avatar: "https://avatars.githubusercontent.com/u/6",
       description: "Real-time health tracking and data synchronization.",
       stars: 310,
@@ -81,7 +81,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "7",
       name: "Cloud-Native-Ops",
       owner: "DevOpsPro",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/7",
       description: "Kubernetes orchestration and monitoring tools.",
       stars: 520,
@@ -93,7 +93,7 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
       githubId: "8",
       name: "Ethio-Fintech",
       owner: "AbyssiniaDev",
-      isWorkspace: true,
+      isImported: true,
       avatar: "https://avatars.githubusercontent.com/u/8",
       description: "Local payment gateway integration for Ethiopia.",
       stars: 180,
@@ -105,14 +105,14 @@ export const fetchExploreRepos = async (page = 1, query = "", tag = "") => {
 
   // 1. FILTER BY QUERY (Workspace/Repository)
   if (query === "repository") {
-    baseRepos = baseRepos.filter(repo => !repo.isWorkspace);
+    baseRepos = baseRepos.filter(repo => !repo.isImported);
   } else if (query === "workspace") {
-    baseRepos = baseRepos.filter(repo => repo.isWorkspace);
+    baseRepos = baseRepos.filter(repo => repo.isImported);
   }
 
   // 2. FILTER BY TAG (?tag=health)
   if (tag) {
-    baseRepos = baseRepos.filter(repo => 
+    baseRepos = baseRepos.filter(repo =>
       repo.tags && repo.tags.includes(tag.toLowerCase())
     );
   }

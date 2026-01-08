@@ -23,11 +23,11 @@ export default function ExploreProvider({ children }) {
         // setRepos(reposRes.data.data.repos);
         // setTags(tagsRes.data.data);
         // setHasNextPage(reposRes.data.data.hasNextPage);
-        
+
         // Mock implementation
         await new Promise(resolve => setTimeout(resolve, 500));
         setTags(mockTopics);
-        
+
         // Enrich repos with languages and member avatars
         const enrichedRepos = mockAllRepos.map(repo => {
           const languages = mockLanguages[repo._id] || [];
@@ -35,7 +35,7 @@ export default function ExploreProvider({ children }) {
             const user = mockUsers.find(u => u._id === mem.userId);
             return user?.avatarUrl || "https://via.placeholder.com/40";
           }) || [];
-          
+
           return {
             ...repo,
             languages,
@@ -45,7 +45,7 @@ export default function ExploreProvider({ children }) {
             visibility: repo.isPrivate ? "private" : "public"
           };
         });
-        
+
         setRepos(enrichedRepos);
         setHasNextPage(false);
       } catch (err) {
@@ -66,32 +66,32 @@ export default function ExploreProvider({ children }) {
       //   params: { query, filter, tag: selectedTag, page: pageNum }
       // });
       // return response.data;
-      
+
       // Mock implementation
       await new Promise(resolve => setTimeout(resolve, 400));
       let filtered = [...mockAllRepos];
-      
+
       if (filter === 'workspace') {
-        filtered = filtered.filter(repo => repo.isWorkspace);
+        filtered = filtered.filter(repo => repo.isImported);
       } else if (filter === 'repository') {
-        filtered = filtered.filter(repo => !repo.isWorkspace);
+        filtered = filtered.filter(repo => !repo.isImported);
       }
-      
+
       if (selectedTag) {
         const tagName = selectedTag.toLowerCase();
-        filtered = filtered.filter(repo => 
+        filtered = filtered.filter(repo =>
           repo.tags?.some(tag => tag.toLowerCase() === tagName) ||
           repo.tags?.some(tag => mockTopics.find(t => t.name === tagName)?.label === tag)
         );
       }
-      
+
       if (query) {
-        filtered = filtered.filter(repo => 
+        filtered = filtered.filter(repo =>
           repo.githubRepoName.toLowerCase().includes(query.toLowerCase()) ||
           repo.description?.toLowerCase().includes(query.toLowerCase())
         );
       }
-      
+
       // Enrich with languages and avatars
       const enriched = filtered.map(repo => {
         const languages = mockLanguages[repo._id] || [];
@@ -99,7 +99,7 @@ export default function ExploreProvider({ children }) {
           const user = mockUsers.find(u => u._id === mem.userId);
           return user?.avatarUrl || "https://via.placeholder.com/40";
         }) || [];
-        
+
         return {
           ...repo,
           languages,
@@ -109,7 +109,7 @@ export default function ExploreProvider({ children }) {
           visibility: repo.isPrivate ? "private" : "public"
         };
       });
-      
+
       return {
         status: 'success',
         data: {

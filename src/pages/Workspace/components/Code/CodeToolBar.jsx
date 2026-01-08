@@ -1,4 +1,6 @@
+import { useContext } from "react"
 import { Code, GitBranch, GitCommit, Star, Trash2 } from "lucide-react"
+import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
 
 function CommitBtn() {
     return (
@@ -7,7 +9,7 @@ function CommitBtn() {
             {/* to be replaced by real data */}
             <span className="text-(--secondary-text-color) text-bold">8</span>
         </button>
-    )   
+    )
 }
 
 function CloneBtn() {
@@ -28,12 +30,11 @@ function BranchBtn() {
     )
 }
 
-function StartBtn() {
+function StartBtn({ stars }) {
     return (
         <button className="svg-btn icon-btn flex gap-2 items-center">
             <Star />
-            {/* to be replaced by real data */}
-            <span className="text-(--secondary-text-color) text-bold">23</span>
+            <span className="text-(--secondary-text-color) text-bold">{stars}</span>
         </button>
     )
 }
@@ -47,12 +48,14 @@ function DeleteBtn() {
 }
 
 export default function CodeToolBar() {
+    const { repository } = useContext(WorkspaceContext);
+
     return (
         <div className="flex gap-6 bg-(--card-bg-lighter) border border-(--main-border-color) rounded-bl-full rounded-tr-2xl px-6 py-2">
             <CommitBtn />
             <CloneBtn />
             <BranchBtn />
-            <StartBtn />
+            <StartBtn stars={repository?.stars || 0} />
             <DeleteBtn />
         </div>
     )

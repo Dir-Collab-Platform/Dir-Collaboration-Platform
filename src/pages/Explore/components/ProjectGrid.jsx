@@ -4,7 +4,7 @@ import { ChevronDown } from 'lucide-react';
 const ProjectGrid = ({ repos, onLoadMore, isLoading, showButton, activeFilter, onFilterChange }) => {
   return (
     <>
-      <div className="w-auto max-w-75 pt-1 px-3 bg-(--card-bg-lighter) border border-(--main-border-color) border-b-none rounded-tl-2xl rounded-tr-[76px] text-(--secondary-text-color) text-[14px] flex items-end">
+      <div className="w-auto max-w-90 pt-1 px-3 bg-(--card-bg-lighter) border border-(--main-border-color) border-b-none rounded-tl-2xl rounded-tr-[76px] text-(--secondary-text-color) text-[14px] flex items-end">
         <button 
           onClick={() => onFilterChange("all")}
           className={`px-4 pt-1.5 transition ${activeFilter === 'all' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-white' : ''}`}

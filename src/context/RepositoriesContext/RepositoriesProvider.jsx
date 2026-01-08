@@ -15,7 +15,7 @@ export default function RepositoriesProvider({ children }) {
         // TODO: Replace with real API call when integrating backend
         // const response = await axios.get('/api/repos');
         // setRepositories(response.data.data);
-        
+
         // Mock implementation - only repos that are NOT workspaces
         await new Promise(resolve => setTimeout(resolve, 400));
         setRepositories(mockRepositories);
@@ -39,13 +39,13 @@ export default function RepositoriesProvider({ children }) {
       // TODO: Replace with real API call when integrating backend
       // const response = await axios.post('/api/repos', repoData);
       // setRepositories(prev => [...prev, response.data.data]);
-      
+
       // Mock implementation
       await new Promise(resolve => setTimeout(resolve, 500));
       const newRepo = {
         _id: `repo_${Date.now()}`,
         ...repoData,
-        isWorkspace: false,
+        isImported: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };

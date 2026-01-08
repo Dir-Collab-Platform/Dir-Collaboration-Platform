@@ -7,6 +7,8 @@ import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesCon
 import { UserContext } from '../../context/UserContext/UserContext';
 import { mockLanguages, mockUsers } from '../../data/mockData';
 
+import getRelativeTime from '../../utils/utils';
+
 export default function WorkSpaceList() {
   const { workspaces, isLoading } = useContext(WorkspacesContext);
   const { user } = useContext(UserContext);
@@ -66,7 +68,7 @@ export default function WorkSpaceList() {
         </div>
       </div>
 
-      <div className="rounded-xl my-4 flex flex-col items-center justify-center border" style={{ 
+      <div className="rounded-xl my-4 flex flex-col items-center justify-center border" style={{
         backgroundColor: 'var(--dimmer-dark-bg)',
         borderColor: 'var(--main-border-color)'
       }}>
@@ -76,16 +78,16 @@ export default function WorkSpaceList() {
             const user = mockUsers.find(u => u._id === mem.userId);
             return user?.avatarUrl || "https://via.placeholder.com/40";
           }) || [];
-          
+
           return (
             <div key={workspace._id} onClick={() => handleWorkspaceClick(workspace._id)} className="w-full cursor-pointer">
               <WorkSpacesSlot
                 projectName={workspace.workspaceName}
                 visibility={workspace.isPrivate ? "private" : "public"}
                 description={workspace.description}
-                stars={workspace.stars || Math.floor(Math.random() * 300)}
+                stars={workspace.stars || 0}
                 contributors={contributors}
-                updatedAt={new Date(workspace.updatedAt).toLocaleDateString()}
+                updatedAt={"Last updated " + getRelativeTime(workspace.updatedAt) + " ago"}
                 languages={languages}
               />
             </div>

@@ -2,12 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { WorkspaceContext } from './WorkspaceContext';
-import { mockWorkspaces, mockUsers, mockRepositoryContents, mockLanguages } from '../../data/mockData';
+import { mockAllRepos, mockUsers, mockRepositoryContents, mockLanguages } from '../../data/mockData';
 
 export default function WorkspaceProvider({ children }) {
     const { id: workspaceId } = useParams();
     const [data, setData] = useState(null);
-    const [activeFile, setActiveFile] = useState(null); 
+    const [activeFile, setActiveFile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -22,25 +22,22 @@ export default function WorkspaceProvider({ children }) {
 
             setIsLoading(true);
             try {
-                // TODO: Replace with real API call when integrating backend
-                // const response = await axios.get(`/api/repos/${workspaceId}`);
-                // const workspaceData = response.data.data;
-                // setData(workspaceData);
-                
                 // Mock implementation
                 await new Promise(resolve => setTimeout(resolve, 800));
-                const workspace = mockWorkspaces.find(ws => ws._id === workspaceId);
-                
+
+                // Search in all repos (workspaces + regular repos)
+                const workspace = mockAllRepos.find(ws => ws._id === workspaceId);
+
                 if (!workspace) {
-                    throw new Error("Workspace not found");
+                    throw new Error("Repository not found");
                 }
 
                 // Get repository contents (files) from mock data
                 const files = mockRepositoryContents[workspaceId] || [];
-                
+
                 // Get languages from mock data
                 const languagesData = mockLanguages[workspaceId] || [];
-                
+
                 // Transform workspace data to match expected structure
                 setData({
                     repository: {
@@ -55,8 +52,19 @@ export default function WorkspaceProvider({ children }) {
                         description: workspace.description,
                         html_url: workspace.url,
                         language: workspace.language,
+                        isImported: workspace.isImported,
+                        stars: workspace.stars,
                         default_branch: "main",
-                        topics: workspace.tags || []
+                        topics: workspace.tags || [],
+                        members: (workspace.members || []).map(mem => {
+                            const user = mockUsers.find(u => u._id === mem.userId);
+                            return {
+                                id: mem.userId, // Use userId as the unique key for the UI
+                                name: user?.githubUsername || "Unknown user",
+                                avatar: user?.avatarUrl,
+                                role: mem.role
+                            };
+                        })
                     },
                     files: files, // Files with plain text content
                     contents: files, // Alias for compatibility
@@ -81,7 +89,7 @@ export default function WorkspaceProvider({ children }) {
                         watchers: 0
                     }
                 });
-                
+
                 // Set default active file (README.md or first file)
                 if (files.length > 0) {
                     const readme = files.find(f => f.name.toLowerCase() === 'readme.md');

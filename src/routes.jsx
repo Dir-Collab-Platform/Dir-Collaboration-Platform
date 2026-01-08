@@ -29,7 +29,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/repository/:id',
-    element: <Repository />,
+    element: <Workspace isRepositoryView={true} />,
   },
   {
     path: '/repository/create',

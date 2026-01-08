@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useContext, useMemo } from "react"
 import { Save, RotateCcw, X } from "lucide-react"
 import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
-import { decodeFileContent } from "../../../../utils/utils"
+// import { decodeFileContent } from "../../../../utils/utils"
 import CommitModal from "./CommitModal"
 
 export default function CodeEditor({ activeFile }) {
     const context = useContext(WorkspaceContext)
-    
+
     if (!context) return null
-    
+
     const { setIsEditingFile } = context
     const [code, setCode] = useState("")
     const [isCommitModalOpen, setIsCommitModalOpen] = useState(false)
@@ -17,12 +17,13 @@ export default function CodeEditor({ activeFile }) {
         description: ""
     })
 
-    const rawContent = useMemo(function() {
+    const rawContent = useMemo(function () {
         if (!activeFile?.content) return ""
-        return decodeFileContent(activeFile.content, activeFile.encoding)
+        // return decodeFileContent(activeFile.content, activeFile.encoding)
+        return activeFile.content
     }, [activeFile])
 
-    useEffect(function() {
+    useEffect(function () {
         if (activeFile?.content) {
             setCode(rawContent)
         }
@@ -42,7 +43,7 @@ export default function CodeEditor({ activeFile }) {
         console.log("Commit Message:", commitData.message)
         console.log("Description:", commitData.description)
         console.log("Code:", code)
-        
+
         setIsCommitModalOpen(false)
         setIsEditingFile(false)
     }
@@ -67,17 +68,17 @@ export default function CodeEditor({ activeFile }) {
                         Editing: {activeFile?.name || "Untitled"}
                     </span>
                 </div>
-                
+
                 <div className="flex items-center gap-6">
-                    <button 
+                    <button
                         onClick={handleReset}
                         className="svg-btn icon-btn"
                         title="Reset to original"
                     >
                         <RotateCcw size={14} />
                     </button>
-                    
-                    <button 
+
+                    <button
                         onClick={handleOpenCommit}
                         className="svg-btn icon-btn"
                         title="Save and commit changes"
@@ -85,7 +86,7 @@ export default function CodeEditor({ activeFile }) {
                         <Save size={14} />
                     </button>
 
-                    <button 
+                    <button
                         onClick={handleExit}
                         className="text-red-600 svg-btn icon-btn"
                         title="Exit without saving"
@@ -116,7 +117,7 @@ export default function CodeEditor({ activeFile }) {
                 </span>
             </div>
 
-            <CommitModal 
+            <CommitModal
                 isOpen={isCommitModalOpen}
                 onClose={() => setIsCommitModalOpen(false)}
                 onConfirm={handleFinalSave}

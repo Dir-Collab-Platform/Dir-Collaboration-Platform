@@ -32,20 +32,20 @@ function MenuPopup({ isOpen, onClose, onDeleteRequest }) {
     if (!isOpen) return null
 
     return (
-        <div 
+        <div
             ref={menuRef}
             className="absolute right-0 top-full mt-2 w-48 bg-(--card-bg) border border-(--main-border-color) rounded-xl shadow-xl overflow-hidden origin-top-right animate-in fade-in zoom-in-95 duration-100"
         >
             <div className="flex flex-col py-1">
-                <button 
+                <button
                     onClick={() => { console.log('Mark read'); onClose() }}
                     className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors text-left"
                 >
                     <CheckCircle2 size={14} />
                     <span>Mark all as read</span>
                 </button>
-                
-                <button 
+
+                <button
                     onClick={() => { console.log('Clear messages'); onClose() }}
                     className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors text-left"
                 >
@@ -53,12 +53,23 @@ function MenuPopup({ isOpen, onClose, onDeleteRequest }) {
                     <span>Clear messages</span>
                 </button>
 
-                <div className="h-px bg-(--main-border-color) my-1 mx-2" />
-                
-                <button 
-                    onClick={() => { 
+                <button
+                    onClick={() => {
                         onClose()
-                        onDeleteRequest() 
+                        onLeaveRequest()
+                    }}
+                    className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color) transition-colors text-left"
+                >
+                    <LogOut size={14} />
+                    <span>Leave channel</span>
+                </button>
+
+                <div className="h-px bg-(--main-border-color) my-1 mx-2" />
+
+                <button
+                    onClick={() => {
+                        onClose()
+                        onDeleteRequest()
                     }}
                     className="flex items-center gap-3 px-4 py-2.5 text-xs font-medium text-red-400 hover:bg-(--secondary-button-hover) hover:text-red-300 transition-colors text-left"
                 >
@@ -98,10 +109,10 @@ export default function ChatHeader({ name, notif_count }) {
 
                     <div className="relative">
                         <MoreBtn onClick={() => setIsMenuOpen(!isMenuOpen)} />
-                        
-                        <MenuPopup 
-                            isOpen={isMenuOpen} 
-                            onClose={() => setIsMenuOpen(false)} 
+
+                        <MenuPopup
+                            isOpen={isMenuOpen}
+                            onClose={() => setIsMenuOpen(false)}
                             onDeleteRequest={() => setIsDeleteModalOpen(true)}
                         />
                     </div>

@@ -1,7 +1,7 @@
 import { useContext, useMemo } from 'react'
 import { Pencil } from "lucide-react"
 import { WorkspaceContext } from '../../../../context/WorkspaceContext/WorkspaceContext'
-import { decodeFileContent } from '../../../../utils/utils'
+// import { decodeFileContent } from '../../../../utils/utils'
 import { marked } from 'marked'
 import { cleanHTMLData } from '../../../../utils/security'
 
@@ -22,9 +22,9 @@ function EditBtn() {
  */
 export default function ReadMe() {
     const context = useContext(WorkspaceContext)
-    
+
     if (!context) return null
-    
+
     const { repository, contents } = context
 
     // 1. Locate the README file
@@ -35,7 +35,8 @@ export default function ReadMe() {
     // 2. Extract raw content
     const rawContent = useMemo(() => {
         if (readmeFile) {
-            return decodeFileContent(readmeFile.content, readmeFile.encoding)
+            // return decodeFileContent(readmeFile.content, readmeFile.encoding)
+            return readmeFile.content
         }
         return repository?.description || null
     }, [readmeFile, repository])
@@ -64,11 +65,11 @@ export default function ReadMe() {
                         {repository?.name || "Repository Preview"}
                     </h2>
                 </div>
-                
+
                 {/* Using dangerouslySetInnerHTML to render the highlighted markdown code. */}
                 <div className="prose prose-invert max-w-none whitespace-pre-wrap">
                     <pre className="!bg-transparent !p-0 !m-0 !overflow-visible">
-                        <code 
+                        <code
                             className="text-(--secondary-text-color) leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: formattedReadme }}
                         />

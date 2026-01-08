@@ -47,9 +47,11 @@ function ExploreContainerContent() {
   return (
     <>
       <Header />
-      <div className="min-h-screen px-8" style={{ backgroundColor: 'var(--dark-bg)', color: 'var(--primary-text-color)' }}>
+      <div className="min-h-screen px-8 bg-(--dark-bg) text-(--primary-text-color)">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6"><ExploreHero /></div>
+          <div className="mb-6">
+            <ExploreHero />
+          </div>
           <div className="mb-10">
             <TagList 
               tags={tags} 

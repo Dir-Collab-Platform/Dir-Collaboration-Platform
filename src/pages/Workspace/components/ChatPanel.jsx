@@ -23,7 +23,7 @@ import ChannelList from "./Chat/ChannelList"
 import Chat from "./Chat/Chat"
 import ChatHeader from "./Chat/ChatHeader"
 import Collaborators from "./Chat/Collaborators"
-import { ChatContext } from '../../../context/WorkspaceContext/WorkspaceContext'
+import { ChatContext, WorkspaceContext } from '../../../context/WorkspaceContext/WorkspaceContext'
 
 /**
  * ChatPanel Component
@@ -32,6 +32,7 @@ import { ChatContext } from '../../../context/WorkspaceContext/WorkspaceContext'
  */
 export default function ChatPanel() {
     const chatContext = useContext(ChatContext)
+    const { repository } = useContext(WorkspaceContext)
 
     if (!chatContext) {
         return (
@@ -72,26 +73,26 @@ export default function ChatPanel() {
 
     return (
         <div className="chat-panel relative flex flex-col h-full overflow-y-auto scroll-bar bg-(--card-bg) border border-(--main-border-color) rounded-2xl shadow-2xl">
-    {/* Left Column: Channel Navigation (Top Bar) */}
-    <nav className="sticky top-0 z-10 shrink-0 w-full border-r border-(--main-border-color) bg-(--dimmer-dark-bg)">
-        <ChannelList />
-    </nav>
+            {/* Left Column: Channel Navigation (Top Bar) */}
+            <nav className="sticky top-0 z-10 shrink-0 w-full border-r border-(--main-border-color) bg-(--dimmer-dark-bg)">
+                <ChannelList />
+            </nav>
 
-    {/* Main Column: Chat Area (Occupies remaining width per Figma) */}
-    <section className="flex flex-col grow min-w-0">
-        <ChatHeader 
-            name={activeChannel?.name || 'Select channel'} 
-            notif_count={notifCount} 
-        />
-        
-        <div className="chat-container grow overflow-hidden">
-            <Chat />
+            {/* Main Column: Chat Area (Occupies remaining width per Figma) */}
+            <section className="flex flex-col grow min-w-0">
+                <ChatHeader
+                    name={activeChannel?.name || 'Select channel'}
+                    notif_count={notifCount}
+                />
+
+                <div className="chat-container grow overflow-hidden">
+                    <Chat />
+                </div>
+
+                <Collaborators members={repository?.members} />
+            </section>
+
         </div>
-
-        <Collaborators />
-    </section>
-
-</div>
 
     )
 }

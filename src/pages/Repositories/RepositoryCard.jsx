@@ -1,68 +1,49 @@
-import { Star } from "lucide-react";
-import Button from "../../common-components/button";
+import { Star, Workflow } from "lucide-react";
 
-function RepositoryCard({ name, visibility, description, stars, updatedAt, languages, contributors }) {
+function RepositoryCard({ name, visibility, description, stars, updatedAt, languages, isImported }) {
   return (
-    <div className="w-full px-6 py-5 cursor-pointer hover:bg-[var(--secondary-button-hover)] transition-colors">
-      <div className="flex items-start justify-between gap-8 border-b border-[var(--main-border-color)] p-4">
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <h2 className="text-xl font-semibold text-[var(--primary-text-color)]">
-              {name}
-            </h2>
+    <div className="w-full p-6 cursor-pointer hover:bg-(--secondary-button) transition-colors">
+      <div className="flex flex-col gap-2">
+        {/* Top Row: Name and Visibility */}
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-bold flex items-center gap-2 text-(--primary-text-color)">
+            {isImported && <Workflow size={18} className="text-(--primary-text-color)" />}
+            {name}
+          </h2>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#2D2D3F] border border-(--main-border-color) text-(--secondary-text-color)">
+            {visibility}
+          </span>
+        </div>
 
-            <Button
-              variant="base"
-              className="rounded-full px-3 py-0.5 text-sm text-[var(--secondary-text-color)] border border-[var(--main-border-color)]"
-            >
-              {visibility}
-            </Button>
-          </div>
+        {/* Description */}
+        <p className="text-sm line-clamp-1 text-(--secondary-text-color)">
+          {description}
+        </p>
 
-          {/* Language Stats Bar */}
+        {/* Bottom Row: Stats and Language Bar */}
+        <div className="flex items-center gap-6 mt-2 text-xs text-(--mid-dim-font-color)">
+
+          {/* Language Bar (Progress-like) */}
           {languages && languages.length > 0 && (
-            <div className="flex h-2 w-56 overflow-hidden rounded-full bg-[var(--main-border-color)]">
-              {languages.map((lang) => (
+            <div className="w-32 h-1.5 rounded-full overflow-hidden flex bg-[#2D2D3F]">
+              {languages.map(lang => (
                 <div
                   key={lang.label}
-                  className="h-full transition-all hover:opacity-80"
-                  style={{
-                    width: `${lang.value}%`,
-                    backgroundColor: lang.color || '#6b7280',
-                  }}
-                  title={`${lang.label}: ${lang.value.toFixed(1)}%`}
+                  className="h-full"
+                  style={{ width: `${lang.value}%`, backgroundColor: lang.color }}
                 />
               ))}
             </div>
           )}
-        </div>
 
-        <div className="flex flex-col gap-4">
-          <p className="text-[var(--mid-dim-font-color)] text-sm max-w-2xl">
-            {description}{" "}
-          </p>
-
-          <div className="flex items-center gap-6 text-sm text-[var(--secondary-text-color)]">
-            <span className="flex items-center gap-1.5">
-              <Star size={16} className="text-yellow-400" />
-              {stars || 0}
-            </span>
-
-            <span>{updatedAt}</span>
-
-            {contributors && contributors.length > 0 && (
-              <div className="flex -space-x-2">
-                {contributors.map((src, i) => (
-                  <img
-                    key={i}
-                    src={src}
-                    alt="contributor"
-                    className="h-8 w-8 rounded-full border-2 border-[var(--dark-bg)]"
-                  />
-                ))}
-              </div>
-            )}
+          {/* Stars */}
+          <div className="flex items-center gap-1">
+            <Star size={14} className="text-[#FFB224] fill-[#FFB224]" />
+            <span>{stars || 0}</span>
           </div>
+
+          {/* Updated Time */}
+          <span>{updatedAt}</span>
         </div>
       </div>
     </div>

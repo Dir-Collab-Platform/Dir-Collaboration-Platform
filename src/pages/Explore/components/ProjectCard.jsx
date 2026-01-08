@@ -1,4 +1,4 @@
-import { Star } from 'lucide-react';
+import { Star, Workflow } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 
@@ -6,7 +6,7 @@ const ProjectCard = ({ project }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (project.isWorkspace) {
+    if (project.isImported) {
       navigate(`/workspace/${project._id}`);
     } else {
       navigate(`/repository/${project._id}`);
@@ -30,10 +30,11 @@ const ProjectCard = ({ project }) => {
     >
       <div className="flex items-center justify-between mb-2">
         <div className='flex gap-2 justify-center items-center'>
-          <h3 className="font-bold text-[22px]" style={{ color: 'var(--primary-text-color)' }}>
+          <h3 className="flex items-center gap-2 font-bold text-[22px]" style={{ color: 'var(--primary-text-color)' }}>
+            {project.isImported && <Workflow size={20} className="text-(--primary-text-color)" />}
             {project.workspaceName || project.githubRepoName}
           </h3>
-          <span 
+          <span
             className='px-2 py-0.5 rounded-[34px] text-[12px]'
             style={{
               backgroundColor: 'var(--meta-tag-color)',
@@ -54,7 +55,7 @@ const ProjectCard = ({ project }) => {
         <h4 className='font-semibold text-[20px]' style={{ color: 'var(--mid-dim-font-color)' }}>
           {project.githubOwner}
         </h4>
-        <button 
+        <button
           className='px-2 py-0.5 rounded-[34px] text-[12px]'
           style={{
             backgroundColor: 'var(--meta-tag-color)',
@@ -87,9 +88,9 @@ const ProjectCard = ({ project }) => {
           <div className="flex flex-wrap gap-2 mt-2">
             {project.languages.map((lang) => (
               <div key={lang.label} className="flex items-center gap-2 text-xs">
-                <div 
-                  className="w-2 h-2 rounded" 
-                  style={{ backgroundColor: lang.color || '#6b7280' }} 
+                <div
+                  className="w-2 h-2 rounded"
+                  style={{ backgroundColor: lang.color || '#6b7280' }}
                 />
                 <span style={{ color: 'var(--mid-dim-font-color)' }}>{lang.label}</span>
                 <span style={{ color: 'var(--secondary-text-color)' }}>{lang.value.toFixed(1)}%</span>
@@ -99,24 +100,24 @@ const ProjectCard = ({ project }) => {
         </div>
       )}
 
-      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Collaborators</h3>   
+      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Collaborators</h3>
       <div className="flex -space-x-2">
         {project.collaborators && project.collaborators.length > 0 ? (
           project.collaborators.map((avatar, i) => (
-            <img 
+            <img
               key={i}
-              src={avatar} 
-              className="w-7 h-7 rounded-full border-2" 
+              src={avatar}
+              className="w-7 h-7 rounded-full border-2"
               style={{ borderColor: 'var(--dark-bg)' }}
-              alt="collaborator" 
+              alt="collaborator"
             />
           ))
         ) : (
-          <img 
-            src={project.avatar || "https://via.placeholder.com/40"} 
-            className="w-7 h-7 rounded-full border-2" 
+          <img
+            src={project.avatar || "https://via.placeholder.com/40"}
+            className="w-7 h-7 rounded-full border-2"
             style={{ borderColor: 'var(--dark-bg)' }}
-            alt="owner" 
+            alt="owner"
           />
         )}
       </div>

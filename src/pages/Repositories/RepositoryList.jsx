@@ -7,7 +7,7 @@ import { RepositoriesContext } from '../../context/RepositoriesContext/Repositor
 import { UserContext } from '../../context/UserContext/UserContext';
 import { mockLanguages, mockUsers } from '../../data/mockData';
 
-import getRelativeTime from '../../utils/utils';
+import { getRelativeTime } from '../../utils/utils';
 
 function RepositoryList() {
   const { repositories, isLoading } = useContext(RepositoriesContext);

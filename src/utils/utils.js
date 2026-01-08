@@ -1,4 +1,4 @@
-export default function getRelativeTime(dateString) {
+export function getRelativeTime(dateString) {
     if (!dateString) return null
     const date = new Date(dateString)
     const now = new Date()

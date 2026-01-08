@@ -1,8 +1,8 @@
 import { useContext } from 'react'
 import { Code, Copy, Download, GitBranch } from "lucide-react"
 import CodeToolBar from "./CodeToolBar"
-import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext" 
-import getRelativeTime from '../../../../utils/utils'
+import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
+import { getRelativeTime } from '../../../../utils/utils'
 
 function MetaTagWithIcon({ icon, name }) {
     return (
@@ -15,7 +15,7 @@ function MetaTagWithIcon({ icon, name }) {
 
 export default function CodeViewerHeader() {
     const context = useContext(WorkspaceContext)
-    
+
     // Safety check for context
     if (!context) return null
     const { activeFile, repository, lastCommit } = context
@@ -34,9 +34,9 @@ export default function CodeViewerHeader() {
                         <span className="opacity-50">{dirPath}</span>
                         <span className="text-(--active-text-color)">{fileName}</span>
                     </h2>
-                    <MetaTagWithIcon 
-                        icon={<GitBranch size={16} />} 
-                        name={repository?.default_branch || 'main'} 
+                    <MetaTagWithIcon
+                        icon={<GitBranch size={16} />}
+                        name={repository?.default_branch || 'main'}
                     />
                 </div>
 
@@ -47,12 +47,12 @@ export default function CodeViewerHeader() {
                 {
                     lastCommit?.commit?.message ?
                         <div className="last-commit flex gap-2 items-center paragraph2 text-(--secondary-text-color)">
-                            Last commit 
+                            Last commit
                             <p className="font-extrabold text-(--primary-text-color)">
-                                { lastCommit?.author?.login }
+                                {lastCommit?.author?.login}
                             </p>
                             <p className="truncate max-w-50" title={lastCommit?.commit?.message}>
-                                { lastCommit?.commit?.message ? `"${lastCommit?.commit?.message}"` : 'No message Found'}
+                                {lastCommit?.commit?.message ? `"${lastCommit?.commit?.message}"` : 'No message Found'}
 
                             </p>
                             <p className="font-mono text-xs opacity-60">

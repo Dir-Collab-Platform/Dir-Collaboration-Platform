@@ -2,15 +2,13 @@ import React, { useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateRepoModal from '../../../common-components/Header/components/CreateRepoModal';
+import { mockRepositories } from '../../../data/mockData';
 
 const RecentRepositories = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
-  const repos = [
-    { name: 'Repo one', desc: 'Description ...' },
-    { name: 'Repo Two', desc: 'Description ...' },
-  ];
+  const repos = mockRepositories.slice(0, 3);
 
   return (
     <>
@@ -19,15 +17,15 @@ const RecentRepositories = () => {
         <div className="space-y-6 mb-10">
           {repos.map((repo, i) => (
             <div
-              key={i}
-              onClick={() => navigate('/repositories')}
+              key={repo._id || i}
+              onClick={() => navigate(`/workspace/${repo._id}`)}
               className="flex justify-between items-center group cursor-pointer"
             >
-              <div>
-                <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{repo.name}</p>
-                <p className="text-xs text-gray-500">{repo.desc}</p>
+              <div className="min-w-0 pr-4">
+                <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors truncate">{repo.githubRepoName || repo.name}</p>
+                <p className="text-xs text-gray-500 truncate">{repo.description}</p>
               </div>
-              <ExternalLink size={18} className="text-gray-500 group-hover:text-white" />
+              <ExternalLink size={18} className="text-gray-500 group-hover:text-white shrink-0" />
             </div>
           ))}
         </div>

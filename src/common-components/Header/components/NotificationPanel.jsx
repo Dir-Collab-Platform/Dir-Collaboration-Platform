@@ -2,7 +2,7 @@ import React from 'react';
 import { Bell, X, CheckCheck } from 'lucide-react';
 import NotificationItem from './NotificationItem';
 
-function NotificationPanel({ 
+function NotificationPanel({
   notifications,
   pastNotifications,
   expandedMessages,
@@ -15,16 +15,16 @@ function NotificationPanel({
   onLoadPastNotifications
 }) {
   return (
-    <div 
-      className="absolute top-12 right-0 w-96 max-h-[500px] rounded-lg shadow-xl z-50 overflow-hidden flex flex-col"
+    <div
+      className="absolute top-12 right-0 w-[480px] max-h-[800px] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
       style={{
         backgroundColor: 'var(--dark-bg)',
         border: '1px solid rgba(239, 238, 238, 0.2)'
       }}
     >
-      <div 
+      <div
         className="p-4 border-b flex justify-between items-center"
-        style={{ 
+        style={{
           backgroundColor: 'var(--dark-bg)',
           borderColor: 'rgba(239, 238, 238, 0.2)'
         }}
@@ -34,9 +34,9 @@ function NotificationPanel({
           <h3 className="font-semibold" style={{ color: 'var(--secondary-text-color)' }}>Notifications ({notifications.length})</h3>
         </div>
         <div className="flex items-center gap-3">
-          <button 
+          <button
             className="flex items-center gap-1 px-3 py-1.5 rounded text-xs transition-colors"
-            style={{ 
+            style={{
               backgroundColor: 'var(--primary-button)',
               color: 'var(--primary-text-color)'
             }}
@@ -47,7 +47,7 @@ function NotificationPanel({
             <span>Mark all as read</span>
             <CheckCheck size={12} />
           </button>
-          <button 
+          <button
             className="p-1 rounded"
             style={{ color: 'var(--secondary-text-color)' }}
             onMouseEnter={(e) => {
@@ -65,8 +65,8 @@ function NotificationPanel({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col max-h-[432px]">
-        <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 flex flex-col max-h-[650px]">
+        <div className="flex-1 overflow-y-auto p-2 scroll-bar">
           {notifications.map(notification => (
             <NotificationItem
               key={notification.id}
@@ -88,24 +88,24 @@ function NotificationPanel({
               isPast={true}
             />
           ))}
-          
+
           {notifications.length === 0 && pastNotifications.length === 0 && (
             <div className="text-center py-8">
               <p style={{ color: 'var(--secondary-text-color)' }}>No notifications</p>
             </div>
           )}
         </div>
-        
-        <div 
+
+        <div
           className="p-4 border-t flex justify-end shrink-0"
-          style={{ 
+          style={{
             backgroundColor: 'var(--dark-bg)',
             borderColor: 'rgba(220, 219, 219, 0.2)'
           }}
         >
-          <button 
+          <button
             className="px-6 py-2.5 rounded-md text-sm font-medium transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ 
+            style={{
               backgroundColor: 'var(--primary-button)',
               color: 'var(--primary-text-color)'
             }}

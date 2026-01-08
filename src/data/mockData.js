@@ -331,46 +331,68 @@ export const mockAllMembers = mockAllRepos.flatMap(repo =>
 
 export const mockNotifications = [
     {
-        _id: "NOTIF_001",
-        message: "You were added to specific-channel",
-        isRead: false,
-        type: "message",
-        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // 2 hours ago
+        id: 1,
+        type: 'message',
+        label: 'Message',
+        time: '2hrs ago',
+        channel: '#Front-end team',
+        userImg: '/assets/images/person.jpg',
+        userName: 'Efrata',
+        shortMessage: 'Efrata: Have you finished designing...',
+        fullMessage: 'Efrata: Have you finished designing the header component for the repository page? We need it by tomorrow for the upcoming sprint review. Could you also add the dark mode toggle functionality?',
+        hasMore: true,
+        read: false
     },
     {
-        _id: "NOTIF_002",
-        message: "New commit in MiniGitProject",
-        isRead: false,
-        type: "commit",
-        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() // 3 hours ago
+        id: 2,
+        type: 'github',
+        label: 'GitHub',
+        time: '2hrs ago',
+        repo: 'My-repository',
+        user: 'Abrsh123',
+        shortPR: 'I implemented the file browsing features...',
+        fullPR: 'I implemented the file browsing features with drag-and-drop support and improved the UI for better user experience. Added file type icons, keyboard shortcuts, and bulk selection capabilities. Also optimized the performance for handling large repositories.',
+        hasMore: true,
+        read: false
     },
     {
-        _id: "NOTIF_003",
-        message: "Pull request #42 merged in Dir-Platform",
-        isRead: false,
-        type: "pull_request",
-        createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString() // 5 hours ago
+        id: 3,
+        type: 'alert',
+        label: 'Alert',
+        time: '2hrs ago',
+        repo: 'My-repository',
+        shortAlert: 'Someone logged in with your GitHub account on device...',
+        fullAlert: 'Someone logged in with your GitHub account from a new device in London, UK. If this wasn\'t you, please secure your account immediately. Check your account activity and consider changing your password and enabling two-factor authentication.',
+        hasMore: true,
+        read: false
+    }
+];
+
+export const mockPastNotifications = [
+    {
+        id: 101,
+        type: 'message',
+        label: 'Message',
+        time: 'Yesterday',
+        channel: '#Design-team',
+        userImg: '/assets/images/person.jpg',
+        userName: 'Sarah',
+        shortMessage: 'Sarah: Can you review the new UI mockups...',
+        fullMessage: 'Sarah: Can you review the new UI mockups for the dashboard? I\'ve uploaded them to Figma. Let me know if you have any feedback on the color scheme and layout.',
+        hasMore: true,
+        past: true
     },
     {
-        _id: "NOTIF_004",
-        message: "You were mentioned in #general",
-        isRead: false,
-        type: "mention",
-        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString() // 6 hours ago
-    },
-    {
-        _id: "NOTIF_005",
-        message: "New issue created in Task-Master",
-        isRead: false,
-        type: "issue",
-        createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() // 8 hours ago
-    },
-    {
-        _id: "NOTIF_006",
-        message: "Repository E-Commerce-App was updated",
-        isRead: false,
-        type: "repository",
-        createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString() // 12 hours ago
+        id: 102,
+        type: 'github',
+        label: 'GitHub',
+        time: '1 day ago',
+        repo: 'Design-system',
+        user: 'DesignLead',
+        shortPR: 'Added new color variables and typography...',
+        fullPR: 'Added new color variables and typography scale to the design system. This includes new tokens for spacing, shadows, and component-specific styling improvements.',
+        hasMore: true,
+        past: true
     }
 ];
 

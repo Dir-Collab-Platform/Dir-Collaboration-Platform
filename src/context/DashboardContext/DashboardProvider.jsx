@@ -23,9 +23,10 @@ export default function DashboardProvider({ children }) {
         // setStats(statsRes.data.data);
         // setActivityFeed(activityRes.data.data);
         // setHeatmapData(heatmapRes.data.data);
-        
+
         // Mock implementation
         await new Promise(resolve => setTimeout(resolve, 600));
+        console.log('DashboardProvider: Setting mock data', { mockStats, mockActivityFeed, mockHeatmapData });
         setStats(mockStats);
         setActivityFeed(mockActivityFeed);
         setHeatmapData(mockHeatmapData);
@@ -45,7 +46,7 @@ export default function DashboardProvider({ children }) {
       // TODO: Replace with real API call when integrating backend
       // const response = await axios.get('/api/activity/feed');
       // setActivityFeed(response.data.data);
-      
+
       // Mock implementation
       await new Promise(resolve => setTimeout(resolve, 400));
       setActivityFeed(mockActivityFeed);

@@ -7,7 +7,7 @@ import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesCon
 import { UserContext } from '../../context/UserContext/UserContext';
 import { mockLanguages, mockUsers } from '../../data/mockData';
 
-import getRelativeTime from '../../utils/utils';
+import { getRelativeTime } from '../../utils/utils';
 
 export default function WorkSpaceList() {
   const { workspaces, isLoading } = useContext(WorkspacesContext);

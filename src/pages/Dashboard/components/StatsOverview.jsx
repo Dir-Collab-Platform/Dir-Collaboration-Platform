@@ -2,10 +2,10 @@ import React from 'react';
 
 const StatsOverview = ({ stats }) => {
   const cards = [
-    { label: "Total Repositories", value: stats?.githubTotalCount ?? 10 },
-    { label: "Total Workspaces", value: stats?.activeWorkspacesCount ?? 10 },
-    { label: "Open Pull requests", value: 10 },
-    { label: "Open Pull requests", value: 10 }
+    { label: "Total Repositories", value: stats?.githubTotalCount ?? 0 },
+    { label: "Total Workspaces", value: stats?.activeWorkspacesCount ?? 0 },
+    { label: "Total Tasks", value: stats?.totalTasks ?? 0 },
+    { label: "Unread Notifications", value: stats?.unreadNotifications ?? 0 }
   ];
 
   return (

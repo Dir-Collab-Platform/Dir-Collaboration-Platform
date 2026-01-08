@@ -9,6 +9,7 @@ import Workspaces from './pages/Workspaces/Workspaces';
 import ExploreContainer from './pages/Explore/ExploreContainer';
 import CreateWorkspace from './pages/CreateWorkspace/CreateWorkspace';
 import NotFound from './pages/NotFound/NotFound';
+import Landing from './pages/Landing/Landing';
 
 /**
  * Application Routes
@@ -21,6 +22,10 @@ import NotFound from './pages/NotFound/NotFound';
 const router = createBrowserRouter([
   {
     path: '/',
+    element: <Landing />,
+  },
+  {
+    path: '/dashboard',
     element: <Dashboard />,
   },
   {

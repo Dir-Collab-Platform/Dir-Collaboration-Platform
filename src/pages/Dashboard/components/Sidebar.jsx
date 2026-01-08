@@ -16,7 +16,7 @@ export default function Sidebar() {
     }
 
     const navItems = [
-        { name: "Dashboard", icon: LayoutDashboard, path: "/" },
+        { name: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
         { name: "Repositories", icon: Folder, path: "/repositories" },
         { name: "Workspaces", icon: Workflow, path: "/workspaces" },
         { name: "Explore", icon: Search, path: "/explore" },

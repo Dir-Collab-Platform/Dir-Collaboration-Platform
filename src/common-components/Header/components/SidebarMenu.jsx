@@ -53,7 +53,7 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
 
             <div className="px-4 space-y-1">
                 <NavLink 
-                    to="/"
+                    to="/dashboard"
                     end
                     onClick={onClose}
                     className={({ isActive }) => 

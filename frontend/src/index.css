@@ -1,0 +1,4 @@
+@import './styles/variables.css';
+@import './styles/global.css';
+/* the above might be removed since we diceded to switch to tailwind */
+@import "tailwindcss";

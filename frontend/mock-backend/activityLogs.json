@@ -1,0 +1,5 @@
+[
+  { "_id": "a1", "user_id": "u1", "repo_id": "r1", "action": "commit", "target_type": "file", "target_id": "f1", "details": {"branch":"main"}, "created_at": "2025-12-01T10:00:00Z" },
+  { "_id": "a2", "user_id": "u3", "repo_id": "r1", "action": "task_update", "target_type": "task", "target_id": "t1", "details": {"status":"in-progress"}, "created_at": "2025-12-01T12:30:00Z" },
+  { "_id": "a3", "user_id": "u2", "repo_id": "r3", "action": "repo_join", "target_type": "repo", "target_id": "r3", "details": {}, "created_at": "2025-12-05T11:05:00Z" }
+]

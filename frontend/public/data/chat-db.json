@@ -1,0 +1,395 @@
+{
+  "users": [
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f001",
+      "githubUsername": "Abe-Alefew",
+      "githubId": "12345678",
+      "email": "abe@example.com",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/12345678?v=4",
+      "profileUrl": "https://www.google.com/search?q=https://github.com/Abe-Alefew",
+      "bio": "Full-stack developer.",
+      "role": "admin",
+      "isActive": true,
+      "lastLogin": "2023-10-25T10:30:00Z",
+      "preferences": {
+        "notificationsEnabled": true,
+        "theme": "dark"
+      },
+      "createdAt": "2023-01-15T08:00:00Z",
+      "updatedAt": "2023-10-25T10:30:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f002",
+      "githubUsername": "collab-dev",
+      "githubId": "87654321",
+      "email": "collab@example.com",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/87654321?v=4",
+      "profileUrl": "https://www.google.com/search?q=https://github.com/collab-dev",
+      "bio": "Open source contributor.",
+      "role": "user",
+      "isActive": true,
+      "lastLogin": "2023-10-24T15:45:00Z",
+      "preferences": {
+        "theme": "system"
+      },
+      "createdAt": "2023-03-20T12:00:00Z",
+      "updatedAt": "2023-10-24T15:45:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f003",
+      "githubUsername": "sarah-chen",
+      "githubId": "11223344",
+      "email": "sarah@example.com",
+      "avatarUrl": null,
+      "profileUrl": "https://github.com/sarah-chen",
+      "bio": "UI/UX Specialist",
+      "role": "user",
+      "isActive": true,
+      "lastLogin": "2023-10-25T09:00:00Z",
+      "createdAt": "2023-05-10T08:00:00Z",
+      "updatedAt": "2023-10-25T09:00:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f004",
+      "githubUsername": "jordan-smith",
+      "githubId": "55667788",
+      "email": "jordan@example.com",
+      "avatarUrl": null,
+      "profileUrl": "https://www.google.com/search?q=https://github.com/jordan-smith",
+      "bio": "Backend Engineer",
+      "role": "user",
+      "isActive": true,
+      "lastLogin": "2023-10-25T11:00:00Z",
+      "createdAt": "2023-06-15T08:00:00Z",
+      "updatedAt": "2023-10-25T11:00:00Z"
+    }
+  ],
+  "channels": [
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f111",
+      "channel_id": "658af5c2f1a2b3c4d5e6f111",
+      "name": "general",
+      "created_at": "2023-10-25T09:00:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f112",
+      "channel_id": "658af5c2f1a2b3c4d5e6f112",
+      "name": "core-team",
+      "created_at": "2023-10-25T09:05:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f113",
+      "channel_id": "658af5c2f1a2b3c4d5e6f113",
+      "name": "announcements",
+      "created_at": "2023-10-25T09:10:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f114",
+      "channel_id": "658af5c2f1a2b3c4d5e6f114",
+      "name": "help-desk",
+      "created_at": "2023-10-25T09:15:00Z"
+    },
+    {
+      "_id": "658af5c2f1a2b3c4d5e6f115",
+      "channel_id": "658af5c2f1a2b3c4d5e6f115",
+      "name": "empty-project",
+      "created_at": "2023-10-26T10:00:00Z"
+    }
+  ],
+  "messages": [
+    {
+      "_id": "m1",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Welcome everyone to the new workspace!",
+      "createdAt": "2023-10-25T10:00:00Z"
+    },
+    {
+      "_id": "m2",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Thanks Abe! Excited to be here.",
+      "createdAt": "2023-10-25T10:05:00Z"
+    },
+    {
+      "_id": "m3",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f003",
+      "content": "The UI is looking very clean.",
+      "createdAt": "2023-10-25T10:10:00Z"
+    },
+    {
+      "_id": "m4",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "Agreed. I'm finishing up the backend migrations.",
+      "createdAt": "2023-10-25T10:15:00Z"
+    },
+    {
+      "_id": "m5",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Great, let's keep the focus on the schema updates for today.",
+      "createdAt": "2023-10-25T10:20:00Z"
+    },
+    {
+      "_id": "m6",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Abe, did you see my PR regarding the mentions logic?",
+      "createdAt": "2023-10-25T10:25:00Z"
+    },
+    {
+      "_id": "m7",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "I've updated the messageSchema to include attachments and mentions.",
+      "attachments": [
+        {
+          "fileId": "f1",
+          "name": "architecture.pdf",
+          "url": "https://www.google.com/search?q=https://example.com/files/architecture.pdf"
+        }
+      ],
+      "createdAt": "2023-10-25T11:00:00Z"
+    },
+    {
+      "_id": "m8",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Well done, that's a very fine job.",
+      "reactions": [
+        {
+          "userId": "658af5c2f1a2b3c4d5e6f001",
+          "emoji": "🚀",
+          "createdAt": "2023-10-25T11:05:00Z"
+        }
+      ],
+      "createdAt": "2023-10-25T11:02:00Z"
+    },
+    {
+      "_id": "m9",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f003",
+      "content": "I'll start designing the icons for different file types.",
+      "createdAt": "2023-10-25T11:08:00Z"
+    },
+    {
+      "_id": "m10",
+      "channelId": "658af5c2f1a2b3c4d5e6f111",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Make sure to check the indexes for mentions query performance.",
+      "createdAt": "2023-10-25T11:10:00Z"
+    },
+    {
+      "_id": "c1",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Core team sync starting now.",
+      "createdAt": "2023-10-25T12:00:00Z"
+    },
+    {
+      "_id": "c2",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "I'm here. Looking at the WorkspaceContext.",
+      "createdAt": "2023-10-25T12:01:00Z"
+    },
+    {
+      "_id": "c3",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Does the new WorkspaceContext handle the file switching logic correctly?",
+      "createdAt": "2023-10-25T12:05:00Z"
+    },
+    {
+      "_id": "c4",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "Yes, it uses a memoized state to avoid re-renders.",
+      "createdAt": "2023-10-25T12:06:00Z"
+    },
+    {
+      "_id": "c5",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Perfect. What about the collaborative cursor visibility?",
+      "createdAt": "2023-10-25T12:10:00Z"
+    },
+    {
+      "_id": "c6",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "That's linked via WebSockets. Working smoothly in staging.",
+      "createdAt": "2023-10-25T12:12:00Z"
+    },
+    {
+      "_id": "c7",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "We might need a throttle on the mouse position updates.",
+      "createdAt": "2023-10-25T12:15:00Z"
+    },
+    {
+      "_id": "c8",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Agreed. 50ms should be enough.",
+      "createdAt": "2023-10-25T12:17:00Z"
+    },
+    {
+      "_id": "c9",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "Implemented. I'll push the changes shortly.",
+      "createdAt": "2023-10-25T12:20:00Z"
+    },
+    {
+      "_id": "c10",
+      "channelId": "658af5c2f1a2b3c4d5e6f112",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Let's review the final build tonight.",
+      "createdAt": "2023-10-25T12:25:00Z"
+    },
+    {
+      "_id": "a1",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "System maintenance scheduled for tonight at 12 PM UTC.",
+      "createdAt": "2023-10-25T11:20:00Z"
+    },
+    {
+      "_id": "a2",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "API documentation updated at /docs/v2",
+      "createdAt": "2023-10-25T11:30:00Z"
+    },
+    {
+      "_id": "a3",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "New security policies are now in effect.",
+      "createdAt": "2023-10-25T11:40:00Z"
+    },
+    {
+      "_id": "a4",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Quarterly review starts tomorrow morning.",
+      "createdAt": "2023-10-25T11:50:00Z"
+    },
+    {
+      "_id": "a5",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Workspace storage limits increased for all users.",
+      "createdAt": "2023-10-25T12:00:00Z"
+    },
+    {
+      "_id": "a6",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Reminder: Use descriptive PR titles.",
+      "createdAt": "2023-10-25T12:10:00Z"
+    },
+    {
+      "_id": "a7",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Production deployment successful.",
+      "createdAt": "2023-10-25T12:20:00Z"
+    },
+    {
+      "_id": "a8",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Dark mode fixes pushed to main.",
+      "createdAt": "2023-10-25T12:30:00Z"
+    },
+    {
+      "_id": "a9",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Beta testers needed for the mobile app.",
+      "createdAt": "2023-10-25T12:40:00Z"
+    },
+    {
+      "_id": "a10",
+      "channelId": "658af5c2f1a2b3c4d5e6f113",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Coffee machine in the breakroom is fixed!",
+      "createdAt": "2023-10-25T12:50:00Z"
+    },
+    {
+      "_id": "h1",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Having trouble with the Prism loader on the CodePanel.",
+      "createdAt": "2023-10-25T13:00:00Z"
+    },
+    {
+      "_id": "h2",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Checking it now, might be a CDN availability issue.",
+      "createdAt": "2023-10-25T13:05:00Z"
+    },
+    {
+      "_id": "h3",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f003",
+      "content": "I'm seeing a font-family glitch in Safari too.",
+      "createdAt": "2023-10-25T13:10:00Z"
+    },
+    {
+      "_id": "h4",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "Safari handles web worker imports differently.",
+      "createdAt": "2023-10-25T13:15:00Z"
+    },
+    {
+      "_id": "h5",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Confirmed. Prism is failing because of the 'self' context.",
+      "createdAt": "2023-10-25T13:20:00Z"
+    },
+    {
+      "_id": "h6",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f002",
+      "content": "Is there a local fallback we can use?",
+      "createdAt": "2023-10-25T13:25:00Z"
+    },
+    {
+      "_id": "h7",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "I'll bundle the core languages with the main asset.",
+      "createdAt": "2023-10-25T13:30:00Z"
+    },
+    {
+      "_id": "h8",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f003",
+      "content": "That should resolve the flickering too.",
+      "createdAt": "2023-10-25T13:35:00Z"
+    },
+    {
+      "_id": "h9",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f004",
+      "content": "Let me know when the patch is in staging.",
+      "createdAt": "2023-10-25T13:40:00Z"
+    },
+    {
+      "_id": "h10",
+      "channelId": "658af5c2f1a2b3c4d5e6f114",
+      "senderId": "658af5c2f1a2b3c4d5e6f001",
+      "content": "Patch is live. Please refresh and verify.",
+      "createdAt": "2023-10-25T13:50:00Z"
+    }
+  ]
+}

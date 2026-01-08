@@ -1,0 +1,91 @@
+{
+  "repository": {
+    "id": 847291,
+    "name": "My-repository",
+    "full_name": "username/My-repository",
+    "private": false,
+    "owner": {
+      "login": "username",
+      "avatar_url": "https://www.google.com/search?q=https://i.pravatar.cc/150%3Fu%3Dusername"
+    },
+    "description": "A fully static multi-page website built using vanilla HTML and CSS.",
+    "html_url": "https://www.google.com/search?q=https://github.com/username/My-repository",
+    "forks_count": 4,
+    "stargazers_count": 23,
+    "watchers_count": 23,
+    "open_issues_count": 2,
+    "default_branch": "main",
+    "topics": [
+      "html5",
+      "css3",
+      "vanilla-js"
+    ],
+    "visibility": "public",
+    "pushed_at": "2023-10-25T11:00:00Z"
+  },
+  "contents": [
+    {
+      "name": "src",
+      "path": "src",
+      "type": "dir",
+      "sha": "7d530219",
+      "children": [
+        {
+          "name": "main.js",
+          "path": "src/main.js",
+          "type": "file",
+          "size": 450,
+          "sha": "8b3f2a11",
+          "encoding": "base64",
+          "content": "aW1wb3J0ICcuLi9zdHlsZXMvd29ya3NwYWNlLmNzcycKaW1wb3J0IHsgaW5p\ndFByb2plY3RJbnRha2UsIHJlbmRlclByb2plY3RzLCByZW5kZXJUYXNrcyB9\nIGZyb20gJy4vZG9tJzsKaW1wb3J0IHsgZ2V0Q3VyclByb2plY3RJZCwgaW5p\ndFN0b3JhZ2UsIHByb2plY3RzSlNPTiwgc2V0Q3VyclByb2plY3RJZCB9IGZy\nb20gJy4vc3RvcmFnZSc7CmltcG9ydCB7IG5leHRQcm9qSWQgfSBmcm9tICcu\nL3V0aWxzJzsKCmxldCBpc1Byb2pBZGRCdG5BY3RpdmUgPSB0cnVlOwoKY29u\nc3QgYm9keSA9IGRvY3VtZW50LmJvZHk7CmNvbnN0IGFkZFByb2plY3RCdG4g\nPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYWRkLXByb2plY3QnKTsKY29u\nc3Qgc2lkZUJhciA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdzaWRlLWJh\ncicpOwpjb25zdCBzaWRlQmFyT25CdG4gPSBkb2N1bWVudC5nZXRFbGVtZW50\nQnlJZCgnc2lkZWJhci10b2dnbGUtYnRuJyk7CmNvbnN0IHNpZGVCYXJPZmZC\ndG4gPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgnYXNpZGUtb2ZmJyk7CmNv\nbnN0IHRoZW1lQnRuID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ3RoZW1l\nLWJ0bicpOwoKLy8gYmVsbG93IGFyZSB0aGUgZnVuY3Rpb24gZGVmaW5pdGlv\nbnMKCi8vIHRvIG1ha2Ugc3VyZSB0aGUgdXNlciBkb24ndCBrZWVwIHRvdWNo\naW5nIHRoZSBhZGQgcHJvamVjdCBidXR0b24gYmVmb3JlIGZpbmlzaGluZyB0\naGVpciBwcm9qZWN0IGFkZGluZyBzZXNzaW9uLgpleHBvcnQgZnVuY3Rpb24g\nSW52ZXJ0SXNQcm9qQWRkQnRuQWN0aXZlKCkgewogICAgaXNQcm9qQWRkQnRu\nQWN0aXZlID0gIWlzUHJvakFkZEJ0bkFjdGl2ZTsKfQoKLy8gYmVsbG93IGFy\nZSB0aGUgRnVuY3Rpb24gY2FsbHMgYW5kIEV2ZW50IExpc3RlbmVycwoKaW5p\ndFN0b3JhZ2UoKSAvLyB0aGlzIGRvZXMgbm90aGluZyBpZiBsb2NhbFN0b3Jh\nZ2UgaXMgYWxyZWFkeSBpbml0aWFsaXplZAoKcmVuZGVyUHJvamVjdHMoMSk7\nCgpyZW5kZXJUYXNrcygpOwoKYWRkUHJvamVjdEJ0bi5hZGRFdmVudExpc3Rl\nbmVyKCdjbGljaycsICgpID0+IHsKICAgIGlmIChpc1Byb2pBZGRCdG5BY3Rp\ndmUpIHsKICAgICAgICBpbml0UHJvamVjdEludGFrZSgpOwogICAgICAgIElu\ndmVydElzUHJvakFkZEJ0bkFjdGl2ZSgpOwogICAgfQp9KTsKCi8vID09PSB1\naSBhbmQgdG9nZ2xlcyA9PT0gLy8KCi8vIHRvZ2dsZSBzaWRlYmFyCgpzaWRl\nQmFyT25CdG4uYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLCAoKSA9PiB7CiAg\nICBpZiAoc2lkZUJhci5jbGFzc0xpc3QuY29udGFpbnMoJ3NpZGUtYmFyLW9m\nZicpKSBzaWRlQmFyLmNsYXNzTGlzdC5yZW1vdmUoJ3NpZGUtYmFyLW9mZicp\nOwogICAgc2lkZUJhci5jbGFzc0xpc3QuYWRkKCdzaWRlLWJhci1vbicpOwp9\nKQoKc2lkZUJhck9mZkJ0bi5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsICgp\nID0+IHsKICAgIGlmIChzaWRlQmFyLmNsYXNzTGlzdC5jb250YWlucygnc2lk\nZS1iYXItb24nKSkgc2lkZUJhci5jbGFzc0xpc3QucmVtb3ZlKCdzaWRlLWJh\nci1vbicpOwogICAgc2lkZUJhci5jbGFzc0xpc3QuYWRkKCdzaWRlLWJhci1v\nZmYnKTsKfSkKCi8vIGl0IHNob3VsZCBoYXZlIG5vIGFuaW1hdGlvbiBpZiB3\naW5kb3cgc2l6ZSA+PSA3NDBweAp3aW5kb3cuYWRkRXZlbnRMaXN0ZW5lcign\ncmVzaXplJywgKCkgPT4gewogICAgaWYgKHdpbmRvdy5pbm5lcldpZHRoID49\nIDc0MCkgewogICAgICAgIGlmIChzaWRlQmFyLmNsYXNzTGlzdC5jb250YWlu\ncygnc2lkZS1iYXItb2ZmJykpIHNpZGVCYXIuY2xhc3NMaXN0LnJlbW92ZSgn\nc2lkZS1iYXItb2ZmJyk7CiAgICAgICAgaWYgKHNpZGVCYXIuY2xhc3NMaXN0\nLmNvbnRhaW5zKCdzaWRlLWJhci1vbicpKSBzaWRlQmFyLmNsYXNzTGlzdC5y\nZW1vdmUoJ3NpZGUtYmFyLW9uJyk7CiAgICB9Cn0pCgovLyB0aGVtZSB0b2dn\nbGUKCmlmICghbG9jYWxTdG9yYWdlLmdldEl0ZW0oJ3RoZW1lJykpIGxvY2Fs\nU3RvcmFnZS5zZXRJdGVtKCd0aGVtZScsICdkYXJrJyk7CmxvY2FsU3RvcmFn\nZS5nZXRJdGVtKCd0aGVtZScpID09PSAnZGFyaycgPyBib2R5LmNsYXNzTGlz\ndC5yZW1vdmUoJ2xpZ2h0bW9kZScpIDogYm9keS5jbGFzc0xpc3QuYWRkKCds\naWdodG1vZGUnKQoKdGhlbWVCdG4uYWRkRXZlbnRMaXN0ZW5lcignY2xpY2sn\nLCAoKSA9PiB7CiAgICBjb25zdCB0aGVtZSA9IGxvY2FsU3RvcmFnZS5nZXRJ\ndGVtKCd0aGVtZScpOwoKICAgIGlmICh0aGVtZSA9PT0gJ2RhcmsnKSB7CiAg\nICAgICAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ3RoZW1lJywgJ2xpZ2h0Jyk7\nCiAgICAgICAgYm9keS5jbGFzc0xpc3QuYWRkKCdsaWdodG1vZGUnKTsKICAg\nIH0gZWxzZSB7CiAgICAgICAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oJ3RoZW1l\nJywgJ2RhcmsnKTsKICAgICAgICBib2R5LmNsYXNzTGlzdC5yZW1vdmUoJ2xp\nZ2h0bW9kZScpOwogICAgfQp9KQ==\n"
+        },
+        {
+          "name": "auth.js",
+          "path": "src/auth.js",
+          "type": "file",
+          "size": 320,
+          "sha": "2c9e41b0",
+          "encoding": "base64",
+          "content": "ZXhwb3J0IGNvbnN0IGluaXRBdXRoID0gKCkgPT4ge1xuICBjb25zdCB1c2VyID0gbG9jYWxTdG9yYWdlLmdldEl0ZW0oJ3VzZXInKTtcbiAgaWYgKHVzZXIpIHtcbiAgICBjb25zb2xlLmxvZygnVXNlciBzZXNzaW9uIGZvdW5kOicsIEpTT04ucGFyc2UodXNlcikpO1xuICB9IGVsc2Uge1xuICAgIGNvbnNvbGUubG9nKCdObyBhY3RpdmUgc2Vzc2lvbi4nKTtcbiAgfVxufTs="
+        }
+      ]
+    },
+    {
+      "name": "styles.css",
+      "path": "styles.css",
+      "type": "file",
+      "size": 820,
+      "sha": "94f2e8c1",
+      "encoding": "base64",
+      "content": "OnJvb3Qge1xuICAtLXByaW1hcnk6ICNlZjQ0NDQ7XG4gIC0tZGFyazogIzBmMTcyYTtcbiB9XG5cbiBib2R5IHtcbiAgYmFja2dyb3VuZC1jb2xvcjogdmFyKC0tZGFyayk7XG4gIGNvbG9yOiB3aGl0ZTtcbiAgZm9udC1mYW1pbHk6ICdJbnRlcicsIHNhbnMtc2VyaWY7XG4gfVxuXG4gLmNvbnRhaW5lciB7XG4gIG1heC13aWR0aDogMTIwMHB4O1xuICBtYXJnaW46IDAgYXV0bztcbiAgcGFkZGluZzogMnJlbTtcbiB9"
+    },
+    {
+      "name": "README.md",
+      "path": "README.md",
+      "type": "file",
+      "size": 1500,
+      "sha": "1a2b3c4d",
+      "encoding": "base64",
+      "content": "IyBJcm9uLUNvcmUgR3ltXG5cblRoaXMgaXMgYSBtb2Rlcm4gZ3ltIHdlYnNpdGUgYnVpbHQgd2l0aCB2YW5pbGxhIEpTIGFuZCBDU1MuXG5cbiMjIEZlYXR1cmVzXG4tIFJlc3BvbnNpdmUgZGVzaWduXG4tIFJlYWwtdGltZSBzY2hlZHVsZVxuLSBNZW1iZXJzaGlwIHBvcnRhbFxuXG4jIyBJbnN0YWxsYXRpb25cbmBgYmFzaFxubnBtIGluc3RhbGxcbm5wbSBzdGFydFxuYGB"
+    }
+  ],
+  "languages": {
+      "JavaScript": 40737,
+      "CSS": 18336,
+      "HTML": 7825
+  },
+  "last_commit": {
+    "sha": "4ed6gh78291077221b6d0130938291",
+    "commit": {
+      "author": {
+        "name": "username",
+        "date": "2025-12-25T11:00:00Z"
+      },
+      "message": "fixed the bug in the chat feature and improved layout",
+      "comment_count": 0
+    },
+    "author": {
+      "login": "username"
+    }
+  }
+}

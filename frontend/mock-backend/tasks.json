@@ -1,0 +1,62 @@
+[
+  {
+    "_id": "t1",
+    "repo_id": "r1",
+    "title": "Build landing page",
+    "description": "Implement the hero and feature sections",
+    "status": "in-progress",
+    "assigned_to": "u3",
+    "created_at": "2025-12-01T12:00:00Z",
+    "attachments": [
+      { "file_id": "f3", "name": "HeroSection.jsx", "url": "/assets/files/HeroSection.jsx" }
+    ],
+    "comments": [
+      {
+        "comment_id": "tc1",
+        "commenter_id": "u1",
+        "content": "Make sure to follow the design system",
+        "reactions": [{ "user_id": "u3", "emoji": "👍" }],
+        "created_at": "2025-12-01T13:00:00Z"
+      }
+    ],
+    "mentions": [{ "mentioned_user_id": "u2", "mentioned_by": "u1" }]
+  },
+  {
+    "_id": "t2",
+    "repo_id": "r1",
+    "title": "Add feature cards",
+    "description": "Implement feature card components",
+    "status": "pending",
+    "assigned_to": "u2",
+    "created_at": "2025-12-02T12:00:00Z",
+    "attachments": [],
+    "comments": [],
+    "mentions": []
+  },
+  {
+    "_id": "t3",
+    "repo_id": "r2",
+    "title": "Setup backend API",
+    "description": "Create Express server and routes",
+    "status": "in-progress",
+    "assigned_to": "u1",
+    "created_at": "2025-12-02T12:00:00Z",
+    "attachments": [
+      { "file_id": "f4", "name": "server.js", "url": "/assets/files/server.js" }
+    ],
+    "comments": [],
+    "mentions": []
+  },
+  {
+    "_id": "t4",
+    "repo_id": "r3",
+    "title": "Initial commit",
+    "description": "Setup Python project",
+    "status": "done",
+    "assigned_to": "u2",
+    "created_at": "2025-12-05T11:00:00Z",
+    "attachments": [],
+    "comments": [],
+    "mentions": []
+  }
+]

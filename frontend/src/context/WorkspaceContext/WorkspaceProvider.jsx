@@ -13,6 +13,11 @@ export default function WorkspaceProvider({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isEditingFile, setIsEditingFile] = useState(false);
 
+    // Chat-related state (consolidated from ChatProvider)
+    const [channels, setChannels] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [activeChannelId, setActiveChannelId] = useState(null);
+
     const location = useLocation();
     const repoPreview = location.state?.repoData; // Repo data passed from list if not imported
 
@@ -28,54 +33,70 @@ export default function WorkspaceProvider({ children }) {
                 return;
             }
 
-            if (isMounted) setIsLoading(true);
+            // Set both loading states immediately
+            if (isMounted) {
+                setIsLoading(true);
+                setIsLoadingFiles(true);
+            }
 
             try {
-                // Check if it's a valid Mongo ObjectId (24 hex chars)
                 const isMongoId = /^[0-9a-fA-F]{24}$/.test(workspaceId);
 
-                let repoData;
+                // ============================================================
+                // STEP 1: INITIATE ALL 5 NETWORK REQUESTS SIMULTANEOUSLY
+                // Workspace metadata, contents, languages, channels, members
+                // All requests fly out at the same millisecond!
+                // ============================================================
+                const metaPromise = isMongoId
+                    ? apiRequest(`/api/repos/${workspaceId}`)
+                    : Promise.resolve({
+                        status: 'success',
+                        data: {
+                            id: repoPreview.githubId,
+                            _id: null,
+                            name: repoPreview.githubRepoName,
+                            full_name: repoPreview.githubFullName,
+                            private: false,
+                            owner: {
+                                login: repoPreview.githubOwner,
+                                avatar_url: ""
+                            },
+                            description: repoPreview.description,
+                            html_url: repoPreview.url,
+                            language: repoPreview.language,
+                            isImported: false,
+                            default_branch: "main",
+                            topics: [],
+                            members: []
+                        }
+                    });
+
+                const backgroundPromise = isMongoId
+                    ? Promise.all([
+                        apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
+                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`),
+                        apiRequest(`/api/repos/${workspaceId}/channels`),
+                        apiRequest(`/api/repos/${workspaceId}/members`)
+                    ])
+                    : Promise.all([
+                        apiRequest(`/api/repos/contents?owner=${repoPreview?.githubOwner}&repo=${repoPreview?.githubRepoName}`),
+                        apiRequest(`/api/repos/languages?owner=${repoPreview?.githubOwner}&repo=${repoPreview?.githubRepoName}`),
+                        Promise.resolve({ status: 'success', data: [] }), // No channels for preview
+                        Promise.resolve({ status: 'success', data: [] })  // No members for preview
+                    ]);
 
                 // ============================================================
-                // PHASE 1: Fetch Repository Metadata ONLY (Immediate UI Unblock)
+                // 🎯 STEP 2: WAIT ONLY FOR THE TINY METADATA TO SHOW THE UI
                 // ============================================================
-                if (isMongoId) {
-                    // 1. Valid DB Workspace: Fetch metadata from API
-                    const repoRes = await apiRequest(`/api/repos/${workspaceId}`);
-
-                    if (repoRes.status !== 'success') {
-                        throw new Error(repoRes.message || 'Failed to fetch workspace data');
-                    }
-
-                    repoData = repoRes.data;
-                } else if (repoPreview) {
-                    // 2. GitHub Preview (Not imported): Use passed state
-                    repoData = {
-                        // Map GitHub preview data to expected Workspace format
-                        id: repoPreview.githubId,
-                        _id: null, // No DB ID
-                        name: repoPreview.githubRepoName,
-                        full_name: repoPreview.githubFullName,
-                        private: false, // Default assumption or from preview data
-                        owner: {
-                            login: repoPreview.githubOwner,
-                            avatar_url: ""
-                        },
-                        description: repoPreview.description,
-                        html_url: repoPreview.url,
-                        language: repoPreview.language,
-                        isImported: false,
-                        default_branch: "main",
-                        topics: [],
-                        members: [] // No members for preview
-                    };
-                } else {
-                    throw new Error("Repository not found (and no preview data provided)");
+                const repoRes = await metaPromise;
+                if (!isMounted) return;
+                if (repoRes.status !== 'success') {
+                    throw new Error(repoRes.message || 'Failed to fetch workspace data');
                 }
 
-                if (!isMounted) return;
+                const repoData = repoRes.data;
 
-                // Immediately populate basic repository info with empty files/languages
+                // Immediately populate basic repository info
                 setData({
                     repository: {
                         id: repoData.githubId || repoData.id,
@@ -90,7 +111,7 @@ export default function WorkspaceProvider({ children }) {
                         description: repoData.description,
                         html_url: repoData.url || repoData.html_url,
                         language: repoData.language,
-                        isImported: !!repoData._id, // If it has a DB ID, it's imported
+                        isImported: !!repoData._id,
                         stars: 0,
                         default_branch: "main",
                         topics: repoData.tags || [],
@@ -101,44 +122,29 @@ export default function WorkspaceProvider({ children }) {
                             role: mem.role
                         }))
                     },
-                    files: [], // Empty initially
-                    contents: [], // Empty initially
-                    languages: [], // Empty initially
+                    files: [],
+                    contents: [],
+                    languages: [],
                     last_commit: null,
                     stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
-                // CRUCIAL: Unblock the UI immediately after metadata is loaded
+                // 🎯 UNBLOCK MAIN UI NOW - "Syncing repository" spinner disappears!
                 if (isMounted) setIsLoading(false);
 
                 // ============================================================
-                // PHASE 2: Background Fetch (Contents & Languages)
+                // STEP 3: SILENTLY FILL IN ALL BACKGROUND DATA
+                // Files, languages, channels, and members are already in flight!
                 // ============================================================
-                if (isMounted) setIsLoadingFiles(true);
-                let contentsRes, langRes;
-
-                if (isMongoId) {
-                    // Fetch contents and languages for DB workspace
-                    [contentsRes, langRes] = await Promise.all([
-                        apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
-                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
-                    ]);
-                } else if (repoPreview) {
-                    // Fetch contents using Owner/Repo for preview
-                    [contentsRes, langRes] = await Promise.all([
-                        apiRequest(`/api/repos/contents?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`),
-                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
-                    ]);
-                }
-
-                if (!isMounted) return; // Prevent state update if unmounted
+                const [contentsRes, langRes, channelsRes, membersRes] = await backgroundPromise;
+                if (!isMounted) return;
 
                 // Silent update: Merge files and languages into existing state
-                const files = contentsRes?.status === 'success' && contentsRes?.type === 'dir' ? contentsRes.files : [];
+                const files = contentsRes?.status === 'success' ? (contentsRes.files || contentsRes.data || []) : [];
                 const languagesData = langRes?.status === 'success' ? langRes.data : [];
 
-                setData(prevData => ({
-                    ...prevData,
+                setData(prev => ({
+                    ...prev,
                     files: files,
                     contents: files,
                     languages: languagesData
@@ -150,15 +156,39 @@ export default function WorkspaceProvider({ children }) {
                     setActiveFile(readme || files[0]);
                 }
 
+                // Process chat channels
+                if (channelsRes?.status === 'success') {
+                    const list = channelsRes.data || [];
+                    const normalizedChannels = list.map(ch => ({
+                        ...ch,
+                        _id: ch.channel_id || ch._id,
+                        channel_id: ch.channel_id || ch._id
+                    }));
+                    setChannels(normalizedChannels);
+
+                    if (list.length > 0) {
+                        setActiveChannelId(list[0].channel_id || list[0]._id);
+                    }
+                }
+
+                // Process chat members
+                if (membersRes?.status === 'success') {
+                    setUsers(membersRes.data.map(m => ({
+                        _id: m.userId?._id || m.userId,
+                        githubUsername: m.userId?.githubUsername || m.userId?.username,
+                        avatarUrl: m.userId?.avatarUrl,
+                        role: m.role
+                    })));
+                }
+
                 if (isMounted) setIsLoadingFiles(false);
 
             } catch (err) {
                 if (isMounted) {
+                    setError(err.message || 'Failed to load workspace. Please check your connection and try again.');
+                    setIsLoading(false);
                     setIsLoadingFiles(false);
-                    const errorMessage = err.message || 'Failed to load workspace. Please check your connection and try again.';
-                    setError(errorMessage);
                     console.error('Failed to fetch workspace data:', err);
-                    setIsLoading(false); // Ensure loading is stopped on error
                 }
             }
         };
@@ -439,7 +469,14 @@ export default function WorkspaceProvider({ children }) {
         setFolderChildren,
         deleteFile,
         inviteMember,
-        removeMember
+        removeMember,
+        // Chat-related data (consolidated from ChatProvider)
+        channels,
+        setChannels,
+        users,
+        setUsers,
+        activeChannelId,
+        setActiveChannelId
     };
 
     return (

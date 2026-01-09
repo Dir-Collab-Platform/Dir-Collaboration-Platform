@@ -73,12 +73,10 @@ export default function WorkspacesProvider({ children }) {
   const value = {
     workspaces,
     setWorkspaces,
-    isLoading,
     error,
     getWorkspace,
     createWorkspace,
-    isLoading,
-    error
+    isLoading
   };
 
   return (

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { useParams } from 'react-router-dom';
-import { ChatContext } from './WorkspaceContext'
+import { ChatContext, WorkspaceContext } from './WorkspaceContext'
 import { apiRequest } from '../../services/api/api';
 import { useSocket } from '../SocketContext/SocketContext';
 import { useAuth } from '../AuthContext/AuthContext';
@@ -9,11 +9,18 @@ export default function ChatProvider({ children }) {
     const { id: workspaceId } = useParams();
     const { socket, isConnected } = useSocket();
     const { user } = useAuth();
-    const [users, setUsers] = useState([])
-    const [channels, setChannels] = useState([])
+
+    // 🚀 CONSUME FROM WORKSPACECONTEXT instead of independent state
+    const {
+        channels, setChannels,
+        users, setUsers,
+        activeChannelId, setActiveChannelId,
+        isLoading: workspaceLoading
+    } = useContext(WorkspaceContext);
+
+    // Messages are still managed locally (fetched after channels are known)
     const [messages, setMessages] = useState([])
-    const [activeChannelId, setActiveChannelId] = useState(null)
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState(null)
 
     // 1. Join workspace socket room when workspaceId changes
@@ -42,86 +49,27 @@ export default function ChatProvider({ children }) {
         };
     }, [socket, isConnected, workspaceId, activeChannelId]);
 
-    // 3. OPTIMIZED: Parallel Initial Data Fetch
+    // 3. 🚀 Fetch messages when activeChannelId becomes available (from WorkspaceProvider)
     useEffect(() => {
+        if (!workspaceId || !activeChannelId) return;
+        if (!/^[0-9a-fA-F]{24}$/.test(workspaceId)) return;
+
         let isMounted = true;
 
-        async function fetchInitialData() {
-            // 1. Quick Validation
-            if (!workspaceId || !/^[0-9a-fA-F]{24}$/.test(workspaceId)) {
-                setIsLoading(false);
-                return;
-            }
-
-            setIsLoading(true);
-            try {
-                // 2. Fetch Channels and Members at the same time
-                const [channelsRes, membersRes] = await Promise.all([
-                    apiRequest(`/api/repos/${workspaceId}/channels`),
-                    apiRequest(`/api/repos/${workspaceId}/members`)
-                ]);
-
-                if (!isMounted) return;
-
-                // 3. Process Members
-                if (membersRes.status === 'success') {
-                    setUsers(membersRes.data.map(m => ({
-                        _id: m.userId?._id || m.userId,
-                        githubUsername: m.userId?.githubUsername || m.userId?.username,
-                        avatarUrl: m.userId?.avatarUrl,
-                        role: m.role
-                    })));
-                }
-
-                // 4. Process Channels & Immediately trigger Message fetch
-                if (channelsRes.status === 'success') {
-                    const channelList = channelsRes.data || [];
-                    const normalizedChannels = channelList.map(ch => ({
-                        ...ch,
-                        _id: ch.channel_id || ch._id,
-                        channel_id: ch.channel_id || ch._id,
-                    }));
-                    setChannels(normalizedChannels);
-
-                    if (normalizedChannels.length > 0) {
-                        const firstChannelId = normalizedChannels[0]._id;
-                        setActiveChannelId(firstChannelId);
-
-                        // --- THE CRITICAL SPEED FIX ---
-                        // Fire off the message request but DON'T "await" it before closing the loader
-                        apiRequest(`/api/repos/${workspaceId}/channels/${firstChannelId}/messages`)
-                            .then(msgRes => {
-                                if (isMounted && msgRes.status === 'success') {
-                                    setMessages(msgRes.data || []);
-                                }
-                            });
-                    }
-                }
-
-            } catch (err) {
-                console.error("Chat Init Error:", err);
-                if (isMounted) setError(err.message);
-            } finally {
-                // 5. UNBLOCK UI IMMEDIATELY
-                // The messages will populate half a second later via the .then() above
-                if (isMounted) setIsLoading(false);
-            }
-        }
-        fetchInitialData();
-        return () => { isMounted = false; };
-    }, [workspaceId]);
-
-    // 4. Update Message fetcher to ONLY trigger on manual channel switches
-    useEffect(() => {
-        // Skip if it's the initial load (handled above)
-        if (isLoading || !workspaceId || !activeChannelId) return;
-
         async function fetchMessages() {
-            const res = await apiRequest(`/api/repos/${workspaceId}/channels/${activeChannelId}/messages`);
-            if (res.status === 'success') setMessages(res.data || []);
+            try {
+                const res = await apiRequest(`/api/repos/${workspaceId}/channels/${activeChannelId}/messages`);
+                if (isMounted && res.status === 'success') {
+                    setMessages(res.data || []);
+                }
+            } catch (err) {
+                console.error('Failed to fetch messages:', err);
+            }
         }
         fetchMessages();
-    }, [activeChannelId]);
+
+        return () => { isMounted = false; };
+    }, [workspaceId, activeChannelId]);
 
     // 5. Listen for real-time message events via Socket.IO
     useEffect(() => {

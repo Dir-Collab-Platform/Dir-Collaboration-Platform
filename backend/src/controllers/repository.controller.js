@@ -10,7 +10,7 @@ import {
   getDiscoveryKey,
   getActiveListKey,
   getRepoDetailKey,
-  getRepoContentKey
+  getRepoContentKey,
 } from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
 import { getLanguageColor } from "../utils/githubColors.js";
@@ -18,6 +18,7 @@ import { Tag } from "../models/tag.model.js";
 import { createLog } from "../utils/activity.util.js";
 import { registerWebhook } from "../services/webhook.service.js";
 import { isValidObjectId } from "../utils/objectId.util.js";
+import { getIO } from "../sockets/socket.js";
 //@desc 1. discovery: list remote github repositories
 //@route GET /api/repos/discovery
 export const getGithubRepos = async (req, res) => {
@@ -61,8 +62,8 @@ export const getGithubRepos = async (req, res) => {
           stars: repo.stargazers_count,
           updatedAt: repo.updated_at,
           pushedAt: repo.pushed_at,
-          visibility: repo.visibility || (repo.private ? 'private' : 'public'),
-          default_branch: repo.default_branch
+          visibility: repo.visibility || (repo.private ? "private" : "public"),
+          default_branch: repo.default_branch,
         }));
       },
       600
@@ -152,9 +153,16 @@ export const importRepo = async (req, res) => {
     );
 
     // cache invalidation
-    //instead of this I created a
-    // await redisClient.del(`user:stats:${req.user._id}`);
-    //cache invalidation
+    // Invalidate stats cache since repository count changed
+    const statsCacheKey = `user:stats:${req.user._id}`;
+    await redisClient.del(statsCacheKey);
+    // Invalidate activity feed cache since new activity was created
+    const activityFeedKeys = [
+      `activity:feed:${req.user._id}:1:10`,
+      `activity:feed:${req.user._id}:1:20`,
+    ];
+    await Promise.all(activityFeedKeys.map((key) => redisClient.del(key)));
+    // Also invalidate repo-related caches
     await invalidateRepoCache(req.user._id, newRepo[0]._id);
     //update user's reposOwned list
     await User.findByIdAndUpdate(
@@ -170,6 +178,13 @@ export const importRepo = async (req, res) => {
     // invalidating cache- because when we call getGitHubRepo, we will get the old data if invalidation doesn't take place
     await redisClient.del(getDiscoveryKey(req.user._id));
     await redisClient.del(getActiveListKey(req.user._id));
+
+    // Emit socket event to notify user that stats have been updated
+    getIO().to(`user:${req.user._id}`).emit("stats_updated", {
+      message: "Dashboard stats updated",
+      repositoryId: newRepo[0]._id,
+      repositoryName: newRepo[0].githubRepoName,
+    });
 
     res.status(StatusCodes.CREATED).json({
       status: "success",
@@ -210,10 +225,60 @@ export const getActiveRepos = async (req, res) => {
         },
         1800
       );
+
+      // Fetch stars from GitHub for each workspace with 5-minute cache
+      const workspacesWithStars = await Promise.all(
+        activeRepos.map(async (repo) => {
+          if (!repo.githubOwner || !repo.githubRepoName) {
+            return { ...repo, stars: 0 };
+          }
+
+          // Cache key for individual repo stars (5 minutes = 300 seconds)
+          const starsCacheKey = `repo:stars:${repo.githubOwner.toLowerCase()}:${repo.githubRepoName.toLowerCase()}`;
+
+          try {
+            const stars = await getOrSetCache(
+              starsCacheKey,
+              async () => {
+                const octokit = createGitHubClient(req.user.accessToken);
+                try {
+                  const { data } = await octokit.rest.repos.get({
+                    owner: repo.githubOwner,
+                    repo: repo.githubRepoName,
+                  });
+                  return data.stargazers_count || 0;
+                } catch (error) {
+                  // If repo not found or access denied, return 0
+                  console.warn(
+                    `Failed to fetch stars for ${repo.githubOwner}/${repo.githubRepoName}:`,
+                    error.message
+                  );
+                  return 0;
+                }
+              },
+              300 // 5 minutes cache
+            );
+            return { ...repo, stars };
+          } catch (error) {
+            console.error(
+              `Error fetching stars for ${repo.githubOwner}/${repo.githubRepoName}:`,
+              error
+            );
+            return { ...repo, stars: 0 };
+          }
+        })
+      );
+
+      const totalStars = workspacesWithStars.reduce(
+        (sum, ws) => sum + (ws.stars || 0),
+        0
+      );
+
       return res.status(StatusCodes.OK).json({
         status: "success",
-        results: activeRepos.length,
-        data: activeRepos,
+        totalStars,
+        results: workspacesWithStars.length,
+        data: workspacesWithStars,
       });
     }
 
@@ -233,10 +298,58 @@ export const getActiveRepos = async (req, res) => {
       .populate("members.userId", "avatarUrl githubUsername")
       .lean(); // ✅ Add .lean() for consistency with cached path
 
+    // Fetch stars from GitHub for filtered results too
+    const workspacesWithStars = await Promise.all(
+      repos.map(async (repo) => {
+        if (!repo.githubOwner || !repo.githubRepoName) {
+          return { ...repo, stars: 0 };
+        }
+
+        // Cache key for individual repo stars (5 minutes = 300 seconds)
+        const starsCacheKey = `repo:stars:${repo.githubOwner.toLowerCase()}:${repo.githubRepoName.toLowerCase()}`;
+
+        try {
+          const stars = await getOrSetCache(
+            starsCacheKey,
+            async () => {
+              const octokit = createGitHubClient(req.user.accessToken);
+              try {
+                const { data } = await octokit.rest.repos.get({
+                  owner: repo.githubOwner,
+                  repo: repo.githubRepoName,
+                });
+                return data.stargazers_count || 0;
+              } catch (error) {
+                console.warn(
+                  `Failed to fetch stars for ${repo.githubOwner}/${repo.githubRepoName}:`,
+                  error.message
+                );
+                return 0;
+              }
+            },
+            300 // 5 minutes cache
+          );
+          return { ...repo, stars };
+        } catch (error) {
+          console.error(
+            `Error fetching stars for ${repo.githubOwner}/${repo.githubRepoName}:`,
+            error
+          );
+          return { ...repo, stars: 0 };
+        }
+      })
+    );
+
+    const totalStars = workspacesWithStars.reduce(
+      (sum, ws) => sum + (ws.stars || 0),
+      0
+    );
+
     res.status(StatusCodes.OK).json({
       status: "success",
-      results: repos.length,
-      data: repos, // ✅ All IDs are strings (consistent)
+      totalStars,
+      results: workspacesWithStars.length,
+      data: workspacesWithStars,
     });
   } catch (error) {
     res
@@ -253,7 +366,7 @@ export const getActiveRepo = async (req, res) => {
     if (!isValidObjectId(req.params.id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: "error",
-        message: "Invalid repository ID format"
+        message: "Invalid repository ID format",
       });
     }
 
@@ -273,18 +386,16 @@ export const getActiveRepo = async (req, res) => {
         status: "error",
         message: "Repository not found",
       });
-    // const octokit = createGitHubClient(req.user.accessToken);
 
-    // const ghRepo = octokit.rest.repos.get({
-    //   ownerId: repo.githubOwner,
-    //   repoId: repo.repoId,
-    // });
-
-    // res.status(StatusCodes.OK).json({ status: "success", data: repo, ssh_url: ghRepo.ssh_url, clone_url: ghRepo.clone_url });
+    // Return the repository data
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      data: repo,
+    });
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: error.message });
+      .json({ status: "error", message: error.message });
   }
 };
 
@@ -727,7 +838,7 @@ export const createRemoteRepo = async (req, res) => {
     await Promise.all([
       redisClient.del(getActiveListKey(req.user._id)),
       redisClient.del(getRepoDetailKey(newRepo[0]._id)),
-      redisClient.del(getDiscoveryKey(req.user._id))
+      redisClient.del(getDiscoveryKey(req.user._id)),
     ]);
 
     await session.commitTransaction();
@@ -793,11 +904,23 @@ export const getContents = async (req, res) => {
       async () => {
         const octokit = createGitHubClient(req.user.accessToken);
 
-        const { data } = await octokit.rest.repos.getContent({
-          owner: targetOwner,
-          repo: targetRepo,
-          path: path,
-        });
+        let data;
+        try {
+          const response = await octokit.rest.repos.getContent({
+            owner: targetOwner,
+            repo: targetRepo,
+            path: path,
+          });
+          data = response.data;
+        } catch (err) {
+          // specific handling for empty repositories
+          if (err.status === 404 && err.message.includes("empty")) {
+            // Return empty directory structure
+            data = [];
+          } else {
+            throw err;
+          }
+        }
 
         if (Array.isArray(data)) {
           // Return a clean object for "directory" type
@@ -867,45 +990,62 @@ export const getRepoLanguages = async (req, res) => {
       targetRepo = workspace.githubRepoName;
     }
 
+    // Validate Parameters - prevent 404s from undefined params
     if (!targetOwner || !targetRepo) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ status: "error", message: "Owner and Repo name are required" });
+      // Return empty stats array instead of error
+      return res.status(StatusCodes.OK).json({ status: "success", data: [] });
+    }
+
+    // Check Authentication
+    if (!req.user || !req.user.accessToken) {
+      return res.status(StatusCodes.OK).json({ status: "success", data: [] });
     }
 
     const cacheKey = `repo:languages:${targetOwner.toLowerCase()}:${targetRepo.toLowerCase()}`;
 
     //caching
+    try {
+      const stats = await getOrSetCache(
+        cacheKey,
+        async () => {
+          const octokit = createGitHubClient(req.user.accessToken);
+          let languages = {};
 
-    const stats = await getOrSetCache(
-      cacheKey,
-      async () => {
-        const octokit = createGitHubClient(req.user.accessToken);
+          try {
+            // explicit endpoint as requested
+            const { data } = await octokit.request('GET /repos/{owner}/{repo}/languages', {
+              owner: targetOwner,
+              repo: targetRepo,
+            });
+            languages = data;
+          } catch (err) {
+            console.warn(`Languages API failed for ${targetOwner}/${targetRepo}:`, err.message);
+            return []; // return empty stats if API fails
+          }
 
-        //fetch languages from github
-        const { data: languages } = await octokit.rest.repos.listLanguages({
-          owner: targetOwner,
-          repo: targetRepo,
-        });
+          //calculate the percentage from each language
+          const totalBytes = Object.values(languages).reduce(
+            (acc, curr) => acc + curr,
+            0
+          );
+          return Object.keys(languages).map((lang) => ({
+            label: lang,
+            value:
+              totalBytes > 0
+                ? parseFloat(((languages[lang] / totalBytes) * 100).toFixed(1))
+                : 0,
+            color: getLanguageColor(lang),
+          }));
+        },
+        3600
+      );
 
-        //calculate the percentage from each language
-        const totalBytes = Object.values(languages).reduce(
-          (acc, curr) => acc + curr,
-          0
-        );
-        return Object.keys(languages).map((lang) => ({
-          label: lang,
-          value:
-            totalBytes > 0
-              ? ((languages[lang] / totalBytes) * 100).toFixed(1)
-              : 0,
-          color: getLanguageColor(lang),
-        }));
-      },
-      3600
-    );
+      res.status(StatusCodes.OK).json({ status: "success", data: stats });
+    } catch (err) {
+      // Fallback for cache errors
+      res.status(StatusCodes.OK).json({ status: "success", data: [] });
+    }
 
-    res.status(StatusCodes.OK).json({ status: "success", data: stats });
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)
@@ -962,13 +1102,19 @@ export const updateFile = async (req, res) => {
     );
 
     // invalidating cache
-    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    const parentPath = path.includes("/")
+      ? path.substring(0, path.lastIndexOf("/"))
+      : "";
     await Promise.all([
-      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)),
-      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath))
+      redisClient.del(
+        getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)
+      ),
+      redisClient.del(
+        getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath)
+      ),
     ]);
 
-    await res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       status: "success",
       message: "File successfully committed to Github",
       data: {
@@ -1021,11 +1167,17 @@ export const deleteFile = async (req, res) => {
       sha: sha,
     });
 
-    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    const parentPath = path.includes("/")
+      ? path.substring(0, path.lastIndexOf("/"))
+      : "";
     // invalidate cache for the parent directory (listing) and the specific file (if any content cache exists)
     await Promise.all([
-      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)),
-      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath))
+      redisClient.del(
+        getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)
+      ),
+      redisClient.del(
+        getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath)
+      ),
     ]);
 
     //log activity
@@ -1099,9 +1251,13 @@ export const createFile = async (req, res) => {
         content: base64Content,
       });
 
-    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    const parentPath = path.includes("/")
+      ? path.substring(0, path.lastIndexOf("/"))
+      : "";
     // invalidate cache for the parent directory so the new file shows up in the list
-    await redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath));
+    await redisClient.del(
+      getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath)
+    );
 
     // Log the creation
     await createLog(

@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from "../../common-components/Header/Header";
 import WorkspaceHeader from "./components/WorkspaceHeader";
 import CodePanel from "./components/CodePanel";

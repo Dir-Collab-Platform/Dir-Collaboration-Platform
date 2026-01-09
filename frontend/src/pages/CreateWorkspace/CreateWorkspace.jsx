@@ -36,6 +36,8 @@ const CreateWorkspace = () => {
 
 
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleCreateWorkspace = async (e) => {
     if (e) e.preventDefault();
 
@@ -49,20 +51,32 @@ const CreateWorkspace = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      await createWorkspace({
+      const newWorkspace = await createWorkspace({
         workspaceName: workspaceName,
         githubRepoName: repoName,
         description: description
       });
+      console.log("Workspace created:", newWorkspace);
       alert(`Workspace "${workspaceName}" created successfully!`);
-      // Reset form or navigate
+      
+      // Reset form
       setWorkspaceName('');
       setDescription('');
       setRepoName('');
-      navigate('/workspaces');
+      
+      // Navigate to the new workspace
+      if (newWorkspace && newWorkspace._id) {
+        navigate(`/workspace/${newWorkspace._id}`);
+      } else {
+        navigate('/workspaces');
+      }
     } catch (err) {
+      console.error(err);
       alert(`Failed to create workspace: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -105,7 +119,7 @@ const CreateWorkspace = () => {
           </div>
 
           <div className="flex flex-col gap-2 mb-4">
-            <label htmlFor="workingRepository" className="text-[0.95rem] font-medium">Working Repository</label>
+            <label htmlFor="workingRepository" className="text-[0.95rem] font-medium">Existing GitHub Repository Name</label>
             <input
               type="text"
               id="workingRepository"
@@ -131,8 +145,12 @@ const CreateWorkspace = () => {
           </div>
 
           <div className="flex justify-center mt-4">
-            <button type="submit" className="py-3 px-8 bg-[var(--primary-button)] text-[var(--primary-text-color)] border-none rounded-lg cursor-pointer font-semibold text-base font-[var(--main-font-family)] hover:bg-[var(--primary-button-hover)]">
-              Create Workspace
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className={`py-3 px-8 bg-[var(--primary-button)] text-[var(--primary-text-color)] border-none rounded-lg cursor-pointer font-semibold text-base font-[var(--main-font-family)] hover:bg-[var(--primary-button-hover)] ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isSubmitting ? 'Creating...' : 'Create Workspace'}
             </button>
           </div>
         </form>

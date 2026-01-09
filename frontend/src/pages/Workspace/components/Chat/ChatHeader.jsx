@@ -81,7 +81,13 @@ function MenuPopup({ isOpen, onClose, onDeleteRequest, onLeaveRequest }) {
     )
 }
 
+import { useContext } from 'react'
+import { ChatContext } from '../../../../context/WorkspaceContext/WorkspaceContext'
+
+// ... (imports remain)
+
 export default function ChatHeader({ name, notif_count }) {
+    const { leaveChannel, activeChannelId } = useContext(ChatContext)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
@@ -93,9 +99,16 @@ export default function ChatHeader({ name, notif_count }) {
     }
 
     // Function to execute when user confirms leave
-    const handleLeaveChannel = () => {
-        console.log(`Left channel #${name}`)
-        // Future logic: call API to leave channel
+    const handleLeaveChannel = async () => {
+        if (activeChannelId) {
+            try {
+                await leaveChannel(activeChannelId);
+                console.log(`Left channel #${name}`);
+            } catch (error) {
+                console.error("Failed to leave channel", error);
+            }
+        }
+        setIsLeaveModalOpen(false); // Close modal
     }
 
     return (

@@ -1,4 +1,5 @@
 import { LogOut } from "lucide-react";
+import { useAuth } from "../../../context/AuthContext/AuthContext";
 import Header from "../../../common-components/Header/Header";
 import ProfileForm from "../ProfileForm/ProfileForm";
 import Sidebar from "../Sidebar/Sidebar";
@@ -7,7 +8,17 @@ import Footer from "../../../common-components/Footer/Footer";
 import { ProfileContext } from '../../../context/ProfileContext/ProfileContext';
 import ProfileProvider from '../../../context/ProfileContext/ProfileProvider';
 
+import { useNavigate } from "react-router-dom";
+
 function ProfileContent() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <>
       <Header />
@@ -17,7 +28,8 @@ function ProfileContent() {
           <h1 className="text-lg font-semibold" style={{ color: 'var(--primary-text-color)' }}>Public Profile</h1>
           <Button
             variant="outline"
-            className="rounded-2xl flex justify-center items-center gap-3 py-3 px-3"
+            className="rounded-2xl flex justify-center items-center gap-3 py-3 px-3 hover:bg-(--hover-bg)"
+            onClick={handleLogout}
           >
             <LogOut />
             <span style={{ color: 'var(--secondary-text-color)' }}>Log out</span>

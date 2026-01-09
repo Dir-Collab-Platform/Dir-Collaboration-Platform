@@ -6,9 +6,12 @@ import DashboardProvider from "./context/DashboardContext/DashboardProvider";
 import NotificationProvider from "./context/NotificationContext/NotificationProvider";
 import RepositoriesProvider from "./context/RepositoriesContext/RepositoriesProvider";
 
+import ThemeSynchronizer from "./common-components/ThemeSynchronizer";
+
 function App() {
   return (
     <AuthProvider>
+      <ThemeSynchronizer />
       <SocketProvider>
         <NotificationProvider>
           <DashboardProvider>

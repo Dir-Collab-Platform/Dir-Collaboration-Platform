@@ -10,6 +10,7 @@ import {
     Workflow
 } from "lucide-react"
 import { useAuth } from "../../../context/AuthContext/AuthContext"
+import Avatar from "../../../pages/Workspace/components/Chat/Avatar";
 
 export default function SidebarMenu({ isMenuOpen, onClose }) {
     const { user, logout } = useAuth();
@@ -37,14 +38,15 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
             </button>
 
             <div className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4" style={{ backgroundColor: 'var(--card-bg)' }}>
-                <img
-                    src={user?.avatarUrl || "/assets/images/person.jpg"}
-                    alt="person"
-                    className="w-12 h-12 rounded-full object-cover"
+                <Avatar
+                    src={user?.avatarUrl}
+                    alt="avatar"
+                    size={40}
+                    className="rounded-full object-cover"
                 />
                 <div>
-                    <p className="font-semibold" style={{ color: 'var(--primary-text-color)' }}>{user?.githubUsername || "Efrata"}</p>
-                    <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>@{user?.githubUsername?.toLowerCase() || "zeamanuel"}</p>
+                    <p className="font-semibold" style={{ color: 'var(--primary-text-color)' }}>{user?.githubUsername || "No logged in user"}</p>
+                    <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>@{user?.githubUsername?.toLowerCase() || "--"}</p>
                 </div>
             </div>
 

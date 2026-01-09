@@ -1,6 +1,10 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
 
 const CreateWorkspace = () => {
+  const { createWorkspace } = useContext(WorkspacesContext);
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [selectedRole, setSelectedRole] = useState('contributor');
@@ -24,32 +28,42 @@ const CreateWorkspace = () => {
       alert("Please enter a collaborator username");
       return;
     }
-    
+
     console.log(`Sending invite to: ${searchInput} as ${selectedRole}`);
     alert(`Invitation sent to ${searchInput} as ${selectedRole}`);
     handleCloseModal();
   };
 
-  const handleCreateWorkspace = (e) => {
+
+
+  const handleCreateWorkspace = async (e) => {
     if (e) e.preventDefault();
-    
+
     if (!workspaceName.trim()) {
       alert("Please enter a workspace name");
       return;
     }
-    
+
     if (!repoName.trim()) {
       alert("Please enter a repository name");
       return;
     }
-    
-    console.log(`Creating workspace: ${workspaceName} with repo: ${repoName}`);
-    alert(`Workspace "${workspaceName}" created successfully!`);
-    
-    // Reset form
-    setWorkspaceName('');
-    setDescription('');
-    setRepoName('');
+
+    try {
+      await createWorkspace({
+        workspaceName: workspaceName,
+        githubRepoName: repoName,
+        description: description
+      });
+      alert(`Workspace "${workspaceName}" created successfully!`);
+      // Reset form or navigate
+      setWorkspaceName('');
+      setDescription('');
+      setRepoName('');
+      navigate('/workspaces');
+    } catch (err) {
+      alert(`Failed to create workspace: ${err.message}`);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -63,13 +77,13 @@ const CreateWorkspace = () => {
       <div className="bg-[var(--dimmer-dark-bg)] py-8 px-12 rounded-xl w-full max-w-[600px] flex flex-col gap-6 shadow-lg border border-[var(--main-border-color)] scale-90">
         <h1 className="text-1.4rem text-center mb-0.5">Create New Workspace</h1>
         <hr className="w-4/5 mx-auto mb-6 border border-[var(--main-border-color)]" />
-        
+
         <form onSubmit={handleCreateWorkspace}>
           <div className="flex flex-col gap-2 mb-4">
             <label htmlFor="workspaceName" className="text-[0.95rem] font-medium">Workspace name</label>
-            <input 
-              type="text" 
-              placeholder="My workspace.." 
+            <input
+              type="text"
+              placeholder="My workspace.."
               id="workspaceName"
               value={workspaceName}
               onChange={(e) => setWorkspaceName(e.target.value)}
@@ -77,10 +91,10 @@ const CreateWorkspace = () => {
               className="py-2 px-3 border border-[var(--main-border-color)] rounded-md bg-[#303036] text-[var(--primary-text-color)] text-[0.95rem] font-[var(--main-font-family)] focus:outline-none focus:border-[var(--active-text-color)]"
             />
           </div>
-          
+
           <div className="flex flex-col gap-2 mb-4">
             <label htmlFor="descriptionWorkspace" className="text-[0.95rem] font-medium">Description</label>
-            <textarea 
+            <textarea
               id="descriptionWorkspace"
               placeholder="This workspace is ..."
               value={description}
@@ -89,12 +103,12 @@ const CreateWorkspace = () => {
               className="py-2 px-3 border border-[var(--main-border-color)] rounded-md bg-[#303036] text-[var(--primary-text-color)] text-[0.95rem] font-[var(--main-font-family)] focus:outline-none focus:border-[var(--active-text-color)] h-20"
             />
           </div>
-          
+
           <div className="flex flex-col gap-2 mb-4">
             <label htmlFor="workingRepository" className="text-[0.95rem] font-medium">Working Repository</label>
-            <input 
-              type="text" 
-              id="workingRepository" 
+            <input
+              type="text"
+              id="workingRepository"
               placeholder="Repo name..."
               value={repoName}
               onChange={(e) => setRepoName(e.target.value)}
@@ -102,10 +116,10 @@ const CreateWorkspace = () => {
               className="py-2 px-3 border border-[var(--main-border-color)] rounded-md bg-[#303036] text-[var(--primary-text-color)] text-[0.95rem] font-[var(--main-font-family)] focus:outline-none focus:border-[var(--active-text-color)]"
             />
           </div>
-          
+
           <div className="flex gap-4 mb-6">
-            <button 
-              type="button" 
+            <button
+              type="button"
               className="flex-1 py-2.5 px-4 bg-[#1D1D29] text-[var(--primary-text-color)] border-none rounded-md cursor-pointer flex items-center justify-center gap-2 font-medium font-[var(--main-font-family)] hover:opacity-90 w-full"
               onClick={handleOpenModal}
             >
@@ -115,7 +129,7 @@ const CreateWorkspace = () => {
               <span className="plus-icon text-lg">+</span>Add Channel
             </button>
           </div>
-          
+
           <div className="flex justify-center mt-4">
             <button type="submit" className="py-3 px-8 bg-[var(--primary-button)] text-[var(--primary-text-color)] border-none rounded-lg cursor-pointer font-semibold text-base font-[var(--main-font-family)] hover:bg-[var(--primary-button-hover)]">
               Create Workspace
@@ -126,11 +140,11 @@ const CreateWorkspace = () => {
 
       {/* Invite Collaborators Modal */}
       {isModalOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/70 flex justify-center items-center z-[1000] backdrop-blur-sm animate-[fadeIn_0.3s_ease] "
           onClick={handleCloseModal}
         >
-          <div 
+          <div
             className="bg-[var(--dimmer-dark-bg)] rounded-xl w-full max-w-[480px] overflow-hidden border border-[var(--main-border-color)] animate-[slideUp_0.3s_ease] shadow-lg "
             onClick={(e) => e.stopPropagation()}
           >
@@ -138,12 +152,12 @@ const CreateWorkspace = () => {
               <h2 className="text-xl text-[var(--primary-text-color)] mb-2">Invite Collaborators</h2>
               <p className="text-sm text-[var(--secondary-text-color)] m-0">Search by Username, Full name or Email</p>
             </div>
-            
+
             <div className="pb-6 px-6 flex flex-col gap-4">
               <div className="w-full">
                 <div className="w-full">
-                  <input 
-                    type="text" 
+                  <input
+                    type="text"
                     value={searchInput}
                     onChange={(e) => setSearchInput(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -153,16 +167,16 @@ const CreateWorkspace = () => {
                   />
                 </div>
               </div>
-              
+
               <div className="flex flex-col">
                 <h3 className="text-base text-[var(--primary-text-color)] mb-3">Role</h3>
                 <hr className="border-t border-[var(--main-border-color)] mb-4" />
                 <div className="flex flex-row">
                   <label className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer transition-all duration-200">
-                    <input 
-                      type="radio" 
-                      name="role" 
-                      value="owner" 
+                    <input
+                      type="radio"
+                      name="role"
+                      value="owner"
                       checked={selectedRole === 'owner'}
                       onChange={(e) => setSelectedRole(e.target.value)}
                       className="hidden"
@@ -175,10 +189,10 @@ const CreateWorkspace = () => {
                     </span>
                   </label>
                   <label className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer transition-all duration-200">
-                    <input 
-                      type="radio" 
-                      name="role" 
-                      value="admin" 
+                    <input
+                      type="radio"
+                      name="role"
+                      value="admin"
                       checked={selectedRole === 'admin'}
                       onChange={(e) => setSelectedRole(e.target.value)}
                       className="hidden"
@@ -191,10 +205,10 @@ const CreateWorkspace = () => {
                     </span>
                   </label>
                   <label className="flex items-center gap-3 py-3 px-4 rounded-lg cursor-pointer transition-all duration-200">
-                    <input 
-                      type="radio" 
-                      name="role" 
-                      value="contributor" 
+                    <input
+                      type="radio"
+                      name="role"
+                      value="contributor"
                       checked={selectedRole === 'contributor'}
                       onChange={(e) => setSelectedRole(e.target.value)}
                       className="hidden"
@@ -211,14 +225,14 @@ const CreateWorkspace = () => {
 
               {/* buttons*/}
               <div className="flex flex-row gap-3 mt-4">
-                <button 
+                <button
                   className="flex-1 py-3.5 bg-[var(--primary-button)] text-[var(--primary-text-color)] border-none rounded-lg cursor-pointer font-semibold text-[0.95rem] font-[var(--main-font-family)] hover:bg-[var(--primary-button-hover)]"
                   onClick={handleSendInvite}
                   type="button"
                 >
                   Invite Collaborators
                 </button>
-                <button 
+                <button
                   className="flex-1 py-3.5 bg-[var(--primary-button)] text-[var(--primary-text-color)] border-none rounded-lg cursor-pointer font-medium text-[0.95rem] font-[var(--main-font-family)] hover:bg-[var(--primary-button-hover)]"
                   onClick={handleCloseModal}
                   type="button"

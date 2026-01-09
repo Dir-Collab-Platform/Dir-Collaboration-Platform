@@ -1,12 +1,8 @@
-// Base API configuration
-// When integrating with real backend, update BASE_URL and implement real fetch calls
-
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'; // Default to true for development
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
 /**
  * Base fetch wrapper with error handling
- * Replace this with your actual API client (axios, fetch, etc.)
  */
 const apiRequest = async (endpoint, options = {}) => {
   if (USE_MOCK) {
@@ -16,18 +12,29 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 
   const url = `${BASE_URL}${endpoint}`;
+
+  // Get token from storage
+  const token = localStorage.getItem('token');
+
   const config = {
     ...options,
-    credentials: 'include', // Important for session cookies
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options.headers,
     },
   };
 
   try {
     const response = await fetch(url, config);
-    
+
+    // Handle 401 Unauthorized globally (optional but recommended)
+    if (response.status === 401) {
+      // dispatch event or clear storage if needed, but for now just throw
+      localStorage.removeItem('token');
+      // Optional: window.location.href = '/login'; 
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);

@@ -10,8 +10,7 @@ const Navbar = () => {
     const BASE_URL = 'http://localhost:5000';
 
     const handleGithubLogin = () => {
-        alert("Redirecting to Dashboard...");
-        navigate(`${BASE_URL}/auth/github`);
+        window.location.href = `${BASE_URL}/auth/github`;
     };
 
     return (

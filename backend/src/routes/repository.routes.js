@@ -1,16 +1,16 @@
-import express from "express"; 
-import * as repoController from "../controllers/repository.controller.js"; 
-import * as activityController from "../controllers/activity.controller.js"; 
-import * as exploreController from "../controllers/explore.controller.js"; 
-import {authMiddleware} from "../middlewares/auth.middleware.js"; 
-import channelRouter from "../routes/channel.routes.js"; 
+import express from "express";
+import * as repoController from "../controllers/repository.controller.js";
+import * as activityController from "../controllers/activity.controller.js";
+import * as exploreController from "../controllers/explore.controller.js";
+import { authMiddleware } from "../middlewares/auth.middleware.js";
+import channelRouter from "../routes/channel.routes.js";
 import memberRouter from "../routes/membership.routes.js";
 
-const repoRouter = express.Router(); 
+const repoRouter = express.Router();
 
 repoRouter.use(authMiddleware);
 //finding the list and importing 
-repoRouter.get("/discovery", repoController.getGithubRepos); 
+repoRouter.get("/discovery", repoController.getGithubRepos);
 repoRouter.post('/import', repoController.importRepo);
 
 
@@ -18,8 +18,8 @@ repoRouter.post('/import', repoController.importRepo);
 
 repoRouter.get('/explore', authMiddleware, exploreController.explorePublicRepos)
 repoRouter.get('/topics', authMiddleware, exploreController.getPopularTopics);
-repoRouter.post('/topics', authMiddleware, exploreController.createTag); 
-repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag); 
+repoRouter.post('/topics', authMiddleware, exploreController.createTag);
+repoRouter.delete('/topics/:id', authMiddleware, exploreController.deleteTag);
 
 
 
@@ -29,6 +29,7 @@ repoRouter.post('/create-remote', repoController.createRemoteRepo);
 
 //repository file management 
 repoRouter.get('/contents', repoController.getContents);
+repoRouter.get('/:id/contents', repoController.getContents);
 repoRouter.put('/:id/contents', repoController.updateFile);
 repoRouter.delete('/:id/contents', repoController.deleteFile);
 repoRouter.post('/:id/contents', repoController.createFile);
@@ -36,17 +37,17 @@ repoRouter.post('/:id/contents', repoController.createFile);
 //language
 repoRouter.get('/languages', repoController.getRepoLanguages);
 //CRUD functinoalities 
-repoRouter.get('/', repoController.getActiveRepos); 
-repoRouter.get('/:id', repoController.getActiveRepo); 
-repoRouter.patch('/:id', repoController.updateRepo); 
-repoRouter.delete('/:id', repoController.deleteRepo); 
+repoRouter.get('/', repoController.getActiveRepos);
+repoRouter.get('/:id', repoController.getActiveRepo);
+repoRouter.patch('/:id', repoController.updateRepo);
+repoRouter.delete('/:id', repoController.deleteRepo);
 
 //sync with github 
-repoRouter.post('/:id/sync', repoController.manualSync); 
-repoRouter.post('/:id/tags', repoController.addTags); 
+repoRouter.post('/:id/sync', repoController.manualSync);
+repoRouter.post('/:id/tags', repoController.addTags);
 
 // getting a specific repo history
-repoRouter.get('/:id/activity',activityController.getRepoActivity )
+repoRouter.get('/:id/activity', activityController.getRepoActivity)
 
 // channel routes /api/repos/:repoId/channels
 repoRouter.use('/:repoId/channels', channelRouter);

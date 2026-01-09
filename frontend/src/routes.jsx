@@ -10,6 +10,7 @@ import ExploreContainer from './pages/Explore/ExploreContainer';
 import CreateWorkspace from './pages/CreateWorkspace/CreateWorkspace';
 import NotFound from './pages/NotFound/NotFound';
 import Landing from './pages/Landing/Landing';
+import AuthSuccess from './pages/AuthSuccess/AuthSuccess';
 
 /**
  * Application Routes
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
   {
     path: '/createWorkspace',
     element: <CreateWorkspace />,
+  },
+  {
+    path: '/auth-success',
+    element: <AuthSuccess />,
   },
   {
     path: '*',

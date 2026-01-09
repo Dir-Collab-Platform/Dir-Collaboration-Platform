@@ -4,14 +4,12 @@ import { ChevronDown, Search } from "lucide-react";
 import Button from "../../common-components/button";
 import WorkSpacesSlot from "./WorkSpacesSlot";
 import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
-import { UserContext } from '../../context/UserContext/UserContext';
-import { mockLanguages, mockUsers } from '../../data/mockData';
-
+import { useAuth } from '../../context/AuthContext/AuthContext';
 import { getRelativeTime } from '../../utils/utils';
 
 export default function WorkSpaceList() {
   const { workspaces, isLoading } = useContext(WorkspacesContext);
-  const { user } = useContext(UserContext);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -21,6 +19,10 @@ export default function WorkSpaceList() {
   );
 
   const handleWorkspaceClick = (workspaceId) => {
+    if (!workspaceId) {
+      console.error('Cannot navigate: workspaceId is undefined');
+      return;
+    }
     navigate(`/workspace/${workspaceId}`);
   };
 
@@ -73,11 +75,8 @@ export default function WorkSpaceList() {
         borderColor: 'var(--main-border-color)'
       }}>
         {filteredWorkspaces.map((workspace) => {
-          const languages = mockLanguages[workspace._id] || [];
-          const contributors = workspace.members?.slice(0, 4).map(mem => {
-            const user = mockUsers.find(u => u._id === mem.userId);
-            return user?.avatarUrl || "https://via.placeholder.com/40";
-          }) || [];
+          const languages = workspace.languages || [];
+          const contributors = workspace.members?.map(mem => mem.userId?.avatarUrl || "https://via.placeholder.com/40") || [];
 
           return (
             <div key={workspace._id} onClick={() => handleWorkspaceClick(workspace._id)} className="w-full cursor-pointer">

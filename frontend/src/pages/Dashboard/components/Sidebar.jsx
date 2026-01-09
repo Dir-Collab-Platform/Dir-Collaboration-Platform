@@ -1,17 +1,17 @@
 import React, { useContext } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import { LayoutDashboard, Folder, Workflow, Search, Settings, LogOut } from "lucide-react"
-import { UserContext } from "../../../context/UserContext/UserContext"
+import { useAuth} from "../../../context/AuthContext/AuthContext"
 
 export default function Sidebar() {
-    const { user } = useContext(UserContext);
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
 
     function handleLogout() {
         const confirmLogout = window.confirm("Are you sure you want to log out?")
         if (confirmLogout) {
-            // TODO: Handle logout logic here
-            // await logout();
-            // navigate('/login');
+            logout();
+            navigate('/');
         }
     }
 
@@ -24,9 +24,9 @@ export default function Sidebar() {
     ]
 
     return (
-        <div className="flex flex-col h-full" style={{ 
-            backgroundColor: 'var(--dark-bg)', 
-            color: 'var(--secondary-text-color)', 
+        <div className="flex flex-col h-full" style={{
+            backgroundColor: 'var(--dark-bg)',
+            color: 'var(--secondary-text-color)',
             padding: '1.5rem',
             borderRight: '1px solid var(--main-border-color)'
         }}>
@@ -37,10 +37,10 @@ export default function Sidebar() {
 
             <div className="flex items-center gap-3 mb-10 px-2">
                 <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden" style={{ backgroundColor: 'var(--card-bg-lighter)' }}>
-                    <img 
-                        src={user?.avatarUrl || "/assets/images/person.jpg"} 
-                        alt="User profile" 
-                        className="w-full h-full object-cover" 
+                    <img
+                        src={user?.avatarUrl || "/assets/images/person.jpg"}
+                        alt="User profile"
+                        className="w-full h-full object-cover"
                     />
                 </div>
                 <div className="min-w-0">
@@ -59,11 +59,10 @@ export default function Sidebar() {
                         key={item.name}
                         to={item.path}
                         end={item.path === "/"}
-                        className={({ isActive }) => 
-                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
-                                isActive 
-                                    ? "" 
-                                    : "hover:opacity-80"
+                        className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${isActive
+                                ? ""
+                                : "hover:opacity-80"
                             }`
                         }
                         style={({ isActive }) => ({

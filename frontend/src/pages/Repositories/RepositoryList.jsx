@@ -1,29 +1,36 @@
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Search, Folder, Star } from "lucide-react";
 import Button from "../../common-components/button";
 import RepositoryCard from './RepositoryCard';
 import { RepositoriesContext } from '../../context/RepositoriesContext/RepositoriesContext';
-import { UserContext } from '../../context/UserContext/UserContext';
-import { mockLanguages, mockUsers } from '../../data/mockData';
-
+import { useAuth } from '../../context/AuthContext/AuthContext';
 import { getRelativeTime } from '../../utils/utils';
+import { useContext } from 'react';
 
 function RepositoryList() {
-  const { repositories, isLoading } = useContext(RepositoriesContext);
-  const { user } = useContext(UserContext);
+  const { repositories, isLoading, error } = useContext(RepositoriesContext);
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
   const filteredRepos = repositories.filter((repo) =>
-    repo.githubRepoName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    repo.description?.toLowerCase().includes(searchTerm.toLowerCase())
+    (repo.githubRepoName || repo.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (repo.description || "").toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-6 text-(--secondary-text-color)">
         Loading repositories...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 text-center p-6">
+        Error loading repositories: {error}
       </div>
     );
   }
@@ -100,23 +107,31 @@ function RepositoryList() {
       {/* REPOSITORY LIST CONTAINER */}
       <div className="rounded-xl border border-(--main-border-color) overflow-hidden bg-(--dimmer-dark-bg)">
         <div className="divide-y divide-(--main-border-color)">
-          {filteredRepos.map((repo) => {
-            const languages = mockLanguages[repo._id] || [];
-            const contributors = repo.members?.slice(0, 4).map(mem => {
-              const user = mockUsers.find(u => u._id === mem.userId);
-              return user?.avatarUrl || "https://via.placeholder.com/40";
-            }) || [];
+          {filteredRepos.map((repo, index) => {
+            const languages = repo.languages || [];
+            const contributors = repo.members?.map(mem => mem.userId?.avatarUrl || "https://via.placeholder.com/40") || [];
 
             return (
-              <div key={repo._id} onClick={() => navigate(`/repository/${repo._id}`)}>
+              <div key={repo._id || repo.id || index} onClick={() => {
+                // Imported repos have a valid MongoDB _id - navigate to workspace
+                if (repo._id) {
+                  navigate(`/workspace/${repo._id}`, { state: { repoData: repo } });
+                } else if (repo.id || repo.githubId) {
+                  // Non-imported repos only have githubId - navigate to preview (pass full data)
+                  navigate(`/repository/${repo.id || repo.githubId}`, { state: { repoData: repo } });
+                } else {
+                  console.error('Repository has no valid ID:', repo);
+                }
+              }}>
                 <RepositoryCard
-                  name={repo.githubRepoName}
+                  name={repo.githubRepoName || repo.name}
                   visibility={repo.isPrivate ? "private" : "public"}
                   description={repo.description}
                   stars={repo.stars || 0}
                   updatedAt={"Last updated " + getRelativeTime(repo.updatedAt) + " ago"}
                   languages={languages}
                   isImported={repo.isImported}
+                  contributors={contributors}
                 />
               </div>
             );

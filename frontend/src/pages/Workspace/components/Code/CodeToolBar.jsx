@@ -143,8 +143,8 @@ function BranchBtn({ branches = [], currentBranch, onBranchChange }) {
                         key={branch}
                         onClick={() => handleBranchSelect(branch)}
                         className={`w-full px-4 py-2.5 text-left text-xs flex items-center gap-2 hover:bg-(--secondary-button-hover) transition-colors ${branch === currentBranch
-                                ? 'bg-(--secondary-button) text-(--primary-text-color) font-bold'
-                                : 'text-(--secondary-text-color)'
+                            ? 'bg-(--secondary-button) text-(--primary-text-color) font-bold'
+                            : 'text-(--secondary-text-color)'
                             }`}
                     >
                         <GitBranch size={14} />
@@ -181,21 +181,65 @@ function StartBtn({ stars }) {
     )
 }
 
-function DeleteBtn() {
+function DeleteBtn({ activeFile, onDelete }) {
+    const [isConfirming, setIsConfirming] = useState(false)
+    const [isDeleting, setIsDeleting] = useState(false)
+
+    const handleDelete = async () => {
+        if (!activeFile) return;
+
+        setIsDeleting(true);
+        try {
+            await onDelete(activeFile);
+            setIsConfirming(false);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to delete file");
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
+    if (isConfirming) {
+        return (
+            <div className="flex bg-(--secondary-button) rounded-lg border border-red-500/50 overflow-hidden animate-in zoom-in duration-200">
+                <button
+                    onClick={() => setIsConfirming(false)}
+                    className="px-3 py-1 text-xs text-(--secondary-text-color) hover:bg-black/10 transition-colors"
+                    disabled={isDeleting}
+                >
+                    Cancel
+                </button>
+                <button
+                    onClick={handleDelete}
+                    className="px-3 py-1 text-xs font-bold text-white bg-red-500 hover:bg-red-600 transition-colors flex items-center gap-2"
+                    disabled={isDeleting}
+                >
+                    {isDeleting ? 'Deleting...' : 'Confirm'}
+                </button>
+            </div>
+        )
+    }
+
     return (
-        <button className="svg-btn icon-btn flex gap-2 items-center">
-            <Trash2 />
+        <button
+            onClick={() => setIsConfirming(true)}
+            className={`svg-btn icon-btn flex gap-2 items-center text-red-400 hover:text-red-500 hover:bg-red-500/10 ${!activeFile ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={!activeFile}
+            title={activeFile ? `Delete ${activeFile.name}` : "No file selected"}
+        >
+            <Trash2 size={16} />
         </button>
     )
 }
 
 export default function CodeToolBar() {
-    const { repository } = useContext(WorkspaceContext);
+    const { repository, activeFile, deleteFile } = useContext(WorkspaceContext);
     const [currentBranch, setCurrentBranch] = useState(repository?.defaultBranch || 'main');
 
     // Mock branches - replace with real data from repository
     const branches = repository?.branches || ['main', 'develop', 'feature/auth', 'feature/ui'];
-    const cloneUrl = repository?.cloneUrl || `https://github.com/${repository?.owner || 'user'}/${repository?.githubRepoName || 'repo'}.git`;
+    const cloneUrl = repository?.cloneUrl || `https://github.com/${repository?.owner?.login || 'user'}/${repository?.name || 'repo'}.git`;
 
     const handleBranchChange = (branch) => {
         setCurrentBranch(branch);
@@ -204,16 +248,18 @@ export default function CodeToolBar() {
     };
 
     return (
-        <div className="flex gap-6 bg-(--card-bg-lighter) border border-(--main-border-color) rounded-bl-full rounded-tr-2xl px-6 py-2">
+        <div className="flex gap-4 items-center bg-(--card-bg-lighter) border border-(--main-border-color) rounded-bl-full rounded-tr-2xl px-6 py-2">
             <CommitBtn />
+            <div className="w-px h-6 bg-(--main-border-color)"></div>
             <CloneBtn cloneUrl={cloneUrl} />
             <BranchBtn
                 branches={branches}
                 currentBranch={currentBranch}
                 onBranchChange={handleBranchChange}
             />
-            <StartBtn stars={repository?.stars || 0} />
-            <DeleteBtn />
+            <div className="w-px h-6 bg-(--main-border-color)"></div>
+            <StartBtn stars={repository?.stargazers_count || 0} />
+            <DeleteBtn activeFile={activeFile} onDelete={deleteFile} />
         </div>
     )
 }

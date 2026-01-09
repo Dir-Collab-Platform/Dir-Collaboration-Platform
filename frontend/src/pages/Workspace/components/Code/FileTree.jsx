@@ -4,11 +4,12 @@ import { WorkspaceContext } from '../../../../context/WorkspaceContext/Workspace
 
 function FileItem({ item, depth = 0, searchTerm = "" }) {
     const [isOpen, setIsOpen] = useState(false)
+    const [isLoadingChildren, setIsLoadingChildren] = useState(false)
     const context = useContext(WorkspaceContext)
-    
+
     if (!context) return null
-    const { activeFile, setActiveFile } = context
-    
+    const { activeFile, setActiveFile, fetchFolderContents, setFolderChildren } = context
+
     const isFolder = item.type === 'dir'
     const isSelected = activeFile?.path === item.path
 
@@ -16,19 +17,33 @@ function FileItem({ item, depth = 0, searchTerm = "" }) {
     const hasSearchMatch = useMemo(() => {
         if (!searchTerm) return false
         const searchLower = searchTerm.toLowerCase()
-        
+
         const checkMatch = (node) => {
             if (node.name.toLowerCase().includes(searchLower)) return true
             if (node.children) return node.children.some(checkMatch)
             return false
         }
-        
+
         return isFolder && checkMatch(item)
     }, [item, searchTerm, isFolder])
 
-    const handleClick = () => {
+    const handleClick = async () => {
         if (isFolder) {
-            setIsOpen(!isOpen)
+            const willOpen = !isOpen
+            setIsOpen(willOpen)
+
+            // Lazy-load folder contents if opening and not already loaded
+            if (willOpen && !item.children && fetchFolderContents && setFolderChildren) {
+                setIsLoadingChildren(true)
+                try {
+                    const children = await fetchFolderContents(item.path)
+                    setFolderChildren(item.path, children)
+                } catch (err) {
+                    console.error('Failed to load folder contents:', err)
+                } finally {
+                    setIsLoadingChildren(false)
+                }
+            }
         } else {
             setActiveFile(item)
         }
@@ -42,7 +57,7 @@ function FileItem({ item, depth = 0, searchTerm = "" }) {
 
     return (
         <div className="flex flex-col">
-            <div 
+            <div
                 onClick={handleClick}
                 style={{ paddingLeft: `${depth * 12 + 12}px` }}
                 className={`group flex items-center gap-2 py-1.5 cursor-pointer transition-colors hover:bg-(--secondary-button-hover) rounded-md mr-2
@@ -51,9 +66,9 @@ function FileItem({ item, depth = 0, searchTerm = "" }) {
             >
                 <div className="flex items-center justify-center w-4 h-4">
                     {isFolder && (
-                        <ChevronRight 
-                            size={14} 
-                            className={`transition-transform duration-200 ${(isOpen || (searchTerm && hasSearchMatch)) ? 'rotate-90' : ''}`} 
+                        <ChevronRight
+                            size={14}
+                            className={`transition-transform duration-200 ${(isOpen || (searchTerm && hasSearchMatch)) ? 'rotate-90' : ''}`}
                         />
                     )}
                 </div>
@@ -70,11 +85,21 @@ function FileItem({ item, depth = 0, searchTerm = "" }) {
                 </span>
             </div>
 
-            {isFolder && (isOpen || (searchTerm && hasSearchMatch)) && item.children && (
+            {isFolder && (isOpen || (searchTerm && hasSearchMatch)) && (
                 <div className="flex flex-col">
-                    {item.children.map((child, index) => (
-                        <FileItem key={index} item={child} depth={depth + 1} searchTerm={searchTerm} />
-                    ))}
+                    {isLoadingChildren ? (
+                        <div style={{ paddingLeft: `${(depth + 1) * 12 + 12}px` }} className="py-1.5 text-(--secondary-text-color) opacity-50 text-sm">
+                            Loading...
+                        </div>
+                    ) : item.children && item.children.length > 0 ? (
+                        item.children.map((child, index) => (
+                            <FileItem key={child.path || index} item={child} depth={depth + 1} searchTerm={searchTerm} />
+                        ))
+                    ) : item.children && item.children.length === 0 ? (
+                        <div style={{ paddingLeft: `${(depth + 1) * 12 + 12}px` }} className="py-1.5 text-(--secondary-text-color) opacity-50 text-sm italic">
+                            Empty folder
+                        </div>
+                    ) : null}
                 </div>
             )}
         </div>
@@ -92,11 +117,11 @@ export default function FileTree() {
         <div className="file-tree flex flex-col h-full select-none">
             {/* Search Input Section */}
             <div className="relative mb-6 group">
-                <Search 
-                    size={14} 
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-(--secondary-text-color) opacity-50 group-focus-within:opacity-100 transition-opacity" 
+                <Search
+                    size={14}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-(--secondary-text-color) opacity-50 group-focus-within:opacity-100 transition-opacity"
                 />
-                <input 
+                <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -104,7 +129,7 @@ export default function FileTree() {
                     className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl py-2 pl-9 pr-8 paragraph2 outline-none focus:border-(--primary-button) transition-all text-(--primary-text-color)"
                 />
                 {searchTerm && (
-                    <button 
+                    <button
                         onClick={() => setSearchTerm("")}
                         className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-(--secondary-button-hover) rounded-md transition-colors"
                     >

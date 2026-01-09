@@ -1,9 +1,13 @@
-import { useState } from "react"
-import { X, Globe, Lock, ChevronDown, Plus } from 'lucide-react'
+import { useState, useContext } from "react"
+import { X, Globe, Lock, ChevronDown, Plus, Loader2 } from 'lucide-react'
+import { ChatContext } from '../../../../context/WorkspaceContext/WorkspaceContext'
 
 export default function AddChannelModal({ isOpen, onClose, users = [] }) {
+    const chatContext = useContext(ChatContext)
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [createError, setCreateError] = useState(null);
     const [name, setName] = useState('')
     const [type, setType] = useState('public') // 'public' or 'restricted'
     const [selectedMembers, setSelectedMembers] = useState([])
@@ -23,19 +27,33 @@ export default function AddChannelModal({ isOpen, onClose, users = [] }) {
         setTimeout(() => {
             setIsLoading(false);
             setStep(2);
-        }, 1000); // 1 second delay
+        }, 500);
     };
 
-    const handleSubmit = () => {
-        console.log({ name, type, selectedMembers })
-        onClose()
-        // Reset state after closing
-        setTimeout(() => {
-            setStep(1);
-            setName('');
-            setType('public');
-            setSelectedMembers([]);
-        }, 300);
+    const handleSubmit = async () => {
+        if (!chatContext?.createChannel) {
+            console.error("createChannel not available in context");
+            return;
+        }
+
+        setIsCreating(true);
+        setCreateError(null);
+
+        try {
+            await chatContext.createChannel(name);
+            // Success - close modal and reset
+            onClose();
+            setTimeout(() => {
+                setStep(1);
+                setName('');
+                setType('public');
+                setSelectedMembers([]);
+            }, 300);
+        } catch (err) {
+            setCreateError(err.message || 'Failed to create channel');
+        } finally {
+            setIsCreating(false);
+        }
     }
 
     return (

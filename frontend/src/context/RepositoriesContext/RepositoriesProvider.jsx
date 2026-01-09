@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiRequest } from '../../services/api/api';
 import { RepositoriesContext } from './RepositoriesContext';
-import { mockRepositories } from '../../data/mockData';
+
 
 export default function RepositoriesProvider({ children }) {
   const [repositories, setRepositories] = useState([]);
@@ -12,13 +12,33 @@ export default function RepositoriesProvider({ children }) {
     const fetchRepositories = async () => {
       setIsLoading(true);
       try {
-        // TODO: Replace with real API call when integrating backend
-        // const response = await axios.get('/api/repos');
-        // setRepositories(response.data.data);
+        const response = await apiRequest('/api/repos/discovery');
+        if (response.status === 'success') {
+          const initialRepos = response.data;
+          setRepositories(initialRepos);
 
-        // Mock implementation - only repos that are NOT workspaces
-        await new Promise(resolve => setTimeout(resolve, 400));
-        setRepositories(mockRepositories);
+          // Fetch detailed languages for each repo in parallel
+          const reposWithLanguages = await Promise.all(
+            initialRepos.map(async (repo) => {
+              // Only fetch detailed languages if it's an imported workspace with an ID
+              if (!repo._id || !repo.isImported) {
+                return repo;
+              }
+              try {
+                const langRes = await apiRequest(`/api/repos/languages?workspaceId=${repo._id}`);
+                return {
+                  ...repo,
+                  languages: langRes.status === 'success' ? langRes.data : []
+                };
+              } catch (e) {
+                console.warn(`Failed to fetch languages for ${repo.workspaceName}`, e);
+                return repo;
+              }
+            })
+          );
+
+          setRepositories(reposWithLanguages);
+        }
       } catch (err) {
         setError(err.message);
         console.error('Failed to fetch repositories:', err);
@@ -36,21 +56,19 @@ export default function RepositoriesProvider({ children }) {
 
   const createRepository = async (repoData) => {
     try {
-      // TODO: Replace with real API call when integrating backend
-      // const response = await axios.post('/api/repos', repoData);
-      // setRepositories(prev => [...prev, response.data.data]);
+      // Determine if import or create
+      const endpoint = repoData.isImport ? '/api/repos/import' : '/api/repos/create-remote';
+      const response = await apiRequest(endpoint, {
+        method: 'POST',
+        body: repoData
+      });
 
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const newRepo = {
-        _id: `repo_${Date.now()}`,
-        ...repoData,
-        isImported: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setRepositories(prev => [...prev, newRepo]);
-      return newRepo;
+      if (response.status === 'success' || response.status === 'created') {
+        const newRepo = response.data;
+        // Optimistically add to list (re-fetch would be cleaner but this is faster)
+        setRepositories(prev => [...prev, newRepo]);
+        return newRepo;
+      }
     } catch (err) {
       setError(err.message);
       throw err;

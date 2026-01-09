@@ -3,13 +3,15 @@ import  {StatusCodes} from "http-status-codes";
 import { Repository } from "../models/repository.model.js";
 import {createLog} from "../utils/activity.util.js"
 import { createNotification } from "../services/notification.service.js";
+import { toObjectId } from "../utils/objectId.util.js";
 
 
 //@route /api/repos/:repoId/members
 //@desc inviting a member
 export const inviteMember = async (req,res) => {
     try {
-        const {id:workspaceId} = req.params;
+        // ✅ Fix: Cast to ObjectId
+        const workspaceId = toObjectId(req.params.id || req.params.repoId, "Workspace ID");
         const {githubUsername, role = "viewer"} = req.body;
 
 
@@ -26,7 +28,7 @@ export const inviteMember = async (req,res) => {
 
         const workspace = await Repository.findOneAndUpdate( 
             { 
-              _id: workspaceId, 
+              _id: workspaceId, // ✅ Now ObjectId
               "members.userId": { $ne: invitedUser._id } 
             },
             {$push: 
@@ -54,9 +56,9 @@ export const inviteMember = async (req,res) => {
             userId: invitedUser._id,
             message: `${req.user.githubUsername} added you to ${workspace.workspaceName}`,
             type: "message",
-            repoId: workspaceId,
+            repoId: workspaceId.toString(), // ✅ Convert to string for notification
             targetType: "repository",
-            targetId: workspaceId
+            targetId: workspaceId.toString() // ✅ Convert to string for notification
 
         })
 
@@ -79,6 +81,13 @@ export const inviteMember = async (req,res) => {
 
         
     } catch (error) {
+        // Handle validation errors
+        if (error.message.includes("Invalid") || error.message.includes("required")) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: "error",
+                message: error.message
+            });
+        }
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
 }
@@ -87,7 +96,8 @@ export const inviteMember = async (req,res) => {
 // @route GET /api/repos/:repoId/members - todo
 export const listMembers = async (req, res) => {
     try {
-        const { repoId } = req.params;
+        // ✅ Fix: Cast to ObjectId (findById auto-casts, but validate for consistency)
+        const repoId = toObjectId(req.params.repoId || req.params.id, "Repository ID");
         // Find the repository and populate the members array with user details
         const workspace = await Repository.findById(repoId)
             .populate("members.userId", "githubUsername avatarUrl email")
@@ -97,6 +107,13 @@ export const listMembers = async (req, res) => {
 
         res.status(StatusCodes.OK).json({ status: "success", data: workspace.members });
     } catch (error) {
+        // Handle validation errors
+        if (error.message.includes("Invalid") || error.message.includes("required")) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: "error",
+                message: error.message
+            });
+        }
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
 };
@@ -105,11 +122,13 @@ export const listMembers = async (req, res) => {
 //@route PATCH /api/repos/:repoId/members/:userId
 export const updateRole = async (req, res) => {
     try {
-        const { repoId, userId: memberIdToUpdate } = req.params;
+        // ✅ Fix: Cast both to ObjectId
+        const repoId = toObjectId(req.params.repoId || req.params.id, "Repository ID");
+        const memberIdToUpdate = toObjectId(req.params.userId, "User ID");
         const { role } = req.body; 
         
         // Match the membership schema's enum exactly
-        const validRoles = ["owner", "core", "contributor", "viewer"];
+        const validRoles = ["owner", "maintainer", "contributor", "viewer"];
 
         if (!validRoles.includes(role)) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Invalid role specified" });
@@ -118,7 +137,7 @@ export const updateRole = async (req, res) => {
         // finding workspace to be updated
 
         const workspace = await Repository.findOneAndUpdate(
-            { _id: repoId, "members.userId": memberIdToUpdate },
+            { _id: repoId, "members.userId": memberIdToUpdate }, // ✅ Both ObjectIds
             { $set: { "members.$.role": role } },
             { new: true }
         ).select("members workspaceName");
@@ -129,13 +148,20 @@ export const updateRole = async (req, res) => {
             userId: memberIdToUpdate,
             message: `Your role in ${workspace.workspaceName} was updated to ${role}`,
             type: "message",
-            repoId: repoId,
+            repoId: repoId.toString(), // ✅ Convert to string for notification
             targetType: "repository",
-            targetId: repoId
+            targetId: repoId.toString() // ✅ Convert to string for notification
         });
 
         res.status(StatusCodes.OK).json({ status: "success", data: workspace.members });
     } catch (error) {
+        // Handle validation errors
+        if (error.message.includes("Invalid") || error.message.includes("required")) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: "error",
+                message: error.message
+            });
+        }
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
 };
@@ -144,7 +170,9 @@ export const updateRole = async (req, res) => {
 // @route DELETE /api/repos/:repoId/members/:userId
 export const removeMember = async (req, res) => {
     try {
-        const { repoId, userId: memberIdToRemove } = req.params;
+        // ✅ Fix: Cast both to ObjectId
+        const repoId = toObjectId(req.params.repoId || req.params.id, "Repository ID");
+        const memberIdToRemove = toObjectId(req.params.userId, "User ID");
 
         // Security check: Find repo first to ensure we aren't removing the last owner
         const workspaceCheck = await Repository.findById(repoId);
@@ -159,8 +187,8 @@ export const removeMember = async (req, res) => {
         }
 
         const updatedWorkspace = await Repository.findByIdAndUpdate(
-            repoId,
-            { $pull: { members: { userId: memberIdToRemove } } },
+            repoId, // ✅ ObjectId
+            { $pull: { members: { userId: memberIdToRemove } } }, // ✅ ObjectId
             { new: true }
         );
 
@@ -175,6 +203,13 @@ export const removeMember = async (req, res) => {
 
         res.status(StatusCodes.OK).json({ status: "success", message: "Member removed" , data:updatedWorkspace.members});
     } catch (error) {
+        // Handle validation errors
+        if (error.message.includes("Invalid") || error.message.includes("required")) {
+            return res.status(StatusCodes.BAD_REQUEST).json({
+                status: "error",
+                message: error.message
+            });
+        }
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
 };

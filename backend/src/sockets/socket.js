@@ -32,7 +32,8 @@ export const initSocket = (server) => {
 
     // Handle connection
     io.on("connection", (socket) => {
-        const userId = socket.user.id;
+        // ✅ Fix: Use _id from decoded JWT payload (matches auth.controller.js JWT sign)
+        const userId = socket.user.id; // JWT payload uses 'id' field which is user._id
         console.log("User connected: ", `${socket.user.githubUsername} (${userId})`);
 
         // joining private user room - for any notifications

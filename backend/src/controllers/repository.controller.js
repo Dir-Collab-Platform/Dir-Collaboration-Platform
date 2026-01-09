@@ -4,18 +4,20 @@ import { StatusCodes } from "http-status-codes";
 import { createGitHubClient } from "../config/github.js";
 import mongoose from "mongoose";
 import { Repository } from "../models/repository.model.js";
-import { getOrSetCache } from "../utils/cache.util.js";
+import {
+  getOrSetCache,
+  invalidateRepoCache,
+  getDiscoveryKey,
+  getActiveListKey,
+  getRepoDetailKey,
+  getRepoContentKey
+} from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
 import { getLanguageColor } from "../utils/githubColors.js";
 import { Tag } from "../models/tag.model.js";
 import { createLog } from "../utils/activity.util.js";
 import { registerWebhook } from "../services/webhook.service.js";
-import { invalidateRepoCache } from "../utils/cache.util.js";
-// cache keys
-
-const getDiscoveryKey = (userId) => `repos:discovery:${userId}`;
-const getActiveListKey = (userId) => `repos:active:${userId}`;
-const getRepoDetailKey = (userId) => `repos:detail:${userId}`;
+import { isValidObjectId } from "../utils/objectId.util.js";
 //@desc 1. discovery: list remote github repositories
 //@route GET /api/repos/discovery
 export const getGithubRepos = async (req, res) => {
@@ -35,14 +37,18 @@ export const getGithubRepos = async (req, res) => {
 
         const importedRepos = await Repository.find({
           ownerId: req.user._id,
-        }).select("githubId -_id");
-        const importedIds = new Set(
+        }).select("githubId _id");
+
+        const importedMap = new Map(
           importedRepos
             .filter((repo) => repo.githubId)
-            .map((repo) => repo.githubId.toString())
+            .map((repo) => [repo.githubId.toString(), repo._id])
         );
+
         return githubRepos.map((repo) => ({
-          githubId: repo.id.toString(),
+          id: repo.id.toString(), // Frontend expects 'id' for key/navigation fallback
+          githubId: repo.id.toString(), // Explicit Github ID
+          _id: importedMap.get(repo.id.toString()) || null, // MongoDB ID if imported
           githubRepoName: repo.name,
           githubOwner: repo.owner.login,
           githubFullName: repo.full_name,
@@ -50,7 +56,13 @@ export const getGithubRepos = async (req, res) => {
           url: repo.html_url,
           language: repo.language,
           workspaceName: repo.name,
-          isImported: importedIds.has(repo.id.toString()),
+          isImported: importedMap.has(repo.id.toString()),
+          // Added fields for UI
+          stars: repo.stargazers_count,
+          updatedAt: repo.updated_at,
+          pushedAt: repo.pushed_at,
+          visibility: repo.visibility || (repo.private ? 'private' : 'public'),
+          default_branch: repo.default_branch
         }));
       },
       600
@@ -191,7 +203,10 @@ export const getActiveRepos = async (req, res) => {
       const activeRepos = await getOrSetCache(
         cacheKey,
         async () => {
-          return await Repository.find(query).select("-webhookEvents").lean();
+          return await Repository.find(query)
+            .select("-webhookEvents")
+            .populate("members.userId", "avatarUrl githubUsername")
+            .lean();
         },
         1800
       );
@@ -213,12 +228,16 @@ export const getActiveRepos = async (req, res) => {
       ];
     }
 
-    const repos = await Repository.find(query).select("-webhookEvents");
+    // ✅ Also use .lean() here for consistency
+    const repos = await Repository.find(query)
+      .select("-webhookEvents")
+      .populate("members.userId", "avatarUrl githubUsername")
+      .lean(); // ✅ Add .lean() for consistency with cached path
 
     res.status(StatusCodes.OK).json({
       status: "success",
       results: repos.length,
-      data: repos,
+      data: repos, // ✅ All IDs are strings (consistent)
     });
   } catch (error) {
     res
@@ -231,13 +250,21 @@ export const getActiveRepos = async (req, res) => {
 //@route GET /api/repos/:id
 export const getActiveRepo = async (req, res) => {
   try {
+    // ✅ Validate ObjectId format
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(StatusCodes.BAD_REQUEST).json({
+        status: "error",
+        message: "Invalid repository ID format"
+      });
+    }
+
     const cacheKey = getRepoDetailKey(req.params.id);
     const repo = await getOrSetCache(
       cacheKey,
       async () => {
         return await Repository.findById(req.params.id)
           .populate("members.userId", "githubUsername avatarUrl")
-          .lean(); // lean() - caching plain JSON
+          .lean(); // ✅ Consistent with getActiveRepos - returns plain objects with string IDs
       },
       3600
     );
@@ -245,7 +272,7 @@ export const getActiveRepo = async (req, res) => {
     if (!repo)
       return res.status(StatusCodes.NOT_FOUND).json({
         status: "error",
-        message: "Not found",
+        message: "Repository not found",
       });
 
     res.status(StatusCodes.OK).json({ status: "success", data: repo });
@@ -583,7 +610,7 @@ export const createWorkspace = async (req, res) => {
 
     await Promise.all([
       redisClient.del(getActiveListKey(req.user._id)),
-      redisClient.del(getRepoDetailKey(req.params._id)),
+      redisClient.del(getRepoDetailKey(newRepo[0]._id)), // ✅ Fix: Use newRepo[0]._id not req.params._id
       redisClient.del(getDiscoveryKey(req.user._id)),
       redisClient.del(`user:stats:${req.user._id}`),
     ]);
@@ -690,10 +717,15 @@ export const createRemoteRepo = async (req, res) => {
 
     //cache invalidation
     await redisClient.del(`user:stats:${req.user._id}`);
-    redisClient.del(getActiveListKey(req.user._id)),
+
+    // Invalidate other keys safely
+    await Promise.all([
+      redisClient.del(getActiveListKey(req.user._id)),
       redisClient.del(getRepoDetailKey(newRepo[0]._id)),
-      redisClient.del(getDiscoveryKey(req.user._id)),
-      await session.commitTransaction();
+      redisClient.del(getDiscoveryKey(req.user._id))
+    ]);
+
+    await session.commitTransaction();
 
     res.status(StatusCodes.CREATED).json({
       status: "success",
@@ -723,13 +755,15 @@ export const createRemoteRepo = async (req, res) => {
 export const getContents = async (req, res) => {
   try {
     const { workspaceId, owner, repo, path = "" } = req.query;
+    const { id: paramId } = req.params;
 
     let targetOwner = owner;
     let targetRepo = repo;
+    const lookupId = paramId || workspaceId;
 
     //if workspaceId is provided then fetch the repo details from database
-    if (workspaceId) {
-      const workspace = await Repository.findById(workspaceId);
+    if (lookupId) {
+      const workspace = await Repository.findById(lookupId);
       if (!workspace) {
         return res
           .status(StatusCodes.NOT_FOUND)
@@ -746,7 +780,7 @@ export const getContents = async (req, res) => {
         .json({ status: "error", message: "Owner and Repo name are required" });
     }
 
-    const cacheKey = `repo:content:${targetOwner.toLowerCase()}:${targetRepo.toLowerCase()}:${path}`;
+    const cacheKey = getRepoContentKey(targetOwner, targetRepo, path);
 
     // caching
     const results = await getOrSetCache(
@@ -923,9 +957,12 @@ export const updateFile = async (req, res) => {
     );
 
     // invalidating cache
-    await redisClient.del(
-      `repo:content:${repo.githubOwner.toLowerCase()}:${repo.githubRepoName.toLowerCase()}:${path}`
-    );
+    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    await Promise.all([
+      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)),
+      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath))
+    ]);
+
     await res.status(StatusCodes.OK).json({
       status: "success",
       message: "File successfully committed to Github",
@@ -978,6 +1015,13 @@ export const deleteFile = async (req, res) => {
       message: commitMessage || `Deleted ${path} via Dir`,
       sha: sha,
     });
+
+    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    // invalidate cache for the parent directory (listing) and the specific file (if any content cache exists)
+    await Promise.all([
+      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, path)),
+      redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath))
+    ]);
 
     //log activity
     await createLog(
@@ -1049,6 +1093,10 @@ export const createFile = async (req, res) => {
         message: commitMessage || `Created ${path} via Dir`,
         content: base64Content,
       });
+
+    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    // invalidate cache for the parent directory so the new file shows up in the list
+    await redisClient.del(getRepoContentKey(repo.githubOwner, repo.githubRepoName, parentPath));
 
     // Log the creation
     await createLog(

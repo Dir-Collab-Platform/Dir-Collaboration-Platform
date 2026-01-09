@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { ProfileContext } from './ProfileContext';
-import { mockUser } from '../../data/mockData';
+import { apiRequest } from '../../services/api/api';
 
 export default function ProfileProvider({ children }) {
   const [profile, setProfile] = useState(null);
@@ -12,13 +11,10 @@ export default function ProfileProvider({ children }) {
     const fetchProfile = async () => {
       setIsLoading(true);
       try {
-        // TODO: Replace with real API call when integrating backend
-        // const response = await axios.get('/api/me');
-        // setProfile(response.data.data);
-        
-        // Mock implementation
-        await new Promise(resolve => setTimeout(resolve, 300));
-        setProfile(mockUser);
+        const response = await apiRequest('/api/me');
+        if (response.status === 'success') {
+          setProfile(response.data);
+        }
       } catch (err) {
         setError(err.message);
         console.error('Failed to fetch profile:', err);
@@ -32,13 +28,16 @@ export default function ProfileProvider({ children }) {
 
   const updateProfile = async (profileData) => {
     try {
-      // TODO: Replace with real API call when integrating backend
-      // const response = await axios.patch('/api/profile', profileData);
-      // setProfile(response.data.data);
-      
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 400));
-      setProfile(prev => ({ ...prev, ...profileData }));
+      // Backend endpoint: PATCH /api/profile (per API_DOCUMENTATION.md)
+      const response = await apiRequest('/api/profile', {
+        method: 'PATCH',
+        body: profileData
+      });
+
+      if (response.status === 'success') {
+        setProfile(prev => ({ ...prev, ...profileData }));
+      }
+      return response.data;
     } catch (err) {
       setError(err.message);
       throw err;
@@ -46,18 +45,9 @@ export default function ProfileProvider({ children }) {
   };
 
   const updatePreferences = async (preferences) => {
-    try {
-      // TODO: Replace with real API call when integrating backend
-      // const response = await axios.put('/api/notifications/preferences', preferences);
-      // setProfile(prev => ({ ...prev, preferences: response.data.data }));
-      
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 300));
-      setProfile(prev => ({ ...prev, preferences: { ...prev.preferences, ...preferences } }));
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    }
+    // Implement if backend supports it, otherwise keep as placeholder or local state
+    console.warn("Preferences update not fully implemented in backend yet");
+    setProfile(prev => ({ ...prev, preferences: { ...prev.preferences, ...preferences } }));
   };
 
   const value = {

@@ -11,6 +11,76 @@ export default function NotificationProvider({ children }) {
     const { socket, isConnected } = useSocket();
     const { user } = useAuth();
 
+    // Helper to format time as "5m", "2h", "1d"
+    const formatTimeAgo = (dateString) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+
+        if (diffInSeconds < 60) return 'just now';
+        const diffInMinutes = Math.floor(diffInSeconds / 60);
+        if (diffInMinutes < 60) return `${diffInMinutes}m`;
+        const diffInHours = Math.floor(diffInMinutes / 60);
+        if (diffInHours < 24) return `${diffInHours}h`;
+        const diffInDays = Math.floor(diffInHours / 24);
+        return `${diffInDays}d`;
+    };
+
+    // Helper to transform backend notification to UI format
+    const transformNotification = (n) => {
+        let msgContent = n.message || "";
+
+        // Defensive: Check if message is JSON (user hint)
+        if (typeof msgContent === 'string' && (msgContent.startsWith('{') || msgContent.startsWith('['))) {
+            try {
+                const parsed = JSON.parse(msgContent);
+                // Assume parsed object might have 'content' or 'text' or be the message itself
+                if (typeof parsed === 'object') {
+                    msgContent = parsed.content || parsed.text || parsed.message || JSON.stringify(parsed);
+                } else {
+                    msgContent = String(parsed);
+                }
+            } catch (e) {
+                // Not JSON, keep as is
+            }
+        }
+
+        // Defensive: Check if repoId is populated
+        const workspaceName = (n.repoId && typeof n.repoId === 'object' && n.repoId.workspaceName)
+            ? n.repoId.workspaceName
+            : 'General';
+
+        return {
+            ...n,
+            id: n._id,
+            // Map backend types to UI types ('message', 'github', 'alert')
+            type: ['message', 'mention', 'comment'].includes(n.type) ? 'message' : 'alert',
+            label: n.type || 'Notification',
+            time: formatTimeAgo(n.createdAt),
+            channel: workspaceName,
+            userImg: "https://github.com/identicons/default.png", // specific sender not in model yet
+            userName: "User",
+            fullMessage: msgContent || "(No message content)",
+            shortMessage: (msgContent || "(No message content)").length > 50
+                ? (msgContent || "").substring(0, 50) + '...'
+                : (msgContent || "(No message content)"),
+            hasMore: (msgContent || "").length > 50,
+            read: n.isRead, // Ensure this property exists for UI
+
+            // For github/alert types
+            repo: workspaceName,
+            user: "User",
+            fullPR: msgContent || "(No content)",
+            shortPR: (msgContent || "").length > 50
+                ? (msgContent || "").substring(0, 50) + '...'
+                : (msgContent || "(No content)"),
+            fullAlert: msgContent || "(No alert content)",
+            shortAlert: (msgContent || "").length > 50
+                ? (msgContent || "").substring(0, 50) + '...'
+                : (msgContent || "(No alert content)"),
+        };
+    };
+
     // Fetch initial notifications
     useEffect(() => {
         const fetchNotifications = async () => {
@@ -22,8 +92,11 @@ export default function NotificationProvider({ children }) {
             try {
                 const response = await apiRequest('/api/notifications');
                 if (response.status === 'success') {
-                    setNotifications(response.data || []);
-                    const unread = (response.data || []).filter(n => !n.isRead).length;
+                    const rawData = response.data || [];
+                    const formattedData = rawData.map(transformNotification);
+                    setNotifications(formattedData);
+
+                    const unread = formattedData.filter(n => !n.read).length;
                     setUnreadCount(unread);
                 }
             } catch (error) {
@@ -40,16 +113,15 @@ export default function NotificationProvider({ children }) {
     useEffect(() => {
         if (!socket || !isConnected || !user?._id) return;
 
-        // Join user's private notification room
         const userId = user._id;
-        socket.emit('joinWorkspace', userId); // Backend joins user:${userId} on connect, but we can also join manually
+        socket.emit('joinWorkspace', userId);
 
-        // Listen for new notifications
         const handleNewNotification = (notification) => {
             console.log('Received new notification:', notification);
-            setNotifications(prev => [notification, ...prev]);
-            
-            // Only increment unread if notification is for current user
+            const formatted = transformNotification(notification);
+
+            setNotifications(prev => [formatted, ...prev]);
+
             if (notification.userId === userId || notification.userId === userId.toString()) {
                 setUnreadCount(prev => prev + 1);
             }
@@ -70,7 +142,7 @@ export default function NotificationProvider({ children }) {
 
             if (response.status === 'success') {
                 setNotifications(prev =>
-                    prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
+                    prev.map(n => n._id === notificationId ? { ...n, isRead: true, read: true } : n)
                 );
                 setUnreadCount(prev => Math.max(0, prev - 1));
             }
@@ -84,8 +156,8 @@ export default function NotificationProvider({ children }) {
         try {
             // Backend doesn't have a bulk mark-all endpoint yet, so we'll do it client-side
             // Or we can update each one individually
-            const unreadNotifications = notifications.filter(n => !n.isRead);
-            
+            const unreadNotifications = notifications.filter(n => !n.read);
+
             await Promise.all(
                 unreadNotifications.map(n => markAsRead(n._id))
             );
@@ -103,7 +175,7 @@ export default function NotificationProvider({ children }) {
             if (response.status === 'success') {
                 const deleted = notifications.find(n => n._id === notificationId);
                 setNotifications(prev => prev.filter(n => n._id !== notificationId));
-                if (deleted && !deleted.isRead) {
+                if (deleted && !deleted.read) {
                     setUnreadCount(prev => Math.max(0, prev - 1));
                 }
             }
@@ -127,8 +199,10 @@ export default function NotificationProvider({ children }) {
                 try {
                     const response = await apiRequest('/api/notifications');
                     if (response.status === 'success') {
-                        setNotifications(response.data || []);
-                        const unread = (response.data || []).filter(n => !n.isRead).length;
+                        const rawData = response.data || [];
+                        const formattedData = rawData.map(transformNotification);
+                        setNotifications(formattedData);
+                        const unread = formattedData.filter(n => !n.read).length;
                         setUnreadCount(unread);
                     }
                 } catch (error) {

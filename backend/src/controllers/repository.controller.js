@@ -788,40 +788,51 @@ export const getContents = async (req, res) => {
       async () => {
         const octokit = createGitHubClient(req.user.accessToken);
 
-        const { data } = await octokit.rest.repos.getContent({
-          owner: targetOwner,
-          repo: targetRepo,
-          path: path,
-        });
+        try {
+          const { data } = await octokit.rest.repos.getContent({
+            owner: targetOwner,
+            repo: targetRepo,
+            path: path,
+          });
 
-        if (Array.isArray(data)) {
-          // Return a clean object for "directory" type
-          return {
-            type: "dir",
-            files: data.map((item) => ({
-              name: item.name,
-              path: item.path,
-              type: item.type,
-              sha: item.sha,
-              url: item.html_url,
-            })),
-          };
-        } else {
-          // Return a clean object for "file" type
-          const decodedContent = Buffer.from(data.content, "base64").toString(
-            "utf-8"
-          );
-          return {
-            type: "file",
-            fileData: {
-              name: data.name,
-              path: data.path,
-              content: decodedContent,
-              size: data.size,
-              sha: data.sha,
-              downloadUrl: data.download_url,
-            },
-          };
+          if (Array.isArray(data)) {
+            // Return a clean object for "directory" type
+            return {
+              type: "dir",
+              files: data.map((item) => ({
+                name: item.name,
+                path: item.path,
+                type: item.type,
+                sha: item.sha,
+                url: item.html_url,
+              })),
+            };
+          } else {
+            // Return a clean object for "file" type
+            const decodedContent = Buffer.from(data.content, "base64").toString(
+              "utf-8"
+            );
+            return {
+              type: "file",
+              fileData: {
+                name: data.name,
+                path: data.path,
+                content: decodedContent,
+                size: data.size,
+                sha: data.sha,
+                downloadUrl: data.download_url,
+              },
+            };
+          }
+        } catch (err) {
+          // Handle empty repository specifically
+          if (err.status === 404 && err.message.includes('empty')) {
+            return {
+              type: "dir",
+              files: [], // Return empty list for empty repo
+            };
+          }
+          throw err; // Re-throw other errors
         }
       },
       120
@@ -877,18 +888,30 @@ export const getRepoLanguages = async (req, res) => {
       async () => {
         const octokit = createGitHubClient(req.user.accessToken);
 
-        //fetch languages from github
-        const { data: languages } = await octokit.rest.repos.listLanguages({
-          owner: targetOwner,
-          repo: targetRepo,
-        });
+        let languages = {};
+        try {
+          //fetch languages from github
+          const res = await octokit.rest.repos.listLanguages({
+            owner: targetOwner,
+            repo: targetRepo,
+          });
+          languages = res.data;
+        } catch (err) {
+          // If 404, assumes empty repo => no languages
+          if (err.status !== 404) throw err;
+          console.warn(`[DEBUG] Languages 404 for ${targetOwner}/${targetRepo} (likely empty repo)`);
+          languages = {};
+        }
+
+        console.log(`[DEBUG] GitHub Raw Languages Response:`, JSON.stringify(languages));
 
         //calculate the percentage from each language
         const totalBytes = Object.values(languages).reduce(
           (acc, curr) => acc + curr,
           0
         );
-        return Object.keys(languages).map((lang) => ({
+
+        const formatted = Object.keys(languages).map((lang) => ({
           label: lang,
           value:
             totalBytes > 0
@@ -896,6 +919,9 @@ export const getRepoLanguages = async (req, res) => {
               : 0,
           color: getLanguageColor(lang),
         }));
+
+        console.log(`[DEBUG] Formatted Stats:`, JSON.stringify(formatted));
+        return formatted;
       },
       3600
     );

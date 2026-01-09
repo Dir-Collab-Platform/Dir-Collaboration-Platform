@@ -84,10 +84,11 @@ export const getUserStats = async (req, res) => {
 //@route PUT /api/user/profile
 export const updatedProfile = async (req, res) => {
   try {
-    const { bio, theme, notificationsEnabled, emailNotifications } = req.body;
+    const { bio, theme, notificationsEnabled, emailNotifications, profileUrl } = req.body;
     const updatedData = {};
 
     if (bio !== undefined) updatedData.bio = bio;
+    if (profileUrl !== undefined) updatedData.profileUrl = profileUrl;
     if (theme !== undefined) updatedData["preferences.theme"] = theme;
     if (notificationsEnabled !== undefined)
       updatedData["preferences.notificationsEnabled"] = notificationsEnabled;

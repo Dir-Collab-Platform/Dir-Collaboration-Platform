@@ -20,8 +20,8 @@ export default function ChatProvider({ children }) {
     useEffect(() => {
         if (!socket || !isConnected || !workspaceId) return;
 
-        // Join workspace room
-        socket.emit('joinWorkspace', { workspaceId });
+        // Join workspace room - backend accepts both object and string
+        socket.emit('joinWorkspace', workspaceId);
 
         return () => {
             // Leave workspace room on unmount

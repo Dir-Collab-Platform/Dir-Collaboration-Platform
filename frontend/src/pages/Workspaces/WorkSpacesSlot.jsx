@@ -10,6 +10,9 @@ export default function WorkSpacesSlot({
   contributors,
   languages,
 }) {
+  // Debug log to see what data is being received
+  console.log("Languages data:", languages);
+
   return (
     <div className="w-full px-6 py-5">
       <div className="flex items-start justify-between gap-8 border-b border-(--main-border-color) p-4">
@@ -29,21 +32,35 @@ export default function WorkSpacesSlot({
 
           {/* Language Stats Bar - will be populated from languages prop */}
           {languages && languages.length > 0 ? (
-            <div className="flex h-2 w-56 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--main-border-color)' }}>
-              {languages.map((lang) => (
-                <div
-                  key={lang.label}
-                  className="h-full transition-all hover:opacity-80"
-                  style={{
-                    width: `${lang.value}%`,
-                    backgroundColor: lang.color || '#6b7280',
-                  }}
-                  title={`${lang.label}: ${lang.value.toFixed(1)}%`}
-                />
-              ))}
+            <div
+              className="flex h-2 w-56 overflow-hidden rounded-full"
+              style={{ backgroundColor: "var(--main-border-color)" }}
+            >
+              {languages.map((lang) => {
+                // Safely convert lang.value to number if it's a string
+                const numericValue =
+                  typeof lang.value === "number"
+                    ? lang.value
+                    : parseFloat(lang.value) || 0;
+
+                return (
+                  <div
+                    key={lang.label}
+                    className="h-full transition-all hover:opacity-80"
+                    style={{
+                      width: `${numericValue}%`,
+                      backgroundColor: lang.color || "#6b7280",
+                    }}
+                    title={`${lang.label}: ${numericValue.toFixed(1)}%`}
+                  />
+                );
+              })}
             </div>
           ) : (
-            <div className="flex h-2 w-56 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--main-border-color)' }}>
+            <div
+              className="flex h-2 w-56 overflow-hidden rounded-full"
+              style={{ backgroundColor: "var(--main-border-color)" }}
+            >
               <span className="w-2/3 bg-green-500" />
               <span className="w-1/4 bg-purple-600" />
             </div>

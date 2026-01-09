@@ -42,7 +42,11 @@ export default function WorkspaceProvider({ children }) {
                         apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
                         apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
                     ]);
-                    if (repoRes.status !== 'success') throw new Error(repoRes.message);
+                    
+                    if (repoRes.status !== 'success') {
+                        throw new Error(repoRes.message || 'Failed to fetch workspace data');
+                    }
+                    
                     repoData = repoRes.data;
                     contentsRes = cRes;
                     langRes = lRes;
@@ -122,8 +126,11 @@ export default function WorkspaceProvider({ children }) {
                     setActiveFile(readme || files[0]);
                 }
             } catch (err) {
-                if (isMounted) setError(err.message);
-                console.error('Failed to fetch workspace data:', err);
+                if (isMounted) {
+                    const errorMessage = err.message || 'Failed to load workspace. Please check your connection and try again.';
+                    setError(errorMessage);
+                    console.error('Failed to fetch workspace data:', err);
+                }
             } finally {
                 if (isMounted) setIsLoading(false);
             }

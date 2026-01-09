@@ -95,13 +95,18 @@ Fetching a file tree for a repo like `facebook/react` can overwhelm the browser 
 ```bash
 cd backend
 # Create .env file
-echo "PORT=5000
+echo "NODE_ENV=development
+PORT=5000
 MONGO_URI=mongodb://localhost:27017/dir_collab
-REDIS_HOST=localhost
-REDIS_PORT=6379
+SESSION_SECRET=your_session_secret
+MAIN_URL=http://localhost:5173
 GITHUB_CLIENT_ID=your_id
 GITHUB_CLIENT_SECRET=your_secret
+REDIS_URL=redis://localhost:6379
+REDIS_DB=0
+BASE_URL=http://localhost:5000
 JWT_SECRET=supersecret
+GITHUB_CALLBACK_URL=http://localhost:5000/api/auth/github/callback
 CLIENT_URL=http://localhost:5173" > .env
 
 npm install

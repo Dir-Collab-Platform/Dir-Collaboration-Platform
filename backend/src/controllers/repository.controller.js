@@ -50,6 +50,7 @@ export const getGithubRepos = async (req, res) => {
           url: repo.html_url,
           language: repo.language,
           workspaceName: repo.name,
+          stars: repo.stargazers_count, 
           isImported: importedIds.has(repo.id.toString()),
         }));
       },
@@ -195,7 +196,6 @@ export const getActiveRepos = async (req, res) => {
         },
         1800
       );
-
       return res.status(StatusCodes.OK).json({
         status: "success",
         results: activeRepos.length,
@@ -247,8 +247,14 @@ export const getActiveRepo = async (req, res) => {
         status: "error",
         message: "Not found",
       });
+    // const octokit = createGitHubClient(req.user.accessToken);
 
-    res.status(StatusCodes.OK).json({ status: "success", data: repo });
+    // const ghRepo = octokit.rest.repos.get({
+    //   ownerId: repo.githubOwner,
+    //   repoId: repo.repoId,
+    // });
+
+    // res.status(StatusCodes.OK).json({ status: "success", data: repo, ssh_url: ghRepo.ssh_url, clone_url: ghRepo.clone_url });
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

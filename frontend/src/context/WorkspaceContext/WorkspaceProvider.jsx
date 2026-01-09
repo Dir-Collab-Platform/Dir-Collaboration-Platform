@@ -40,7 +40,7 @@ export default function WorkspaceProvider({ children }) {
                     const [repoRes, cRes, lRes] = await Promise.all([
                         apiRequest(`/api/repos/${workspaceId}`),
                         apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
-                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
+                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`).catch(() => ({ status: 'success', data: [] }))
                     ]);
                     
                     if (repoRes.status !== 'success') {
@@ -75,7 +75,7 @@ export default function WorkspaceProvider({ children }) {
                     // Fetch contents using Owner/Repo
                     const [cRes, lRes] = await Promise.all([
                         apiRequest(`/api/repos/contents?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`),
-                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
+                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`).catch(() => ({ status: 'success', data: [] }))
                     ]);
                     contentsRes = cRes;
                     langRes = lRes;
@@ -364,23 +364,33 @@ export default function WorkspaceProvider({ children }) {
     /**
      * Import a repository (create workspace from existing GitHub repo)
      */
+    /**
+     * Import a repository (create workspace from existing GitHub repo)
+     */
     const importRepo = async (workspaceName, description) => {
         if (!data?.repository) return;
 
         try {
             setIsLoading(true);
-            const res = await apiRequest('/api/repos/create-workspace', {
+            
+            const payload = {
+                githubId: data.repository.id.toString(),
+                githubRepoName: data.repository.name,
+                githubOwner: data.repository.owner?.login,
+                githubFullName: data.repository.full_name,
+                workspaceName: workspaceName,
+                description: description || data.repository.description,
+                url: data.repository.html_url,
+                language: data.repository.language
+            };
+
+            const res = await apiRequest('/api/repos/import', {
                 method: 'POST',
-                body: {
-                    githubRepoName: data.repository.name,
-                    workspaceName: workspaceName,
-                    description: description || data.repository.description
-                }
+                body: payload
             });
 
-            if (res.status === 'success') {
+            if (res.status === 'success' || res.status === 'created') {
                 // Successfully imported/created workspace
-                // Refresh or redirect
                 return res.data;
             }
             throw new Error(res.message || 'Failed to import repository');

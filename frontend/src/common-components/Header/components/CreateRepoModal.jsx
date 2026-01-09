@@ -1,32 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { RepositoriesContext } from '../../../context/RepositoriesContext/RepositoriesContext';
 import { X } from 'lucide-react';
 
 function CreateRepoModal({ onClose }) {
+  const { createRepository } = useContext(RepositoriesContext);
+  const navigate = useNavigate();
+
   const [repoName, setRepoName] = useState('');
   const [description, setDescription] = useState('');
   const [visibility, setVisibility] = useState('private');
   const [readme, setReadme] = useState('no');
   const [gitignore, setGitignore] = useState('no');
 
-  const handleCreateRepository = (e) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleCreateRepository = async (e) => {
     if (e) e.preventDefault();
     
     if (!repoName.trim()) {
-      alert("Please enter a repository name");
+      setError("Please enter a repository name");
       return;
     }
     
-    console.log('Creating repository:', {
-      name: repoName,
-      description,
-      visibility,
-      readme,
-      gitignore
-    });
-    
-    alert(`Repository "${repoName}" created successfully!`);
-    
-    handleClose();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const newRepo = await createRepository({
+        name: repoName,
+        description,
+        isPrivate: visibility, // Backend expects "private" string
+        auto_init: readme === 'yes' ? 'Yes' : 'No',
+        gitignore_template: gitignore === 'yes' ? 'Yes' : 'No',
+        isImport: false
+      });
+
+      // alert(`Repository "${newRepo.workspaceName}" created successfully!`); // Optional success message
+      handleClose();
+      // Redirect to the new workspace
+      navigate(`/workspace/${newRepo._id}`);
+      
+    } catch (err) {
+      console.error("Creation failed:", err);
+      // Display specific backend error message
+      setError(err.message || "Failed to create repository");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -87,6 +109,12 @@ function CreateRepoModal({ onClose }) {
         </div>
 
         <div className="p-6">
+          {error && (
+            <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/50 text-red-500 text-sm">
+              {error}
+            </div>
+          )}
+          
           <form onSubmit={handleCreateRepository}>
             <div className="mb-6">
               <label className="block text-sm font-medium mb-2" style={{ color: 'var(--primary-text-color)' }}>
@@ -98,6 +126,7 @@ function CreateRepoModal({ onClose }) {
                 value={repoName}
                 onChange={(e) => setRepoName(e.target.value)}
                 required
+                disabled={isSubmitting}
                 className="w-full px-3 py-2 rounded-md text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[var(--active-text-color)] focus:border-transparent"
                 style={{
                   backgroundColor: '#303036',
@@ -212,15 +241,18 @@ function CreateRepoModal({ onClose }) {
             <div>
               <button 
                 type="submit" 
+                disabled={isSubmitting}
                 className="w-full py-3 rounded-lg font-semibold transition-colors hover:-translate-y-0.5"
                 style={{
                   backgroundColor: 'var(--primary-button)',
-                  color: 'var(--primary-text-color)'
+                  color: 'var(--primary-text-color)',
+                  opacity: isSubmitting ? 0.7 : 1,
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer'
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
+                onMouseEnter={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)')}
+                onMouseLeave={(e) => !isSubmitting && (e.currentTarget.style.backgroundColor = 'var(--primary-button)')}
               >
-                Create Repository
+                {isSubmitting ? 'Creating...' : 'Create Repository'}
               </button>
             </div>
           </form>

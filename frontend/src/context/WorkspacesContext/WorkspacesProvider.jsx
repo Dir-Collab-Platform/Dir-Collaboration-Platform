@@ -1,14 +1,21 @@
-import { useState, useEffect } from "react";
-import { apiRequest } from "../../services/api/api";
-import { WorkspacesContext } from "./WorkspacesContext";
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom'; // Required for ID and Preview
+import { apiRequest } from '../../services/api/api';
+import { WorkspacesContext } from './WorkspacesContext';
 
 export default function WorkspacesProvider({ children }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchWorkspaces = async () => {
+  // Get current context from URL if applicable
+  const { id: workspaceId } = useParams(); 
+  const location = useLocation();
+  const repoPreview = location.state?.repoData;
+
+  // Function to fetch the list of all joined/owned workspaces
+  const fetchWorkspaces = async () => {
+    try {
       setIsLoading(true);
       try {
         const response = await apiRequest("/api/repos");
@@ -67,11 +74,14 @@ export default function WorkspacesProvider({ children }) {
       }
     };
 
+  useEffect(() => {
     fetchWorkspaces();
   }, []);
 
   const getWorkspace = (workspaceId) => {
     return workspaces.find((ws) => ws._id === workspaceId);
+  const getWorkspace = (id) => {
+    return workspaces.find(ws => ws._id === id);
   };
 
   const createWorkspace = async (workspaceData) => {
@@ -99,6 +109,7 @@ export default function WorkspacesProvider({ children }) {
     createWorkspace,
     isLoading,
     error,
+    refreshWorkspaces: fetchWorkspaces
   };
 
   return (

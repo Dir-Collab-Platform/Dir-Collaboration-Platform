@@ -99,7 +99,7 @@ export default function CreateRepoForm() {
             activeState={readMe}
           />
           <RepoOptions
-            label={"ss .gitignore"}
+            label={"Add .gitignore"}
             option1={"Yes"}
             option2={"No"}
             onStateChange={handleGitIgnore}

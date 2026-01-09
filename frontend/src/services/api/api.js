@@ -1,19 +1,29 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
-/**
- * Base fetch wrapper with error handling
- */
 const apiRequest = async (endpoint, options = {}) => {
   if (USE_MOCK) {
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
     throw new Error('Mock mode: Use mock service functions instead');
   }
 
-  const url = `${BASE_URL}${endpoint}`;
+  // REFACTORED: Construct URL with query parameters
+  let url = `${BASE_URL}${endpoint}`;
+  
+  if (options.params) {
+    const queryParams = new URLSearchParams();
+    Object.entries(options.params).forEach(([key, value]) => {
+      // Only append if value is not null, undefined, or empty
+      if (value !== undefined && value !== null && value !== '') {
+        queryParams.append(key, value);
+      }
+    });
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+  }
 
-  // Get token from storage
   const token = localStorage.getItem('token');
 
   const config = {
@@ -28,11 +38,8 @@ const apiRequest = async (endpoint, options = {}) => {
   try {
     const response = await fetch(url, config);
 
-    // Handle 401 Unauthorized globally (optional but recommended)
     if (response.status === 401) {
-      // dispatch event or clear storage if needed, but for now just throw
       localStorage.removeItem('token');
-      // Optional: window.location.href = '/login'; 
     }
 
     if (!response.ok) {

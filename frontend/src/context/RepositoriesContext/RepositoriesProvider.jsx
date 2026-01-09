@@ -60,7 +60,7 @@ export default function RepositoriesProvider({ children }) {
       const endpoint = repoData.isImport ? '/api/repos/import' : '/api/repos/create-remote';
       const response = await apiRequest(endpoint, {
         method: 'POST',
-        body: repoData
+        body: JSON.stringify(repoData)
       });
 
       if (response.status === 'success' || response.status === 'created') {

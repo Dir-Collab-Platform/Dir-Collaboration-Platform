@@ -361,6 +361,37 @@ export default function WorkspaceProvider({ children }) {
         }
     };
 
+    /**
+     * Import a repository (create workspace from existing GitHub repo)
+     */
+    const importRepo = async (workspaceName, description) => {
+        if (!data?.repository) return;
+
+        try {
+            setIsLoading(true);
+            const res = await apiRequest('/api/repos/create-workspace', {
+                method: 'POST',
+                body: {
+                    githubRepoName: data.repository.name,
+                    workspaceName: workspaceName,
+                    description: description || data.repository.description
+                }
+            });
+
+            if (res.status === 'success') {
+                // Successfully imported/created workspace
+                // Refresh or redirect
+                return res.data;
+            }
+            throw new Error(res.message || 'Failed to import repository');
+        } catch (err) {
+            console.error('Import Repo Error:', err);
+            throw err;
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const value = {
         repository: data?.repository,
         contents: data?.contents,
@@ -380,7 +411,8 @@ export default function WorkspaceProvider({ children }) {
         setFolderChildren,
         deleteFile,
         inviteMember,
-        removeMember
+        removeMember,
+        importRepo
     };
 
     return (

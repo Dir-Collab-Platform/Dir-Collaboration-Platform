@@ -4,6 +4,7 @@ import { AuthProvider } from "./context/AuthContext/AuthContext";
 import { SocketProvider } from "./context/SocketContext/SocketContext";
 import DashboardProvider from "./context/DashboardContext/DashboardProvider";
 import NotificationProvider from "./context/NotificationContext/NotificationProvider";
+import RepositoriesProvider from "./context/RepositoriesContext/RepositoriesProvider";
 
 function App() {
   return (
@@ -11,7 +12,9 @@ function App() {
       <SocketProvider>
         <NotificationProvider>
           <DashboardProvider>
-            <RouterProvider router={router} />
+            <RepositoriesProvider>
+              <RouterProvider router={router} />
+            </RepositoriesProvider>
           </DashboardProvider>
         </NotificationProvider>
       </SocketProvider>

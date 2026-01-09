@@ -12,7 +12,8 @@ import ChatProvider from '../../context/WorkspaceContext/ChatProvider';
 
 
 function WorkspaceContent({ isRepositoryView }) {
-    const { isLoading, error, repository } = useContext(WorkspaceContext);
+    const { isLoading, error, repository, importRepo } = useContext(WorkspaceContext);
+    const navigate = useNavigate();
 
     // State for chat panel toggle on mobile/small screens
     const [showChat, setShowChat] = useState(false);
@@ -20,8 +21,9 @@ function WorkspaceContent({ isRepositoryView }) {
     // State for create workspace modal
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
+    const [isImporting, setIsImporting] = useState(false);
 
-    if (isLoading) return <PageLoader msg="Syncing repository" />;
+    if (isLoading && !isImporting) return <PageLoader msg="Syncing repository" />;
 
     if (error) return (
         <div className="h-full flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: 'var(--dark-bg)' }}>
@@ -42,14 +44,24 @@ function WorkspaceContent({ isRepositoryView }) {
     const showRepoView = isRepositoryView || (repository && !repository.isImported);
 
     const handleCreateWorkspaceClick = () => {
+        setNewWorkspaceName(repository?.name || '');
         setIsCreateModalOpen(true);
     };
 
-    const submitCreateWorkspace = () => {
-        // Logic to create workspace would go here
-        alert(`Creating workspace: ${newWorkspaceName}`);
-        setIsCreateModalOpen(false);
-        setNewWorkspaceName('');
+    const submitCreateWorkspace = async () => {
+        if (!newWorkspaceName.trim()) return;
+
+        setIsImporting(true);
+        try {
+            const newWs = await importRepo(newWorkspaceName);
+            setIsCreateModalOpen(false);
+            // Navigate to the newly created workspace using its MongoDB ID
+            navigate(`/workspace/${newWs._id}`);
+        } catch (err) {
+            alert(`Failed to create workspace: ${err.message}`);
+        } finally {
+            setIsImporting(false);
+        }
     };
 
     return (

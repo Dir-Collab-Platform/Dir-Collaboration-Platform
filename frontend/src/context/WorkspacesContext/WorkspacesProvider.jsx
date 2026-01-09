@@ -1,54 +1,39 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, useLocation } from 'react-router-dom'; // Required for ID and Preview
 import { apiRequest } from '../../services/api/api';
 import { WorkspacesContext } from './WorkspacesContext';
-
 
 export default function WorkspacesProvider({ children }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchWorkspaces = async () => {
+  // Get current context from URL if applicable
+  const { id: workspaceId } = useParams(); 
+  const location = useLocation();
+  const repoPreview = location.state?.repoData;
+
+  // Function to fetch the list of all joined/owned workspaces
+  const fetchWorkspaces = async () => {
+    try {
       setIsLoading(true);
-      try {
-        const response = await apiRequest('/api/repos');
-        if (response.status === 'success') {
-          const initialWorkspaces = response.data;
-          setWorkspaces(initialWorkspaces);
-
-          // Fetch detailed languages for each workspace in parallel
-          const workspacesWithLanguages = await Promise.all(
-            initialWorkspaces.map(async (ws) => {
-              if (!ws._id) return ws;
-              try {
-                const langRes = await apiRequest(`/api/repos/languages?workspaceId=${ws._id}`);
-                return {
-                  ...ws,
-                  languages: langRes.status === 'success' ? langRes.data : []
-                };
-              } catch (e) {
-                console.warn(`Failed to fetch languages for ${ws.workspaceName}`, e);
-                return ws;
-              }
-            })
-          );
-
-          setWorkspaces(workspacesWithLanguages);
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error('Failed to fetch workspaces:', err);
-      } finally {
-        setIsLoading(false);
+      const res = await apiRequest('/api/repos'); // Assuming this endpoint lists user repos
+      if (res.status === 'success') {
+        setWorkspaces(res.data);
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchWorkspaces();
   }, []);
 
-  const getWorkspace = (workspaceId) => {
-    return workspaces.find(ws => ws._id === workspaceId);
+  const getWorkspace = (id) => {
+    return workspaces.find(ws => ws._id === id);
   };
 
   const createWorkspace = async (workspaceData) => {
@@ -75,7 +60,8 @@ export default function WorkspacesProvider({ children }) {
     getWorkspace,
     createWorkspace,
     isLoading,
-    error
+    error,
+    refreshWorkspaces: fetchWorkspaces
   };
 
   return (

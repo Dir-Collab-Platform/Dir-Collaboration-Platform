@@ -1,15 +1,27 @@
+import { useState } from 'react';
 import { Star, Workflow } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, onTagClick }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (project.isImported) {
+    if (project.isImported && project._id) {
       navigate(`/workspace/${project._id}`);
     } else {
-      navigate(`/repository/${project._id}`);
+      navigate(`/repository/${project.githubId}`, {
+        state: {
+          repoData: {
+            ...project,
+            // Ensure keys match what WorkspaceProvider expects
+            githubRepoName: project.name,
+            githubOwner: project.owner,
+            githubFullName: `${project.owner}/${project.name}`,
+            repoId: project.githubId
+          }
+        }
+      });
     }
   };
 
@@ -32,7 +44,7 @@ const ProjectCard = ({ project }) => {
         <div className='flex gap-2 justify-center items-center'>
           <h3 className="flex items-center gap-2 font-bold text-[22px]" style={{ color: 'var(--primary-text-color)' }}>
             {project.isImported && <Workflow size={20} className="text-(--primary-text-color)" />}
-            {project.workspaceName || project.githubRepoName}
+            {project.workspaceName || project.githubRepoName || project.name}
           </h3>
           <span
             className='px-2 py-0.5 rounded-[34px] text-[12px]'
@@ -53,7 +65,7 @@ const ProjectCard = ({ project }) => {
 
       <div className='flex items-center gap-3 mb-2'>
         <h4 className='font-semibold text-[20px]' style={{ color: 'var(--mid-dim-font-color)' }}>
-          {project.githubOwner}
+          {project.githubOwner || project.owner}
         </h4>
         <button
           className='px-2 py-0.5 rounded-[34px] text-[12px]'
@@ -99,6 +111,26 @@ const ProjectCard = ({ project }) => {
           </div>
         </div>
       )}
+
+      {/* Tags Section - Simplified */}
+      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Tags</h3>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {project.tags && project.tags.map((tag, idx) => (
+          <button
+            key={idx}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (onTagClick) onTagClick(tag);
+            }}
+            className="px-2 py-0.5 rounded-[34px] text-[10px] bg-(--meta-tag-color) text-(--secondary-text-color) hover:opacity-80 cursor-pointer"
+          >
+            {tag}
+          </button>
+        ))}
+        {(!project.tags || project.tags.length === 0) && (
+          <span className="text-[10px] text-gray-500 italic">No tags</span>
+        )}
+      </div>
 
       <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Collaborators</h3>
       <div className="flex -space-x-2">

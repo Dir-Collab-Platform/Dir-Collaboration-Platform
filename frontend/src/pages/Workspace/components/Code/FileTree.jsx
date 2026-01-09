@@ -110,8 +110,8 @@ export default function FileTree() {
     const [searchTerm, setSearchTerm] = useState("")
     const context = useContext(WorkspaceContext)
 
-    if (!context || !context.contents) return null
-    const { contents } = context
+    if (!context) return null
+    const { contents, isLoadingFiles } = context
 
     return (
         <div className="file-tree flex flex-col h-full select-none">
@@ -145,7 +145,14 @@ export default function FileTree() {
             </div>
 
             <div className="overflow-y-auto flex-1 custom-scrollbar">
-                {contents.length > 0 ? (
+                {isLoadingFiles ? (
+                    <div className="px-3 py-4 text-center flex flex-col items-center gap-3">
+                        <div className="w-5 h-5 border-2 border-(--primary-button) border-t-transparent rounded-full animate-spin"></div>
+                        <span className="paragraph2 text-(--secondary-text-color) opacity-70">
+                            Loading files...
+                        </span>
+                    </div>
+                ) : contents && contents.length > 0 ? (
                     contents.map((item, index) => (
                         <FileItem key={index} item={item} searchTerm={searchTerm} />
                     ))

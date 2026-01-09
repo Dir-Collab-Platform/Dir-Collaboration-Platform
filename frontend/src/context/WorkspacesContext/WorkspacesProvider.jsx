@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Required for ID and Preview
 import { apiRequest } from '../../services/api/api';
 import { WorkspacesContext } from './WorkspacesContext';
 
@@ -8,87 +7,71 @@ export default function WorkspacesProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Get current context from URL if applicable
-  const { id: workspaceId } = useParams(); 
-  const location = useLocation();
-  const repoPreview = location.state?.repoData;
-
   // Function to fetch the list of all joined/owned workspaces
   const fetchWorkspaces = async () => {
     try {
       setIsLoading(true);
-      try {
-        const response = await apiRequest("/api/repos");
-        if (response.status === "success") {
-          // Backend now returns: { status: "success", totalStars: X, results: N, data: workspaces }
-          // The workspaces array is in response.data, and each workspace now includes stars
-          const initialWorkspaces = response.data || [];
+      const response = await apiRequest("/api/repos");
+      
+      if (response.status === "success") {
+        const rawWorkspaces = response.data || [];
 
-          // Log totalStars if available for debugging
-          if (response.totalStars !== undefined) {
-            console.log(
-              `Total stars across all workspaces: ${response.totalStars}`
-            );
-          }
+        // --- STEP 1: RENDER IMMEDIATELY ---
+        // Prepare the basic data and show it NOW
+        const initialWorkspaces = rawWorkspaces.map(ws => ({
+          ...ws,
+          stars: typeof ws.stars === "number" ? ws.stars : parseInt(ws.stars) || 0,
+          languages: {} // Placeholder to prevent UI crashes
+        }));
 
-          // Fetch detailed languages for each workspace in parallel
-          const workspacesWithLanguages = await Promise.all(
-            initialWorkspaces.map(async (ws) => {
-              if (!ws._id) return ws;
-              try {
-                const langRes = await apiRequest(
-                  `/api/repos/languages?workspaceId=${ws._id}`
-                );
-                return {
-                  ...ws,
-                  languages: langRes.status === "success" ? langRes.data : [],
-                  // Stars are already included from backend, but ensure it's a number
-                  stars:
-                    typeof ws.stars === "number"
-                      ? ws.stars
-                      : parseInt(ws.stars) || 0,
-                };
-              } catch (e) {
-                console.warn(
-                  `Failed to fetch languages for ${ws.workspaceName}`,
-                  e
-                );
-                return {
-                  ...ws,
-                  stars:
-                    typeof ws.stars === "number"
-                      ? ws.stars
-                      : parseInt(ws.stars) || 0,
-                };
-              }
-            })
-          );
+        setWorkspaces(initialWorkspaces); 
+        setIsLoading(false); // <--- STOP LOADING SPINNER HERE
 
-          setWorkspaces(workspacesWithLanguages);
-        }
-      } catch (err) {
-        setError(err.message);
-        console.error("Failed to fetch workspaces:", err);
-      } finally {
-        setIsLoading(false);
+        // --- STEP 2: FETCH DETAILS IN BACKGROUND ---
+        // Now fetch languages silently while the user looks at the list
+        const workspacesWithLanguages = await Promise.all(
+          initialWorkspaces.map(async (ws) => {
+            if (!ws._id) return ws;
+            try {
+              const langRes = await apiRequest(
+                `/api/repos/languages?workspaceId=${ws._id}`
+              );
+              return {
+                ...ws,
+                languages: langRes.status === "success" ? langRes.data : {},
+              };
+            } catch (e) {
+              console.warn(`Background fetch failed for ${ws.workspaceName}`, e);
+              return ws;
+            }
+          })
+        );
+
+        // --- STEP 3: UPDATE AGAIN ---
+        // Update the list with the colorful language bars
+        setWorkspaces(workspacesWithLanguages);
       }
-    };
+    } catch (err) {
+      setError(err.message);
+      console.error("Failed to fetch workspaces:", err);
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchWorkspaces();
   }, []);
 
-  const getWorkspace = (workspaceId) => {
-    return workspaces.find((ws) => ws._id === workspaceId);
   const getWorkspace = (id) => {
-    return workspaces.find(ws => ws._id === id);
+    return workspaces.find((ws) => ws._id === id);
   };
 
   const createWorkspace = async (workspaceData) => {
     try {
+      // FIX: Ensure body is stringified for fetch
       const response = await apiRequest("/api/repos/create-workspace", {
         method: "POST",
-        body: workspaceData,
+        body: JSON.stringify(workspaceData), // <--- Added JSON.stringify
       });
 
       if (response.status === "success" || response.status === "created") {
@@ -105,11 +88,11 @@ export default function WorkspacesProvider({ children }) {
   const value = {
     workspaces,
     setWorkspaces,
-    getWorkspace,
-    createWorkspace,
     isLoading,
     error,
-    refreshWorkspaces: fetchWorkspaces
+    getWorkspace,
+    createWorkspace,
+    fetchWorkspaces
   };
 
   return (

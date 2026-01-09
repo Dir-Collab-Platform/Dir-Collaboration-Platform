@@ -8,6 +8,7 @@ export default function WorkspaceProvider({ children }) {
     const [data, setData] = useState(null);
     const [activeFile, setActiveFile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [isLoadingFiles, setIsLoadingFiles] = useState(false);
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isEditingFile, setIsEditingFile] = useState(false);
@@ -33,25 +34,22 @@ export default function WorkspaceProvider({ children }) {
                 // Check if it's a valid Mongo ObjectId (24 hex chars)
                 const isMongoId = /^[0-9a-fA-F]{24}$/.test(workspaceId);
 
-                let repoData, contentsRes, langRes;
+                let repoData;
 
+                // ============================================================
+                // PHASE 1: Fetch Repository Metadata ONLY (Immediate UI Unblock)
+                // ============================================================
                 if (isMongoId) {
-                    // 1. Valid DB Workspace: Fetch from API
-                    const [repoRes, cRes, lRes] = await Promise.all([
-                        apiRequest(`/api/repos/${workspaceId}`),
-                        apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
-                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
-                    ]);
-                    
+                    // 1. Valid DB Workspace: Fetch metadata from API
+                    const repoRes = await apiRequest(`/api/repos/${workspaceId}`);
+
                     if (repoRes.status !== 'success') {
                         throw new Error(repoRes.message || 'Failed to fetch workspace data');
                     }
-                    
+
                     repoData = repoRes.data;
-                    contentsRes = cRes;
-                    langRes = lRes;
                 } else if (repoPreview) {
-                    // 2. GitHub Preview (Not imported): Use passed state + GitHub API proxy
+                    // 2. GitHub Preview (Not imported): Use passed state
                     repoData = {
                         // Map GitHub preview data to expected Workspace format
                         id: repoPreview.githubId,
@@ -71,24 +69,13 @@ export default function WorkspaceProvider({ children }) {
                         topics: [],
                         members: [] // No members for preview
                     };
-
-                    // Fetch contents using Owner/Repo
-                    const [cRes, lRes] = await Promise.all([
-                        apiRequest(`/api/repos/contents?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`),
-                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
-                    ]);
-                    contentsRes = cRes;
-                    langRes = lRes;
                 } else {
                     throw new Error("Repository not found (and no preview data provided)");
                 }
 
                 if (!isMounted) return;
 
-                // Common Processing
-                const files = contentsRes.status === 'success' && contentsRes.type === 'dir' ? contentsRes.files : [];
-                const languagesData = langRes.status === 'success' ? langRes.data : [];
-
+                // Immediately populate basic repository info with empty files/languages
                 setData({
                     repository: {
                         id: repoData.githubId || repoData.id,
@@ -114,25 +101,65 @@ export default function WorkspaceProvider({ children }) {
                             role: mem.role
                         }))
                     },
-                    files: files,
-                    contents: files,
-                    languages: languagesData,
-                    last_commit: null, // No commit data for now
+                    files: [], // Empty initially
+                    contents: [], // Empty initially
+                    languages: [], // Empty initially
+                    last_commit: null,
                     stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
-                if (files.length > 0) {
+                // CRUCIAL: Unblock the UI immediately after metadata is loaded
+                if (isMounted) setIsLoading(false);
+
+                // ============================================================
+                // PHASE 2: Background Fetch (Contents & Languages)
+                // ============================================================
+                if (isMounted) setIsLoadingFiles(true);
+                let contentsRes, langRes;
+
+                if (isMongoId) {
+                    // Fetch contents and languages for DB workspace
+                    [contentsRes, langRes] = await Promise.all([
+                        apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
+                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
+                    ]);
+                } else if (repoPreview) {
+                    // Fetch contents using Owner/Repo for preview
+                    [contentsRes, langRes] = await Promise.all([
+                        apiRequest(`/api/repos/contents?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`),
+                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
+                    ]);
+                }
+
+                if (!isMounted) return; // Prevent state update if unmounted
+
+                // Silent update: Merge files and languages into existing state
+                const files = contentsRes?.status === 'success' && contentsRes?.type === 'dir' ? contentsRes.files : [];
+                const languagesData = langRes?.status === 'success' ? langRes.data : [];
+
+                setData(prevData => ({
+                    ...prevData,
+                    files: files,
+                    contents: files,
+                    languages: languagesData
+                }));
+
+                // Set active file if files are available
+                if (files.length > 0 && isMounted) {
                     const readme = files.find(f => f.name.toLowerCase() === 'readme.md');
                     setActiveFile(readme || files[0]);
                 }
+
+                if (isMounted) setIsLoadingFiles(false);
+
             } catch (err) {
                 if (isMounted) {
+                    setIsLoadingFiles(false);
                     const errorMessage = err.message || 'Failed to load workspace. Please check your connection and try again.';
                     setError(errorMessage);
                     console.error('Failed to fetch workspace data:', err);
+                    setIsLoading(false); // Ensure loading is stopped on error
                 }
-            } finally {
-                if (isMounted) setIsLoading(false);
             }
         };
 
@@ -371,11 +398,11 @@ export default function WorkspaceProvider({ children }) {
             setIsLoading(true);
             const res = await apiRequest('/api/repos/create-workspace', {
                 method: 'POST',
-                body: {
+                body: JSON.stringify({
                     githubRepoName: data.repository.name,
                     workspaceName: workspaceName,
                     description: description || data.repository.description
-                }
+                })
             });
 
             if (res.status === 'success') {
@@ -402,6 +429,7 @@ export default function WorkspaceProvider({ children }) {
         setActiveFile: selectFile,
         isLoading,
         isLoadingFile,
+        isLoadingFiles,
         error,
         isSidebarOpen,
         setIsSidebarOpen,

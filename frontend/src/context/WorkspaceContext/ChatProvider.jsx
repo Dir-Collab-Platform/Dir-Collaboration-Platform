@@ -42,83 +42,86 @@ export default function ChatProvider({ children }) {
         };
     }, [socket, isConnected, workspaceId, activeChannelId]);
 
-    // 3. Fetch Channels & Members when workspace loads
+    // 3. OPTIMIZED: Parallel Initial Data Fetch
     useEffect(() => {
+        let isMounted = true;
+
         async function fetchInitialData() {
-            // Validate workspaceId format (MongoDB ObjectId)
-            // Non-imported repos (preview mode) won't have a valid MongoDB ID
+            // 1. Quick Validation
             if (!workspaceId || !/^[0-9a-fA-F]{24}$/.test(workspaceId)) {
-                // Not an error - just means this is a preview of a non-imported repo
-                // Chat features are unavailable in preview mode
                 setIsLoading(false);
                 return;
             }
 
             setIsLoading(true);
             try {
+                // 2. Fetch Channels and Members at the same time
                 const [channelsRes, membersRes] = await Promise.all([
                     apiRequest(`/api/repos/${workspaceId}/channels`),
                     apiRequest(`/api/repos/${workspaceId}/members`)
                 ]);
 
-                if (channelsRes.status === 'success') {
-                    // Channels come as array from repository.channels
-                    const channelList = channelsRes.data || [];
-                    // Normalize channels to have consistent ID field
-                    const normalizedChannels = channelList.map(ch => {
-                        const channelId = ch.channel_id || ch._id;
-                        return {
-                            ...ch,
-                            _id: channelId, // Always use _id for consistency
-                            channel_id: channelId, // Keep channel_id as well for compatibility
-                        };
-                    });
-                    setChannels(normalizedChannels);
+                if (!isMounted) return;
 
-                    // Set first channel (usually "general") as active
-                    if (normalizedChannels.length > 0) {
-                        setActiveChannelId(normalizedChannels[0]._id);
-                    }
-                }
-
+                // 3. Process Members
                 if (membersRes.status === 'success') {
-                    // Normalize members list to user objects
-                    const memberUsers = membersRes.data.map(m => ({
+                    setUsers(membersRes.data.map(m => ({
                         _id: m.userId?._id || m.userId,
                         githubUsername: m.userId?.githubUsername || m.userId?.username,
                         avatarUrl: m.userId?.avatarUrl,
                         role: m.role
+                    })));
+                }
+
+                // 4. Process Channels & Immediately trigger Message fetch
+                if (channelsRes.status === 'success') {
+                    const channelList = channelsRes.data || [];
+                    const normalizedChannels = channelList.map(ch => ({
+                        ...ch,
+                        _id: ch.channel_id || ch._id,
+                        channel_id: ch.channel_id || ch._id,
                     }));
-                    setUsers(memberUsers);
+                    setChannels(normalizedChannels);
+
+                    if (normalizedChannels.length > 0) {
+                        const firstChannelId = normalizedChannels[0]._id;
+                        setActiveChannelId(firstChannelId);
+
+                        // --- THE CRITICAL SPEED FIX ---
+                        // Fire off the message request but DON'T "await" it before closing the loader
+                        apiRequest(`/api/repos/${workspaceId}/channels/${firstChannelId}/messages`)
+                            .then(msgRes => {
+                                if (isMounted && msgRes.status === 'success') {
+                                    setMessages(msgRes.data || []);
+                                }
+                            });
+                    }
                 }
 
             } catch (err) {
-                console.error("Chat Init Data Error:", err);
-                setError(err.message);
+                console.error("Chat Init Error:", err);
+                if (isMounted) setError(err.message);
             } finally {
-                setIsLoading(false);
+                // 5. UNBLOCK UI IMMEDIATELY
+                // The messages will populate half a second later via the .then() above
+                if (isMounted) setIsLoading(false);
             }
         }
         fetchInitialData();
+        return () => { isMounted = false; };
     }, [workspaceId]);
 
-    // 4. Fetch Messages when Active Channel changes
+    // 4. Update Message fetcher to ONLY trigger on manual channel switches
     useEffect(() => {
-        async function fetchMessages() {
-            if (!workspaceId || !activeChannelId) return;
+        // Skip if it's the initial load (handled above)
+        if (isLoading || !workspaceId || !activeChannelId) return;
 
-            try {
-                const res = await apiRequest(`/api/repos/${workspaceId}/channels/${activeChannelId}/messages`);
-                if (res.status === 'success') {
-                    setMessages(res.data || []);
-                }
-            } catch (err) {
-                console.error("Fetch Messages Error:", err);
-                // Don't set global error here to avoid blocking UI, just log it
-            }
+        async function fetchMessages() {
+            const res = await apiRequest(`/api/repos/${workspaceId}/channels/${activeChannelId}/messages`);
+            if (res.status === 'success') setMessages(res.data || []);
         }
         fetchMessages();
-    }, [workspaceId, activeChannelId]);
+    }, [activeChannelId]);
 
     // 5. Listen for real-time message events via Socket.IO
     useEffect(() => {

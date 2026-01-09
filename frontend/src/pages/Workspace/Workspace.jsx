@@ -1,5 +1,5 @@
 import { useContext, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Header from "../../common-components/Header/Header";
 import WorkspaceHeader from "./components/WorkspaceHeader";
 import CodePanel from "./components/CodePanel";
@@ -49,20 +49,25 @@ function WorkspaceContent({ isRepositoryView }) {
     };
 
     const submitCreateWorkspace = async () => {
-        if (!newWorkspaceName.trim()) return;
-
+    try {
         setIsImporting(true);
-        try {
-            const newWs = await importRepo(newWorkspaceName);
-            setIsCreateModalOpen(false);
-            // Navigate to the newly created workspace using its MongoDB ID
+        
+        const newWs = await importRepo(newWorkspaceName); 
+        
+        setIsCreateModalOpen(false);
+        
+        
+        if (newWs && newWs._id) {
             navigate(`/workspace/${newWs._id}`);
-        } catch (err) {
-            alert(`Failed to create workspace: ${err.message}`);
-        } finally {
-            setIsImporting(false);
+        } else {
+            // Fallback to dashboard if ID is missing
+            navigate('/dashboard');
         }
-    };
+    } catch (err) {
+        // Error is handled by provider state, but we stop the local loading
+        setIsImporting(false);
+    }
+};
 
     return (
         <>

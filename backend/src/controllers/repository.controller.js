@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import { ActivityLog } from "../models/activityLog.model.js";
+// import { ActivityLog } from "../models/activitylog.model.js";
 import { StatusCodes } from "http-status-codes";
 import { createGitHubClient } from "../config/github.js";
 import mongoose from "mongoose";

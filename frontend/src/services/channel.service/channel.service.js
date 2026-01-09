@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockChannels } from '../../data/mockData';
 
 // ============================================================================
@@ -18,9 +19,9 @@ export const getChannels = async (repoId) => {
       data: mockChannels
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels`);
+  return apiRequest(`/api/repos/${repoId}/channels`);
 };
 
 /**
@@ -44,12 +45,12 @@ export const createChannel = async (repoId, channelData) => {
       data: newChannel
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels`, {
-  //   method: 'POST',
-  //   body: JSON.stringify(channelData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels`, {
+    method: 'POST',
+    body: JSON.stringify(channelData)
+  });
 };
 
 /**
@@ -72,12 +73,12 @@ export const updateChannel = async (repoId, channelId, channelData) => {
       data: channel
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}`, {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(channelData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(channelData)
+  });
 };
 
 /**
@@ -100,11 +101,11 @@ export const deleteChannel = async (repoId, channelId) => {
       message: `Channel ${channel.name} and messages in ${channel.name} deleted`
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}`, {
-  //   method: 'DELETE'
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}`, {
+    method: 'DELETE'
+  });
 };
 
 /**
@@ -128,11 +129,11 @@ export const joinChannel = async (repoId, channelId) => {
       message: `Successfully joined ${channel.name} (and general)`
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/join`, {
-  //   method: 'POST'
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/join`, {
+    method: 'POST'
+  });
 };
 
 /**
@@ -155,9 +156,9 @@ export const leaveChannel = async (repoId, channelId) => {
       message: 'Left channel successfully'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/leave`, {
-  //   method: 'POST'
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/leave`, {
+    method: 'POST'
+  });
 };

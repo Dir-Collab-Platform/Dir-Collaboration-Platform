@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 import Particles from './Particles';
 
+import { initiateGitHubLogin } from '../../../services/auth.service/auth.service';
+
 const Hero = () => {
     const navigate = useNavigate();
 
     const handleJoinBeta = () => {
-        alert("Redirecting to Dashboard...");
-        navigate('/dashboard');
+        initiateGitHubLogin();
     };
 
     return (

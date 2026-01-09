@@ -15,19 +15,21 @@ const apiRequest = async (endpoint, options = {}) => {
     throw new Error('Mock mode: Use mock service functions instead');
   }
 
+  const token = localStorage.getItem('auth_token');
   const url = `${BASE_URL}${endpoint}`;
   const config = {
     ...options,
     credentials: 'include', // Important for session cookies
     headers: {
       'Content-Type': 'application/json',
+      ...(token && { 'Authorization': `Bearer ${token}` }),
       ...options.headers,
     },
   };
 
   try {
     const response = await fetch(url, config);
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Request failed' }));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);

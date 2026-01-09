@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockRepositories } from '../../data/mockData';
 
 // ============================================================================
@@ -17,9 +18,9 @@ export const getRepositories = async () => {
       data: mockRepositories
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/repos');
+  return apiRequest('/api/repos');
 };
 
 /**
@@ -39,9 +40,9 @@ export const getRepository = async (repoId) => {
       data: repo
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}`);
+  return apiRequest(`/api/repos/${repoId}`);
 };
 
 /**
@@ -70,12 +71,12 @@ export const createRepository = async (repoData) => {
       data: newRepo
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/repos', {
-  //   method: 'POST',
-  //   body: JSON.stringify(repoData)
-  // });
+  return apiRequest('/api/repos', {
+    method: 'POST',
+    body: JSON.stringify(repoData)
+  });
 };
 
 /**
@@ -101,12 +102,12 @@ export const updateRepository = async (repoId, repoData) => {
       data: mockRepositories[repoIndex]
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}`, {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(repoData)
-  // });
+  return apiRequest(`/api/repos/${repoId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(repoData)
+  });
 };
 
 /**
@@ -127,7 +128,7 @@ export const deleteRepository = async (repoId) => {
       message: 'Repository deleted'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}`, { method: 'DELETE' });
+  return apiRequest(`/api/repos/${repoId}`, { method: 'DELETE' });
 };

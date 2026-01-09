@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockMessages } from '../../data/mockData';
 
 // ============================================================================
@@ -19,20 +20,20 @@ export const getMessages = async (repoId, channelId, params = {}) => {
     const limit = params.limit || 50;
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
-    
+
     const channelMessages = mockMessages.filter(m => m.channelId === channelId);
     const paginatedMessages = channelMessages.slice(startIndex, endIndex);
-    
+
     return {
       status: 'success',
       results: paginatedMessages.length,
       data: paginatedMessages
     };
   }
-  
+
   // Real implementation:
-  // const queryString = new URLSearchParams(params).toString();
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages?${queryString}`);
+  const queryString = new URLSearchParams(params).toString();
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages?${queryString}`);
 };
 
 /**
@@ -60,12 +61,12 @@ export const sendMessage = async (repoId, channelId, messageData) => {
       data: newMessage
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages`, {
-  //   method: 'POST',
-  //   body: JSON.stringify(messageData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages`, {
+    method: 'POST',
+    body: JSON.stringify(messageData)
+  });
 };
 
 /**
@@ -88,11 +89,11 @@ export const deleteMessage = async (repoId, channelId, messageId) => {
       message: 'Message deleted'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages/${messageId}`, {
-  //   method: 'DELETE'
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages/${messageId}`, {
+    method: 'DELETE'
+  });
 };
 
 /**
@@ -110,11 +111,11 @@ export const toggleReaction = async (repoId, channelId, messageId, reactionData)
     if (!message) {
       throw new Error('Message not found');
     }
-    
+
     if (!message.reactions) {
       message.reactions = [];
     }
-    
+
     const existingReaction = message.reactions.find(r => r.emoji === reactionData.emoji);
     if (existingReaction) {
       // Toggle: remove if user already reacted, add if not
@@ -133,16 +134,16 @@ export const toggleReaction = async (repoId, channelId, messageId, reactionData)
         users: ['69563538bd45b3713e795fdc']
       });
     }
-    
+
     return {
       status: 'success',
       data: message
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages/${messageId}/reactions`, {
-  //   method: 'PUT',
-  //   body: JSON.stringify(reactionData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/channels/${channelId}/messages/${messageId}/reactions`, {
+    method: 'PUT',
+    body: JSON.stringify(reactionData)
+  });
 };

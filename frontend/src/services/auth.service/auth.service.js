@@ -17,9 +17,9 @@ export const initiateGitHubLogin = () => {
     // In real implementation: window.location.href = `${BASE_URL}/auth/github`;
     return Promise.resolve({ status: 'redirect' });
   }
-  
+
   // Real implementation:
-  // window.location.href = `${BASE_URL}/auth/github`;
+  window.location.href = `${import.meta.env.VITE_API_BASE_URL}/auth/github`;
 };
 
 /**
@@ -37,9 +37,9 @@ export const checkAuthStatus = async () => {
       user: mockUser
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/auth/github/callback');
+  return apiRequest('/auth/github/callback');
 };
 
 /**
@@ -54,9 +54,9 @@ export const logout = async () => {
       message: 'Logged out successfully'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/auth/logout', { method: 'POST' });
+  return apiRequest('/auth/logout', { method: 'POST' });
 };
 
 /**
@@ -71,7 +71,7 @@ export const getCurrentUser = async () => {
       data: mockUser
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/me');
+  return apiRequest('/api/me');
 };

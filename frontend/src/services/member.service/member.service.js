@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockMembers } from '../../data/mockData';
 
 // ============================================================================
@@ -18,9 +19,9 @@ export const getMembers = async (repoId) => {
       data: mockMembers
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/members`);
+  return apiRequest(`/api/repos/${repoId}/members`);
 };
 
 /**
@@ -47,12 +48,12 @@ export const inviteMember = async (repoId, memberData) => {
       data: mockMembers
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/members`, {
-  //   method: 'POST',
-  //   body: JSON.stringify(memberData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/members`, {
+    method: 'POST',
+    body: JSON.stringify(memberData)
+  });
 };
 
 /**
@@ -75,12 +76,12 @@ export const updateMemberRole = async (repoId, userId, memberData) => {
       data: mockMembers
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/members/${userId}`, {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(memberData)
-  // });
+  return apiRequest(`/api/repos/${repoId}/members/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(memberData)
+  });
 };
 
 /**
@@ -103,9 +104,9 @@ export const removeMember = async (repoId, userId) => {
       data: mockMembers
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/repos/${repoId}/members/${userId}`, {
-  //   method: 'DELETE'
-  // });
+  return apiRequest(`/api/repos/${repoId}/members/${userId}`, {
+    method: 'DELETE'
+  });
 };

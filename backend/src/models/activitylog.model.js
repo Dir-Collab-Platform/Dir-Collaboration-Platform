@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const activityLogSchema = new mongoose.Schema({
+const activityLogSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

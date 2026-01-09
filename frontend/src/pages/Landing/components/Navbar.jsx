@@ -4,14 +4,13 @@ import { GithubIcon } from '../../../../public/assets/icons/icons';
 import Logo from '../../../common-components/Logo';
 
 
+import { initiateGitHubLogin } from '../../../services/auth.service/auth.service';
+
 const Navbar = () => {
     const navigate = useNavigate();
 
-    const BASE_URL = 'http://localhost:5000';
-
     const handleGithubLogin = () => {
-        alert("Redirecting to Dashboard...");
-        navigate(`${BASE_URL}/auth/github`);
+        initiateGitHubLogin();
     };
 
     return (

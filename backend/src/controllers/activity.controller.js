@@ -1,5 +1,5 @@
 import { User } from "../models/user.model.js";
-import { ActivityLog } from "../models/activityLog.model.js";
+import { ActivityLog } from "../models/activitylog.model.js";
 import { Repository } from "../models/repository.model.js";
 import { StatusCodes } from "http-status-codes";
 import { getOrSetCache } from "../utils/cache.util.js";

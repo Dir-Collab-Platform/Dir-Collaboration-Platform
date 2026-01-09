@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockUser, mockStats, mockActivityFeed, mockHeatmapData } from '../../data/mockData';
 
 // ============================================================================
@@ -17,9 +18,9 @@ export const getUserProfile = async () => {
       data: mockUser
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/me');
+  return apiRequest('/api/me');
 };
 
 /**
@@ -36,12 +37,12 @@ export const updateUserProfile = async (profileData) => {
       data: updatedUser
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/profile', {
-  //   method: 'PATCH',
-  //   body: JSON.stringify(profileData)
-  // });
+  return apiRequest('/api/profile', {
+    method: 'PATCH',
+    body: JSON.stringify(profileData)
+  });
 };
 
 /**
@@ -56,9 +57,9 @@ export const getUserStats = async () => {
       data: mockStats
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/stats');
+  return apiRequest('/api/stats');
 };
 
 /**
@@ -74,7 +75,7 @@ export const getActivityFeed = async (params = {}) => {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedFeed = mockActivityFeed.slice(startIndex, endIndex);
-    
+
     return {
       status: 'success',
       data: paginatedFeed,
@@ -85,10 +86,10 @@ export const getActivityFeed = async (params = {}) => {
       }
     };
   }
-  
+
   // Real implementation:
-  // const queryString = new URLSearchParams(params).toString();
-  // return apiRequest(`/api/activity/feed?${queryString}`);
+  const queryString = new URLSearchParams(params).toString();
+  return apiRequest(`/api/activity/feed?${queryString}`);
 };
 
 /**
@@ -103,9 +104,9 @@ export const getActivityHeatmap = async () => {
       data: mockHeatmapData
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/activity/heatmap');
+  return apiRequest('/api/activity/heatmap');
 };
 
 /**
@@ -120,7 +121,7 @@ export const clearActivityLogs = async () => {
       message: 'Activity logs cleared'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/activity/logs', { method: 'DELETE' });
+  return apiRequest('/api/activity/logs', { method: 'DELETE' });
 };

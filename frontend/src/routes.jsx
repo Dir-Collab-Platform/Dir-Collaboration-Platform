@@ -10,6 +10,8 @@ import ExploreContainer from './pages/Explore/ExploreContainer';
 import CreateWorkspace from './pages/CreateWorkspace/CreateWorkspace';
 import NotFound from './pages/NotFound/NotFound';
 import Landing from './pages/Landing/Landing';
+import AuthCallback from './pages/AuthCallback/AuthCallback';
+import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 
 /**
  * Application Routes
@@ -25,40 +27,80 @@ const router = createBrowserRouter([
     element: <Landing />,
   },
   {
+    path: '/auth/callback',
+    element: <AuthCallback />,
+  },
+  {
     path: '/dashboard',
-    element: <Dashboard />,
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/repositories',
-    element: <Repositories />,
+    element: (
+      <ProtectedRoute>
+        <Repositories />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/repository/:id',
-    element: <Workspace isRepositoryView={true} />,
+    element: (
+      <ProtectedRoute>
+        <Workspace isRepositoryView={true} />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/repository/create',
-    element: <CreateRepo />,
+    element: (
+      <ProtectedRoute>
+        <CreateRepo />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/workspace/:id',
-    element: <Workspace />,
+    element: (
+      <ProtectedRoute>
+        <Workspace />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/workspaces',
-    element: <Workspaces />,
+    element: (
+      <ProtectedRoute>
+        <Workspaces />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/profile',
-    element: <Profile />,
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/explore',
-    element: <ExploreContainer />,
+    element: (
+      <ProtectedRoute>
+        <ExploreContainer />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/createWorkspace',
-    element: <CreateWorkspace />,
+    element: (
+      <ProtectedRoute>
+        <CreateWorkspace />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '*',
@@ -67,3 +109,4 @@ const router = createBrowserRouter([
 ]);
 
 export default router;
+

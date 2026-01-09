@@ -1,3 +1,4 @@
+import { apiRequest } from '../api/api';
 import { mockNotifications } from '../../data/mockData';
 
 // ============================================================================
@@ -17,9 +18,9 @@ export const getNotifications = async () => {
       data: mockNotifications
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/notifications');
+  return apiRequest('/api/notifications');
 };
 
 /**
@@ -35,12 +36,12 @@ export const updateNotificationPreferences = async (preferences) => {
       data: preferences
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest('/api/notifications/preferences', {
-  //   method: 'PUT',
-  //   body: JSON.stringify(preferences)
-  // });
+  return apiRequest('/api/notifications/preferences', {
+    method: 'PUT',
+    body: JSON.stringify(preferences)
+  });
 };
 
 /**
@@ -60,11 +61,11 @@ export const markNotificationAsRead = async (notificationId) => {
       data: notification
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/notifications/${notificationId}/read`, {
-  //   method: 'PATCH'
-  // });
+  return apiRequest(`/api/notifications/${notificationId}/read`, {
+    method: 'PATCH'
+  });
 };
 
 /**
@@ -85,9 +86,9 @@ export const deleteNotification = async (notificationId) => {
       message: 'Notification deleted'
     };
   }
-  
+
   // Real implementation:
-  // return apiRequest(`/api/notifications/${notificationId}`, {
-  //   method: 'DELETE'
-  // });
+  return apiRequest(`/api/notifications/${notificationId}`, {
+    method: 'DELETE'
+  });
 };

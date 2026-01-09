@@ -1,5 +1,6 @@
 import { useContext, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import Header from "../../common-components/Header/Header";
 import WorkspaceHeader from "./components/WorkspaceHeader";
 import CodePanel from "./components/CodePanel";
@@ -129,7 +130,8 @@ function WorkspaceContent({ isRepositoryView }) {
                                     onChange={(e) => setNewWorkspaceName(e.target.value)}
                                     placeholder="e.g. My Workspace"
                                     autoFocus
-                                    className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl py-2.5 px-4 text-sm text-(--primary-text-color) outline-none focus:border-(--active-text-color) transition-all"
+                                    disabled={isImporting}
+                                    className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl py-2.5 px-4 text-sm text-(--primary-text-color) outline-none focus:border-(--active-text-color) transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 />
                                 <p className="text-xs text-(--secondary-text-color)">
                                     Enter a name for your new workspace.
@@ -139,16 +141,24 @@ function WorkspaceContent({ isRepositoryView }) {
                             <div className="flex justify-end gap-3 mt-2">
                                 <button
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2 text-sm font-semibold text-(--secondary-text-color) hover:text-(--primary-text-color) transition-colors"
+                                    disabled={isImporting}
+                                    className="px-4 py-2 text-sm font-semibold text-(--secondary-text-color) hover:text-(--primary-text-color) transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={submitCreateWorkspace}
-                                    disabled={!newWorkspaceName.trim()}
-                                    className="bg-(--primary-button) text-(--button-text-color) px-6 py-2 rounded-xl text-sm font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={!newWorkspaceName.trim() || isImporting}
+                                    className="bg-(--primary-button) text-(--button-text-color) px-6 py-2 rounded-xl text-sm font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
                                 >
-                                    Create
+                                    {isImporting ? (
+                                        <>
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            <span>Creating...</span>
+                                        </>
+                                    ) : (
+                                        "Create"
+                                    )}
                                 </button>
                             </div>
                         </div>

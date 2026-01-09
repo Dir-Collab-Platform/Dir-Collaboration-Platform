@@ -386,7 +386,7 @@ export default function WorkspaceProvider({ children }) {
 
             const res = await apiRequest('/api/repos/import', {
                 method: 'POST',
-                body: payload
+                body: JSON.stringify(payload)
             });
 
             if (res.status === 'success' || res.status === 'created') {

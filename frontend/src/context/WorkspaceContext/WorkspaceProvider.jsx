@@ -439,8 +439,7 @@ export default function WorkspaceProvider({ children }) {
         setFolderChildren,
         deleteFile,
         inviteMember,
-        removeMember,
-        importRepo
+        removeMember
     };
 
     return (

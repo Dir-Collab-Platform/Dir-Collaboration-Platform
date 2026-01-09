@@ -12,8 +12,7 @@ import ChatProvider from '../../context/WorkspaceContext/ChatProvider';
 
 
 function WorkspaceContent({ isRepositoryView }) {
-    const { isLoading, error, repository, importRepo } = useContext(WorkspaceContext);
-    const navigate = useNavigate();
+    const { isLoading, error, repository } = useContext(WorkspaceContext);
 
     // State for chat panel toggle on mobile/small screens
     const [showChat, setShowChat] = useState(false);
@@ -21,9 +20,8 @@ function WorkspaceContent({ isRepositoryView }) {
     // State for create workspace modal
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newWorkspaceName, setNewWorkspaceName] = useState('');
-    const [isImporting, setIsImporting] = useState(false);
 
-    if (isLoading && !isImporting) return <PageLoader msg="Syncing repository" />;
+    if (isLoading) return <PageLoader msg="Syncing repository" />;
 
     if (error) return (
         <div className="h-full flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: 'var(--dark-bg)' }}>
@@ -44,7 +42,6 @@ function WorkspaceContent({ isRepositoryView }) {
     const showRepoView = isRepositoryView || (repository && !repository.isImported);
 
     const handleCreateWorkspaceClick = () => {
-        setNewWorkspaceName(repository?.name || '');
         setIsCreateModalOpen(true);
     };
 

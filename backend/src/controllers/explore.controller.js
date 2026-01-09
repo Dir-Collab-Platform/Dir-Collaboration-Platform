@@ -66,16 +66,16 @@ export const seedCuratedTags = async () => {
 
 export const explorePublicRepos = async (req, res) => {
   try {
-    const { page = 1, limit = 6, q, tag } = req.query;
-    const perPage = parseInt(limit);
+    const { page = 1, q, tag } = req.query;
+    const perPage = 6;
     const pageNum = parseInt(page);
-    const cacheKey = `explore:v6:q=${q || 'all'}:tag=${tag || 'none'}:page=${pageNum}:limit=${perPage}`
+    const cacheKey = `explore:v5:q=${q || 'all'}:tag=${tag || 'none'}:page=${pageNum}`
 
     const data = await getOrSetCache(cacheKey, async () => {
       const octokit = createGitHubClient(req.user.accessToken)
 
       //Global search: includes all users, filtered by stars for quality
-      let query = "is:public stars:>50";
+      let query = "is:pubilc stars:>50";
       if (q) query += ` ${q}`;
       if (tag) query += ` topic:${tag}`;
 
@@ -90,13 +90,14 @@ export const explorePublicRepos = async (req, res) => {
       const githubIds = searchResults.items.map(repo => repo.id.toString());
       const existingRepos = await Repository.find({
         githubId: { $in: githubIds },
-      }).select("githubId _id");
+      }).select("githubId -_id");
 
-      const existingRepoMap = new Map(existingRepos.map(r => [r.githubId, r._id]));
+      const existingIdsSet = new Set(existingRepos.map(r => r.githubId));
+
 
       // map and fetching the language stats in parallel
 
-      let repos = await Promise.all(
+      const repos = await Promise.all(
         searchResults.items.map(async (repo) => {
           try {
             const { data: langData } = await octokit.rest.repos.listLanguages({
@@ -111,11 +112,9 @@ export const explorePublicRepos = async (req, res) => {
               color: getLanguageColor(label)
             })).filter(l => l.value > 1.0).sort((a, b) => b.value - a.value);
 
-            const githubIdStr = repo.id.toString();
 
             return {
-              githubId: githubIdStr,
-              _id: existingRepoMap.get(githubIdStr), // Return MongoDB ID if confirmed imported
+              githubId: repo.id.toString(),
               name: repo.name,
               owner: repo.owner.login,
               avatar: repo.owner.avatar_url,
@@ -124,26 +123,16 @@ export const explorePublicRepos = async (req, res) => {
               url: repo.html_url,
               tags: repo.topics || [],
               languages,
-              isImported: existingRepoMap.has(githubIdStr),
-              visibility: repo.private ? 'private' : 'public'
+              isImported: existingIdsSet.has(repo.id.toString()),
+
             }
 
           } catch (error) {
-            return null
+
+            return {}
           }
         })
       );
-
-      // Remove failed fetches
-      repos = repos.filter(r => r !== null);
-
-      // Apply filtering based on tabs
-      const filter = req.query.filter || 'all';
-      if (filter === 'repository') {
-        repos = repos.filter(r => !r.isImported);
-      } else if (filter === 'workspace') {
-        repos = repos.filter(r => r.isImported);
-      }
 
       return {
         total: searchResults.total_count,

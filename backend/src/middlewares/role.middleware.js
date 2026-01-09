@@ -1,17 +1,27 @@
 import { Repository } from "../models/repository.model.js";
 import { StatusCodes } from "http-status-codes";
 import { ROLE_PERMISSIONS, PERMISSION_LEVELS } from "../constants/roles.js";
+import { toObjectId } from "../utils/objectId.util.js";
+import mongoose from "mongoose";
 
 export const checkWorkspacePermission = (requiredRole) =>{
     return async (req,res,next) => {
         try {
-            
-            const userId = req.user.id;
+            // ✅ Fix: Use _id not id, and cast params to ObjectId
+            const userId = req.user._id; // ObjectId from Mongoose model
             const workspaceId = req.params.repoId || req.params.id;
-
+            
+            // ✅ Validate and cast workspaceId
+            if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
+                return res.status(StatusCodes.BAD_REQUEST).json({
+                    success: false,
+                    message: "Invalid workspace ID format"
+                });
+            }
+            
             const workspace = await Repository.findOne({
-                _id:workspaceId,
-                "members.userId":userId,
+                _id: new mongoose.Types.ObjectId(workspaceId), // ✅ Cast to ObjectId
+                "members.userId": userId, // ✅ Already ObjectId
             });
 
             if(!workspace){
@@ -21,6 +31,7 @@ export const checkWorkspacePermission = (requiredRole) =>{
                 })
             }
 
+            // ✅ Fix: Compare ObjectIds correctly
             const member = workspace.members.find((member) => member.userId.toString() === userId.toString());
 
             const userRole = member.role;

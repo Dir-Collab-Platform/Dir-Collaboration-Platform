@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiRequest } from '../../services/api/api';
 import { DashboardContext } from './DashboardContext';
-import { mockStats, mockActivityFeed, mockHeatmapData } from '../../data/mockData';
 
 export default function DashboardProvider({ children }) {
   const [stats, setStats] = useState(null);
   const [activityFeed, setActivityFeed] = useState([]);
   const [heatmapData, setHeatmapData] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [recentRepos, setRecentRepos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -14,22 +15,20 @@ export default function DashboardProvider({ children }) {
     const fetchDashboardData = async () => {
       setIsLoading(true);
       try {
-        // TODO: Replace with real API calls when integrating backend
-        // const [statsRes, activityRes, heatmapRes] = await Promise.all([
-        //   axios.get('/api/stats'),
-        //   axios.get('/api/activity/feed'),
-        //   axios.get('/api/activity/heatmap')
-        // ]);
-        // setStats(statsRes.data.data);
-        // setActivityFeed(activityRes.data.data);
-        // setHeatmapData(heatmapRes.data.data);
+        const [statsRes, activityRes, heatmapRes, notifRes, reposRes] = await Promise.all([
+          apiRequest('/api/stats').catch(() => ({ status: 'error', data: null })), // Corrected endpoint
+          apiRequest('/api/activity/feed?limit=10'),
+          apiRequest('/api/activity/heatmap'),
+          apiRequest('/api/notifications'),
+          apiRequest('/api/repos?limit=5').catch(() => ({ status: 'error', data: [] }))
+        ]);
 
-        // Mock implementation
-        await new Promise(resolve => setTimeout(resolve, 600));
-        console.log('DashboardProvider: Setting mock data', { mockStats, mockActivityFeed, mockHeatmapData });
-        setStats(mockStats);
-        setActivityFeed(mockActivityFeed);
-        setHeatmapData(mockHeatmapData);
+        if (statsRes.status === 'success') setStats(statsRes.data);
+        if (activityRes.status === 'success') setActivityFeed(activityRes.data);
+        if (heatmapRes.status === 'success') setHeatmapData(heatmapRes.data);
+        if (notifRes.status === 'success') setNotifications(notifRes.data);
+        if (reposRes.status === 'success') setRecentRepos(reposRes.data);
+
       } catch (err) {
         setError(err.message);
         console.error('Failed to fetch dashboard data:', err);
@@ -43,16 +42,31 @@ export default function DashboardProvider({ children }) {
 
   const refreshActivityFeed = async () => {
     try {
-      // TODO: Replace with real API call when integrating backend
-      // const response = await axios.get('/api/activity/feed');
-      // setActivityFeed(response.data.data);
-
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 400));
-      setActivityFeed(mockActivityFeed);
+      const response = await apiRequest('/api/activity/feed?limit=10');
+      if (response.status === 'success') {
+        setActivityFeed(response.data);
+      }
     } catch (err) {
       setError(err.message);
       throw err;
+    }
+  };
+
+  const markNotificationRead = async (id) => {
+    try {
+      await apiRequest(`/api/notifications/${id}/read`, { method: 'PATCH' });
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
+    } catch (err) {
+      console.error('Failed to mark notification read', err);
+    }
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      await apiRequest(`/api/notifications/${id}`, { method: 'DELETE' });
+      setNotifications(prev => prev.filter(n => n._id !== id));
+    } catch (err) {
+      console.error('Failed to delete notification', err);
     }
   };
 
@@ -63,7 +77,11 @@ export default function DashboardProvider({ children }) {
     setActivityFeed,
     heatmapData,
     setHeatmapData,
+    notifications,
+    recentRepos,
     refreshActivityFeed,
+    markNotificationRead,
+    deleteNotification,
     isLoading,
     error
   };

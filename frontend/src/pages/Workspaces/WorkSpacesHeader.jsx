@@ -1,10 +1,10 @@
 import { useContext } from 'react';
 import { Star, Workflow } from "lucide-react";
-import { UserContext } from '../../context/UserContext/UserContext';
+import { useAuth } from '../../context/AuthContext/AuthContext';
 import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
 
 export default function WorkSpacesHeader() {
-  const { user } = useContext(UserContext);
+  const { user } = useAuth();
   const { workspaces } = useContext(WorkspacesContext);
 
   return (

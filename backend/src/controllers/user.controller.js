@@ -118,7 +118,7 @@ export const updatedProfile = async (req, res) => {
     res.status(StatusCodes.OK).json({
       status: "success",
       message: "Profile updated successfully",
-      data: updatedUser.pre,
+      data: updatedUser,
     });
   } catch (error) {
     res.status(StatusCodes.BAD_REQUEST).json({

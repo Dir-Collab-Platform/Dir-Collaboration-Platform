@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiRequest } from '../../services/api/api';
 import { WorkspacesContext } from './WorkspacesContext';
-import { mockWorkspaces } from '../../data/mockData';
+
 
 export default function WorkspacesProvider({ children }) {
   const [workspaces, setWorkspaces] = useState([]);
@@ -12,13 +12,30 @@ export default function WorkspacesProvider({ children }) {
     const fetchWorkspaces = async () => {
       setIsLoading(true);
       try {
-        // TODO: Replace with real API call when integrating backend
-        // const response = await axios.get('/api/repos?isWorkspace=true');
-        // setWorkspaces(response.data.data);
-        
-        // Mock implementation - only repos that ARE workspaces
-        await new Promise(resolve => setTimeout(resolve, 400));
-        setWorkspaces(mockWorkspaces);
+        const response = await apiRequest('/api/repos');
+        if (response.status === 'success') {
+          const initialWorkspaces = response.data;
+          setWorkspaces(initialWorkspaces);
+
+          // Fetch detailed languages for each workspace in parallel
+          const workspacesWithLanguages = await Promise.all(
+            initialWorkspaces.map(async (ws) => {
+              if (!ws._id) return ws;
+              try {
+                const langRes = await apiRequest(`/api/repos/languages?workspaceId=${ws._id}`);
+                return {
+                  ...ws,
+                  languages: langRes.status === 'success' ? langRes.data : []
+                };
+              } catch (e) {
+                console.warn(`Failed to fetch languages for ${ws.workspaceName}`, e);
+                return ws;
+              }
+            })
+          );
+
+          setWorkspaces(workspacesWithLanguages);
+        }
       } catch (err) {
         setError(err.message);
         console.error('Failed to fetch workspaces:', err);
@@ -36,23 +53,16 @@ export default function WorkspacesProvider({ children }) {
 
   const createWorkspace = async (workspaceData) => {
     try {
-      // TODO: Replace with real API call when integrating backend
-      // const response = await axios.post('/api/repos', { ...workspaceData, isWorkspace: true });
-      // setWorkspaces(prev => [...prev, response.data.data]);
-      
-      // Mock implementation
-      await new Promise(resolve => setTimeout(resolve, 500));
-      const newWorkspace = {
-        _id: `workspace_${Date.now()}`,
-        ...workspaceData,
-        isWorkspace: true,
-        channels: [{ channel_id: `ch_${Date.now()}`, name: "general", _id: `ch_${Date.now()}`, created_at: new Date().toISOString(), participants: [] }],
-        members: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setWorkspaces(prev => [...prev, newWorkspace]);
-      return newWorkspace;
+      const response = await apiRequest('/api/repos/create-workspace', {
+        method: 'POST',
+        body: workspaceData
+      });
+
+      if (response.status === 'success' || response.status === 'created') {
+        const newWorkspace = response.data;
+        setWorkspaces(prev => [...prev, newWorkspace]);
+        return newWorkspace;
+      }
     } catch (err) {
       setError(err.message);
       throw err;

@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CreateRepoModal from '../../../common-components/Header/components/CreateRepoModal';
-import { mockRepositories } from '../../../data/mockData';
+import { DashboardContext } from '../../../context/DashboardContext/DashboardContext';
 
 const RecentRepositories = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
+  const { recentRepos } = useContext(DashboardContext);
 
-  const repos = mockRepositories.slice(0, 3);
+  const repos = recentRepos || [];
 
   return (
     <>
@@ -18,7 +19,7 @@ const RecentRepositories = () => {
           {repos.map((repo, i) => (
             <div
               key={repo._id || i}
-              onClick={() => navigate(`/workspace/${repo._id}`)}
+              onClick={() => repo._id && navigate(`/workspace/${repo._id}`)}
               className="flex justify-between items-center group cursor-pointer"
             >
               <div className="min-w-0 pr-4">

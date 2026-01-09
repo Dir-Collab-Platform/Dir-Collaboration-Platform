@@ -1,12 +1,21 @@
 ﻿import { RouterProvider } from "react-router-dom";
 import router from "./routes";
-import UserProvider from "./context/UserContext/UserProvider";
+import { AuthProvider } from "./context/AuthContext/AuthContext";
+import { SocketProvider } from "./context/SocketContext/SocketContext";
+import DashboardProvider from "./context/DashboardContext/DashboardProvider";
+import NotificationProvider from "./context/NotificationContext/NotificationProvider";
 
 function App() {
   return (
-    <UserProvider>
-      <RouterProvider router={router} />
-    </UserProvider>
+    <AuthProvider>
+      <SocketProvider>
+        <NotificationProvider>
+          <DashboardProvider>
+            <RouterProvider router={router} />
+          </DashboardProvider>
+        </NotificationProvider>
+      </SocketProvider>
+    </AuthProvider>
   );
 }
 

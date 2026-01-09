@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useParams, useLocation } from 'react-router-dom';
 import { WorkspaceContext } from './WorkspaceContext';
-import { mockAllRepos, mockUsers, mockRepositoryContents, mockLanguages } from '../../data/mockData';
+import { apiRequest } from '../../services/api/api';
 
 export default function WorkspaceProvider({ children }) {
     const { id: workspaceId } = useParams();
@@ -13,98 +12,347 @@ export default function WorkspaceProvider({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isEditingFile, setIsEditingFile] = useState(false);
 
+    const location = useLocation();
+    const repoPreview = location.state?.repoData; // Repo data passed from list if not imported
+
     useEffect(() => {
+        let isMounted = true;
+
         const fetchWorkspaceData = async () => {
-            if (!workspaceId) {
-                setIsLoading(false);
+            if (!workspaceId || workspaceId === 'undefined') {
+                if (isMounted) {
+                    setError('Invalid workspace ID');
+                    setIsLoading(false);
+                }
                 return;
             }
 
-            setIsLoading(true);
+            if (isMounted) setIsLoading(true);
+
             try {
-                // Mock implementation
-                await new Promise(resolve => setTimeout(resolve, 800));
+                // Check if it's a valid Mongo ObjectId (24 hex chars)
+                const isMongoId = /^[0-9a-fA-F]{24}$/.test(workspaceId);
 
-                // Search in all repos (workspaces + regular repos)
-                const workspace = mockAllRepos.find(ws => ws._id === workspaceId);
+                let repoData, contentsRes, langRes;
 
-                if (!workspace) {
-                    throw new Error("Repository not found");
+                if (isMongoId) {
+                    // 1. Valid DB Workspace: Fetch from API
+                    const [repoRes, cRes, lRes] = await Promise.all([
+                        apiRequest(`/api/repos/${workspaceId}`),
+                        apiRequest(`/api/repos/contents?workspaceId=${workspaceId}`),
+                        apiRequest(`/api/repos/languages?workspaceId=${workspaceId}`)
+                    ]);
+                    if (repoRes.status !== 'success') throw new Error(repoRes.message);
+                    repoData = repoRes.data;
+                    contentsRes = cRes;
+                    langRes = lRes;
+                } else if (repoPreview) {
+                    // 2. GitHub Preview (Not imported): Use passed state + GitHub API proxy
+                    repoData = {
+                        // Map GitHub preview data to expected Workspace format
+                        id: repoPreview.githubId,
+                        _id: null, // No DB ID
+                        name: repoPreview.githubRepoName,
+                        full_name: repoPreview.githubFullName,
+                        private: false, // Default assumption or from preview data
+                        owner: {
+                            login: repoPreview.githubOwner,
+                            avatar_url: ""
+                        },
+                        description: repoPreview.description,
+                        html_url: repoPreview.url,
+                        language: repoPreview.language,
+                        isImported: false,
+                        default_branch: "main",
+                        topics: [],
+                        members: [] // No members for preview
+                    };
+
+                    // Fetch contents using Owner/Repo
+                    const [cRes, lRes] = await Promise.all([
+                        apiRequest(`/api/repos/contents?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`),
+                        apiRequest(`/api/repos/languages?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
+                    ]);
+                    contentsRes = cRes;
+                    langRes = lRes;
+                } else {
+                    throw new Error("Repository not found (and no preview data provided)");
                 }
 
-                // Get repository contents (files) from mock data
-                const files = mockRepositoryContents[workspaceId] || [];
+                if (!isMounted) return;
 
-                // Get languages from mock data
-                const languagesData = mockLanguages[workspaceId] || [];
+                // Common Processing
+                const files = contentsRes.status === 'success' && contentsRes.type === 'dir' ? contentsRes.files : [];
+                const languagesData = langRes.status === 'success' ? langRes.data : [];
 
-                // Transform workspace data to match expected structure
                 setData({
                     repository: {
-                        id: workspace.githubId,
-                        name: workspace.githubRepoName,
-                        full_name: workspace.githubFullName,
-                        private: workspace.isPrivate,
+                        id: repoData.githubId || repoData.id,
+                        _id: repoData._id,
+                        name: repoData.workspaceName || repoData.name,
+                        full_name: repoData.githubFullName || repoData.full_name,
+                        private: repoData.isPrivate,
                         owner: {
-                            login: workspace.githubOwner,
-                            avatar_url: mockUsers.find(u => u._id === workspace.ownerId)?.avatarUrl || ""
+                            login: repoData.githubOwner || repoData.owner?.login,
+                            avatar_url: repoData.owner?.avatar_url || ""
                         },
-                        description: workspace.description,
-                        html_url: workspace.url,
-                        language: workspace.language,
-                        isImported: workspace.isImported,
-                        stars: workspace.stars,
-                        default_branch: "main",
-                        topics: workspace.tags || [],
-                        members: (workspace.members || []).map(mem => {
-                            const user = mockUsers.find(u => u._id === mem.userId);
-                            return {
-                                id: mem.userId, // Use userId as the unique key for the UI
-                                name: user?.githubUsername || "Unknown user",
-                                avatar: user?.avatarUrl,
-                                role: mem.role
-                            };
-                        })
-                    },
-                    files: files, // Files with plain text content
-                    contents: files, // Alias for compatibility
-                    languages: languagesData, // Languages in API format: [{ label, value, color }]
-                    last_commit: {
-                        sha: "4ed6gh78291077221b6d0130938291",
-                        commit: {
-                            author: {
-                                name: workspace.githubOwner,
-                                date: workspace.updatedAt
-                            },
-                            message: "Latest commit",
-                            comment_count: 0
-                        },
-                        author: {
-                            login: workspace.githubOwner
-                        }
-                    },
-                    stats: {
-                        forks: 0,
+                        description: repoData.description,
+                        html_url: repoData.url || repoData.html_url,
+                        language: repoData.language,
+                        isImported: !!repoData._id, // If it has a DB ID, it's imported
                         stars: 0,
-                        watchers: 0
-                    }
+                        default_branch: "main",
+                        topics: repoData.tags || [],
+                        members: (repoData.members || []).map(mem => ({
+                            id: mem.userId?._id || mem.userId,
+                            name: mem.userId?.githubUsername || "Unknown user",
+                            avatar: mem.userId?.avatarUrl,
+                            role: mem.role
+                        }))
+                    },
+                    files: files,
+                    contents: files,
+                    languages: languagesData,
+                    last_commit: null, // No commit data for now
+                    stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
-                // Set default active file (README.md or first file)
                 if (files.length > 0) {
                     const readme = files.find(f => f.name.toLowerCase() === 'readme.md');
                     setActiveFile(readme || files[0]);
                 }
             } catch (err) {
-                setError(err.message);
+                if (isMounted) setError(err.message);
                 console.error('Failed to fetch workspace data:', err);
             } finally {
-                setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         };
 
         fetchWorkspaceData();
-    }, [workspaceId]);
+
+        return () => {
+            isMounted = false;
+        };
+    }, [workspaceId, repoPreview]);
+
+    /**
+     * Fetch contents of a specific folder path and update the tree
+     * @param {string} folderPath - The path of the folder to fetch
+     */
+    const fetchFolderContents = async (folderPath) => {
+        if (!data?.repository) return [];
+
+        try {
+            const { repository } = data;
+            const isImported = !!repository._id;
+
+            let contentsRes;
+            if (isImported) {
+                contentsRes = await apiRequest(`/api/repos/contents?workspaceId=${repository._id}&path=${encodeURIComponent(folderPath)}`);
+            } else {
+                contentsRes = await apiRequest(`/api/repos/contents?owner=${repository.owner?.login}&repo=${repository.name}&path=${encodeURIComponent(folderPath)}`);
+            }
+
+            if (contentsRes.status === 'success' && contentsRes.type === 'dir') {
+                return contentsRes.files || [];
+            }
+            return [];
+        } catch (err) {
+            console.error('Failed to fetch folder contents:', err);
+            return [];
+        }
+    };
+
+    /**
+     * Update a folder node's children in the contents tree
+     */
+    const setFolderChildren = (folderPath, children) => {
+        setData(prev => {
+            if (!prev) return prev;
+
+            const updateChildren = (items) => {
+                return items.map(item => {
+                    if (item.path === folderPath) {
+                        return { ...item, children };
+                    }
+                    if (item.children) {
+                        return { ...item, children: updateChildren(item.children) };
+                    }
+                    return item;
+                });
+            };
+
+            return {
+                ...prev,
+                contents: updateChildren(prev.contents || [])
+            };
+        });
+    };
+
+    /**
+     * Fetch file content and set as active file
+     * @param {Object} file - The file object with path, name, type, sha
+     */
+    const [isLoadingFile, setIsLoadingFile] = useState(false);
+
+    const selectFile = async (file) => {
+        if (!file || file.type === 'dir') return;
+
+        // If file already has content, just set it as active
+        if (file.content) {
+            setActiveFile(file);
+            return;
+        }
+
+        // Fetch file content from API
+        setIsLoadingFile(true);
+        try {
+            const { repository } = data || {};
+            if (!repository) {
+                throw new Error('Repository data not available');
+            }
+
+            const isImported = !!repository._id;
+            let contentsRes;
+
+            if (isImported) {
+                contentsRes = await apiRequest(`/api/repos/contents?workspaceId=${repository._id}&path=${encodeURIComponent(file.path)}`);
+            } else {
+                contentsRes = await apiRequest(`/api/repos/contents?owner=${repository.owner?.login}&repo=${repository.name}&path=${encodeURIComponent(file.path)}`);
+            }
+
+            if (contentsRes.status === 'success' && contentsRes.type === 'file') {
+                // Backend returns fileData with content already decoded
+                const fileWithContent = {
+                    ...file,
+                    content: contentsRes.fileData?.content || '',
+                    sha: contentsRes.fileData?.sha || file.sha,
+                    size: contentsRes.fileData?.size || file.size
+                };
+                setActiveFile(fileWithContent);
+            } else {
+                // Fallback: set file without content
+                setActiveFile(file);
+            }
+        } catch (err) {
+            console.error('Failed to fetch file content:', err);
+            setActiveFile(file); // Set file anyway, viewer will handle missing content
+        } finally {
+            setIsLoadingFile(false);
+        }
+    };
+
+    /**
+     * Delete a file
+     */
+    const deleteFile = async (file) => {
+        if (!data?.repository?._id || !file?.path || !file?.sha) {
+            throw new Error('Missing required data for deletion');
+        }
+
+        try {
+            const res = await apiRequest(`/api/repos/${data.repository._id}/contents`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    path: file.path,
+                    sha: file.sha,
+                    commitMessage: `Delete ${file.name}`
+                })
+            });
+
+            if (res.status === 'success') {
+                // Determine parent folder path to refresh
+                const pathParts = file.path.split('/');
+                pathParts.pop(); // Remove file name
+                const parentPath = pathParts.join('/');
+
+                // Refresh parent folder contents if we have the function and it's not root
+                if (parentPath && fetchFolderContents && setFolderChildren) {
+                    const children = await fetchFolderContents(parentPath);
+                    setFolderChildren(parentPath, children);
+                } else if (setFolderChildren) {
+                    // Optimization: If it's root or we want to force refresh, we might need a fetchRoot function
+                    // For now, simpler to just close the file if it was active
+                }
+
+                if (activeFile?.path === file.path) {
+                    setActiveFile(null);
+                }
+                return true;
+            }
+            throw new Error(res.message || 'Failed to delete file');
+        } catch (err) {
+            console.error("Delete File Error:", err);
+            throw err;
+        }
+    };
+
+    /**
+     * Invite a member to the workspace
+     */
+    const inviteMember = async (githubUsername, role = 'editor') => {
+        if (!data?.repository?._id) return;
+
+        try {
+            const res = await apiRequest(`/api/repos/${data.repository._id}/members`, {
+                method: 'POST',
+                body: JSON.stringify({ githubUsername, role }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.status === 'success') {
+                // Update local state
+                setData(prev => ({
+                    ...prev,
+                    repository: {
+                        ...prev.repository,
+                        members: res.data || prev.repository.members
+                    }
+                }));
+                return true;
+            }
+            throw new Error(res.message || 'Failed to invite member');
+        } catch (err) {
+            console.error('Invite Member Error:', err);
+            throw err;
+        }
+    };
+
+    /**
+     * Remove a member from the workspace
+     */
+    const removeMember = async (userId) => {
+        if (!data?.repository?._id) return;
+
+        try {
+            const res = await apiRequest(`/api/repos/${data.repository._id}/members/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (res.status === 'success') {
+                // Update local state
+                setData(prev => ({
+                    ...prev,
+                    repository: {
+                        ...prev.repository,
+                        members: prev.repository.members.filter(m => {
+                            const mUserId = m.userId?._id || m.userId; // handle populated/non-populated
+                            return mUserId !== userId;
+                        })
+                    }
+                }));
+                return true;
+            }
+            throw new Error(res.message || 'Failed to remove member');
+        } catch (err) {
+            console.error('Remove Member Error:', err);
+            throw err;
+        }
+    };
 
     const value = {
         repository: data?.repository,
@@ -113,13 +361,19 @@ export default function WorkspaceProvider({ children }) {
         lastCommit: data?.last_commit,
         stats: data?.stats,
         activeFile,
-        setActiveFile,
+        setActiveFile: selectFile,
         isLoading,
+        isLoadingFile,
         error,
         isSidebarOpen,
         setIsSidebarOpen,
         isEditingFile,
-        setIsEditingFile
+        setIsEditingFile,
+        fetchFolderContents,
+        setFolderChildren,
+        deleteFile,
+        inviteMember,
+        removeMember
     };
 
     return (

@@ -41,10 +41,11 @@ export default function ReadMe() {
         return repository?.description || null
     }, [readmeFile, repository])
 
-    // 3. Apply Syntax Highlighting (using 'markdown' as the language)
-    const formattedReadme = cleanHTMLData(marked(rawContent))
-
+    // 3. Early exit if no content available
     if (!rawContent) return null
+
+    // 4. Apply Syntax Highlighting (using 'markdown' as the language)
+    const formattedReadme = cleanHTMLData(marked(rawContent))
 
     return (
         <div className="bg-(--card-bg) border border-(--main-border-color) rounded-2xl overflow-hidden shadow-sm">

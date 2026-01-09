@@ -13,8 +13,8 @@ export default function CodeViewer() {
     const context = useContext(WorkspaceContext)
 
     if (!context) return null
-    
-    const { activeFile } = context
+
+    const { activeFile, isLoadingFile } = context
 
     const extToLang = {
         'py': 'Python',
@@ -47,6 +47,20 @@ export default function CodeViewer() {
         return lines.map((_, i) => i + 1)
     }, [rawContent])
 
+    // Loading state while fetching file content
+    if (isLoadingFile) {
+        return (
+            <div className="flex items-center justify-center h-64 rounded-2xl border" style={{
+                backgroundColor: 'var(--dark-bg)',
+                borderColor: 'var(--main-border-color)',
+                color: 'var(--secondary-text-color)'
+            }}>
+                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500 mr-3"></div>
+                <span>Loading file content...</span>
+            </div>
+        )
+    }
+
     if (!activeFile) {
         return (
             <div className="flex items-center justify-center h-64 rounded-2xl border italic" style={{
@@ -55,6 +69,20 @@ export default function CodeViewer() {
                 color: 'var(--secondary-text-color)'
             }}>
                 Select a file to preview
+            </div>
+        )
+    }
+
+    // File selected but no content (could be binary or still loading)
+    if (!rawContent && activeFile) {
+        return (
+            <div className="flex items-center justify-center h-64 rounded-2xl border flex-col gap-2" style={{
+                backgroundColor: 'var(--dark-bg)',
+                borderColor: 'var(--main-border-color)',
+                color: 'var(--secondary-text-color)'
+            }}>
+                <span className="font-semibold">{activeFile.name}</span>
+                <span className="text-sm italic opacity-60">No content available (file may be binary or empty)</span>
             </div>
         )
     }
@@ -80,7 +108,7 @@ export default function CodeViewer() {
             {/* Code Body with Synchronized Gutter */}
             <div className="grow overflow-auto custom-scrollbar relative flex bg-transparent">
                 {/* Manual Gutter: This ensures line numbers always match line height exactly */}
-                <div className="gutter shrink-0 py-6 bg-transparent border-r select-none text-right" style={{ 
+                <div className="gutter shrink-0 py-6 bg-transparent border-r select-none text-right" style={{
                     width: '3.5rem',
                     borderColor: 'var(--main-border-color)'
                 }}>
@@ -93,9 +121,9 @@ export default function CodeViewer() {
 
                 {/* Code Content */}
                 <pre className="!m-0 !p-6 !bg-transparent !text-[13px] grow overflow-visible">
-                    <code 
+                    <code
                         className={`language-${extension} leading-relaxed block whitespace-pre`}
-                        dangerouslySetInnerHTML={{ __html: highlightedHtml }} 
+                        dangerouslySetInnerHTML={{ __html: highlightedHtml }}
                     />
                 </pre>
             </div>
@@ -113,7 +141,8 @@ export default function CodeViewer() {
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{ __html: `
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 pre, code {
                     tab-size: 4 !important;
                     -moz-tab-size: 4 !important;

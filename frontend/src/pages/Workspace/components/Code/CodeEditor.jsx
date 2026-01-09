@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from "react"
-import { Save, RotateCcw, X } from "lucide-react"
+import { Save, RotateCcw, X, Loader2 } from "lucide-react"
 import { WorkspaceContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
-// import { decodeFileContent } from "../../../../utils/utils"
+import { apiRequest } from "../../../../services/api/api"
 import CommitModal from "./CommitModal"
 
 export default function CodeEditor({ activeFile }) {
@@ -9,9 +9,12 @@ export default function CodeEditor({ activeFile }) {
 
     if (!context) return null
 
-    const { setIsEditingFile } = context
+    const { setIsEditingFile, repository } = context
     const [code, setCode] = useState("")
     const [isCommitModalOpen, setIsCommitModalOpen] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState(null)
+    const [saveSuccess, setSaveSuccess] = useState(false)
     const [commitData, setCommitData] = useState({
         message: "",
         description: ""
@@ -19,7 +22,6 @@ export default function CodeEditor({ activeFile }) {
 
     const rawContent = useMemo(function () {
         if (!activeFile?.content) return ""
-        // return decodeFileContent(activeFile.content, activeFile.encoding)
         return activeFile.content
     }, [activeFile])
 
@@ -34,18 +36,47 @@ export default function CodeEditor({ activeFile }) {
             message: `Update ${activeFile?.name || 'file'}`,
             description: ""
         })
+        setSaveError(null)
         setIsCommitModalOpen(true)
     }
 
-    // to be replaced with push logic to github/ backend
-    function handleFinalSave() {
-        console.log("Committing changes for:", activeFile?.name)
-        console.log("Commit Message:", commitData.message)
-        console.log("Description:", commitData.description)
-        console.log("Code:", code)
+    // Real API call to commit changes to GitHub via backend
+    async function handleFinalSave() {
+        if (!repository?._id || !activeFile?.path || !activeFile?.sha) {
+            setSaveError("Missing required data for commit");
+            return;
+        }
 
-        setIsCommitModalOpen(false)
-        setIsEditingFile(false)
+        setIsSaving(true);
+        setSaveError(null);
+
+        try {
+            const response = await apiRequest(`/api/repos/${repository._id}/contents`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: activeFile.path,
+                    content: code,
+                    sha: activeFile.sha,
+                    commitMessage: commitData.message + (commitData.description ? `\n\n${commitData.description}` : '')
+                })
+            });
+
+            if (response.status === 'success') {
+                setSaveSuccess(true);
+                setTimeout(() => {
+                    setSaveSuccess(false);
+                    setIsCommitModalOpen(false);
+                    setIsEditingFile(false);
+                }, 1500);
+            } else {
+                setSaveError(response.message || 'Failed to save file');
+            }
+        } catch (err) {
+            setSaveError(err.message || 'Failed to commit changes');
+        } finally {
+            setIsSaving(false);
+        }
     }
 
     function handleReset() {
@@ -123,6 +154,9 @@ export default function CodeEditor({ activeFile }) {
                 onConfirm={handleFinalSave}
                 commitData={commitData}
                 setCommitData={setCommitData}
+                isSaving={isSaving}
+                saveError={saveError}
+                saveSuccess={saveSuccess}
             />
         </div>
     )

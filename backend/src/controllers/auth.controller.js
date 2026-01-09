@@ -21,18 +21,18 @@ export const githubAuthCallback = (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`) for later linking
-    res.status(statusCodes.OK).json({
-      status: "success",
-      message: "GitHub Auth successful",
-      token,
-      user:{
-        id: user._id,
-        username: user.githubUsername,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-      },
-    });
+    res.redirect(`${process.env.CLIENT_URL}/auth-success?token=${token}`)
+    // res.status(statusCodes.OK).json({
+    //   status: "success",
+    //   message: "GitHub Auth successful",
+    //   token,
+    //   user:{
+    //     id: user._id,
+    //     username: user.githubUsername,
+    //     email: user.email,
+    //     avatarUrl: user.avatarUrl,
+    //   },
+    // });
   } catch (error) {
     res
       .status(statusCodes.INTERNAL_SERVER_ERROR)

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef, useState } from 'react'
 import { Paperclip, Send } from "lucide-react"
 import { ChatContext } from '../../../../context/WorkspaceContext/WorkspaceContext'
+import { useAuth } from '../../../../context/AuthContext/AuthContext'
 import MessageBubble from './MessageBubble'
 
 /**
@@ -77,8 +78,16 @@ export default function Chat() {
     )
 
     const { activeMessages, sendMessage, activeChannel } = chatContext
-    // replace this with the user id of the authenticated user
-    const CURRENT_USER_ID = "658af5c2f1a2b3c4d5e6f001" 
+    const { user } = useAuth()
+    const currentUserId = user?._id || user?.id
+
+    const handleSendMessage = async (text) => {
+        try {
+            await sendMessage(text)
+        } catch (error) {
+            console.error('Failed to send message:', error)
+        }
+    }
 
     return (
         <div className="chat grid grid-rows-[1fr_auto] h-155 bg-(--card-bg-lighter) border border-(--main-border-color) rounded-2xl">
@@ -88,22 +97,30 @@ export default function Chat() {
             >
                 <div className="flex flex-col gap-6 justify-end min-h-full py-4">
                     {activeMessages?.length ? (
-                        activeMessages.map(msg => (
-                            <MessageBubble
-                                key={msg._id}
-                                message={msg}
-                                isCurrentUser={msg.senderId === CURRENT_USER_ID}
-                            />
-                        ))
+                        activeMessages.map(msg => {
+                            // Handle both populated senderId object and string ID
+                            const messageSenderId = typeof msg.senderId === 'object' 
+                                ? msg.senderId?._id || msg.senderId?.id 
+                                : msg.senderId
+                            const isCurrentUser = messageSenderId?.toString() === currentUserId?.toString()
+                            
+                            return (
+                                <MessageBubble
+                                    key={msg._id}
+                                    message={msg}
+                                    isCurrentUser={isCurrentUser}
+                                />
+                            )
+                        })
                     ) : (
                         <div className="flex flex-col items-center justify-center h-full opacity-40 gap-3">
-                            ...
+                            <p className="text-sm text-(--secondary-text-color)">No messages yet. Start the conversation!</p>
                         </div>
                     )}
                 </div>
             </div>
 
-            <ChatInput onSendMessage={(text) => sendMessage(text, CURRENT_USER_ID)} />
+            <ChatInput onSendMessage={handleSendMessage} />
         </div>
     )
 }

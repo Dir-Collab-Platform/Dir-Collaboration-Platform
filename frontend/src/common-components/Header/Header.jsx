@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, Plus, Menu } from 'lucide-react';
 
@@ -6,17 +6,20 @@ import NotificationPanel from './components/NotificationPanel';
 import CreateRepoModal from './components/CreateRepoModal';
 import SidebarMenu from './components/SidebarMenu';
 import Logo from '../Logo';
-import { mockNotifications, mockPastNotifications } from '../../data/mockData';
+import { DashboardContext } from '../../context/DashboardContext/DashboardContext';
 
 function Header() {
   const navigate = useNavigate();
+  const { notifications, markNotificationRead, deleteNotification } = useContext(DashboardContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isCreateRepoOpen, setIsCreateRepoOpen] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
 
-  const [pastNotifications, setPastNotifications] = useState([]);
+  // Filter for unread or pass all to panel? Let's pass all.
+  // const unreadCount = notifications ? notifications.filter(n => !n.isRead).length : 0;
+
   const [expandedMessages, setExpandedMessages] = useState({});
+  const [pastNotifications, setPastNotifications] = useState([]); // Keep local for now or fetch? Utils
   const [isLoadingPast, setIsLoadingPast] = useState(false);
 
   const notificationPanelRef = useRef(null);
@@ -40,24 +43,21 @@ function Header() {
   };
 
   const handleMarkAllAsRead = () => {
-    const updatedNotifications = notifications.map(notification => ({
-      ...notification,
-      read: true
-    }));
-    setNotifications(updatedNotifications);
+    // Optimistic or batch call
+    if (notifications) {
+      notifications.forEach(n => {
+        if (!n.isRead) markNotificationRead(n._id);
+      });
+    }
   };
 
   const handleCloseNotification = (id) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    deleteNotification(id);
   };
 
   const handleLoadPastNotifications = () => {
-    setIsLoadingPast(true);
-
-    setTimeout(() => {
-      setPastNotifications(prev => [...mockPastNotifications, ...prev]);
-      setIsLoadingPast(false);
-    }, 1200);
+    // Already loaded all?
+    setIsLoadingPast(false);
   };
 
   const handleActionButton = (action, notificationId) => {
@@ -65,13 +65,7 @@ function Header() {
       case 'reply':
         break;
       case 'mark as read':
-        setNotifications(prev =>
-          prev.map(notification =>
-            notification.id === notificationId
-              ? { ...notification, read: true }
-              : notification
-          )
-        );
+        markNotificationRead(notificationId);
         break;
       case 'review':
         break;
@@ -175,12 +169,12 @@ function Header() {
                 }}
               >
                 <Bell size={24} />
-                {notifications.length > 0 && (
+                {notifications && notifications.filter(n => !n.isRead).length > 0 && (
                   <span
                     className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                     style={{ backgroundColor: 'var(--notification-count-bg)' }}
                   >
-                    {notifications.length}
+                    {notifications.filter(n => !n.isRead).length}
                   </span>
                 )}
               </button>

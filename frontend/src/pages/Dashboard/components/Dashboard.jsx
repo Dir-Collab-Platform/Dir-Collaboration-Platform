@@ -7,16 +7,35 @@ import ContributionSummary from './ContributionSummary';
 import NotificationPanel from '../../../common-components/Header/components/NotificationPanel';
 import { Bell } from 'lucide-react';
 import { DashboardContext } from '../../../context/DashboardContext/DashboardContext';
-import DashboardProvider from '../../../context/DashboardContext/DashboardProvider';
+import { getRelativeTime } from '../../../utils/utils';
 
 import { mockNotifications, mockPastNotifications } from '../../../data/mockData';
 
 function DashboardContent() {
-  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  const { stats, activityFeed, heatmapData, isLoading } = useContext(DashboardContext);
+  const {
+    stats,
+    activityFeed,
+    heatmapData,
+    isLoading,
+    notifications: apiNotifications, // Rename to transform
+    markNotificationRead,
+    deleteNotification
+  } = useContext(DashboardContext);
 
-  // Notification states
-  const [notifications, setNotifications] = useState(mockNotifications);
+  // Map API notifications to UI format
+  const notifications = (apiNotifications || []).map(n => ({
+    ...n,
+    id: n._id, // Map MongoDB _id to UI id
+    read: n.isRead, // Map isRead to read
+    // Ensure other UI fields exist with defaults
+    label: n.type || 'Notification',
+    time: n.createdAt ? getRelativeTime(n.createdAt) : 'Just now',
+    userImg: n.sender?.avatarUrl || '/assets/images/person.jpg',
+    userName: n.sender?.githubUsername || 'System',
+  }));
+
+  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
+  // Past notifications state (keep separate as they might not be in the initial API fetch or handled differently)
   const [pastNotifications, setPastNotifications] = useState([]);
   const [expandedMessages, setExpandedMessages] = useState({});
   const [isLoadingPast, setIsLoadingPast] = useState(false);
@@ -33,20 +52,18 @@ function DashboardContent() {
 
   // Notification Handlers
   const handleMarkAllAsRead = () => {
-    const updatedNotifications = notifications.map(notification => ({
-      ...notification,
-      read: true
-    }));
-    setNotifications(updatedNotifications);
+    // Optimistic update locally not needed as context handles it, but if we want strictly local UI update until refresh:
+    notifications.forEach(n => markNotificationRead(n.id));
   };
 
   const handleCloseNotification = (id) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    deleteNotification(id);
   };
 
   const handleLoadPastNotifications = () => {
     setIsLoadingPast(true);
     setTimeout(() => {
+      // For now keeping mock past notifications as backend might not support pagination/past yet
       setPastNotifications(prev => [...mockPastNotifications, ...prev]);
       setIsLoadingPast(false);
     }, 1200);
@@ -55,13 +72,7 @@ function DashboardContent() {
   const handleActionButton = (action, notificationId) => {
     switch (action.toLowerCase()) {
       case 'mark as read':
-        setNotifications(prev =>
-          prev.map(notification =>
-            notification.id === notificationId
-              ? { ...notification, read: true }
-              : notification
-          )
-        );
+        markNotificationRead(notificationId);
         break;
       case 'reject':
       case 'ignore':
@@ -149,11 +160,7 @@ function DashboardContent() {
 }
 
 const Dashboard = () => {
-  return (
-    <DashboardProvider>
-      <DashboardContent />
-    </DashboardProvider>
-  );
+  return <DashboardContent />;
 };
 
 export default Dashboard;

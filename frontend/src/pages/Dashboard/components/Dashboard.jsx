@@ -1,44 +1,14 @@
-import React, { useState, useContext } from 'react';
 import Sidebar from './Sidebar';
 import StatsOverview from './StatsOverview';
 import ActivityFeed from './ActivityFeed';
 import RecentRepositories from './RecentRepositories';
 import ContributionSummary from './ContributionSummary';
-import NotificationPanel from '../../../common-components/Header/components/NotificationPanel';
-import { Bell } from 'lucide-react';
+import NotificationBell from '../../../common-components/Header/components/NotificationBell';
 import { DashboardContext } from '../../../context/DashboardContext/DashboardContext';
-import { getRelativeTime } from '../../../utils/utils';
-
-import { mockNotifications, mockPastNotifications } from '../../../data/mockData';
+import { useContext } from 'react';
 
 function DashboardContent() {
-  const {
-    stats,
-    activityFeed,
-    heatmapData,
-    isLoading,
-    notifications: apiNotifications, // Rename to transform
-    markNotificationRead,
-    deleteNotification
-  } = useContext(DashboardContext);
-
-  // Map API notifications to UI format
-  const notifications = (apiNotifications || []).map(n => ({
-    ...n,
-    id: n._id, // Map MongoDB _id to UI id
-    read: n.isRead, // Map isRead to read
-    // Ensure other UI fields exist with defaults
-    label: n.type || 'Notification',
-    time: n.createdAt ? getRelativeTime(n.createdAt) : 'Just now',
-    userImg: n.sender?.avatarUrl || '/assets/images/person.jpg',
-    userName: n.sender?.githubUsername || 'System',
-  }));
-
-  const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  // Past notifications state (keep separate as they might not be in the initial API fetch or handled differently)
-  const [pastNotifications, setPastNotifications] = useState([]);
-  const [expandedMessages, setExpandedMessages] = useState({});
-  const [isLoadingPast, setIsLoadingPast] = useState(false);
+  const { stats, activityFeed, heatmapData, isLoading } = useContext(DashboardContext);
 
   // Show loader while fetching dashboard data
   if (isLoading) {
@@ -50,46 +20,6 @@ function DashboardContent() {
     );
   }
 
-  // Notification Handlers
-  const handleMarkAllAsRead = () => {
-    // Optimistic update locally not needed as context handles it, but if we want strictly local UI update until refresh:
-    notifications.forEach(n => markNotificationRead(n.id));
-  };
-
-  const handleCloseNotification = (id) => {
-    deleteNotification(id);
-  };
-
-  const handleLoadPastNotifications = () => {
-    setIsLoadingPast(true);
-    setTimeout(() => {
-      // For now keeping mock past notifications as backend might not support pagination/past yet
-      setPastNotifications(prev => [...mockPastNotifications, ...prev]);
-      setIsLoadingPast(false);
-    }, 1200);
-  };
-
-  const handleActionButton = (action, notificationId) => {
-    switch (action.toLowerCase()) {
-      case 'mark as read':
-        markNotificationRead(notificationId);
-        break;
-      case 'reject':
-      case 'ignore':
-        handleCloseNotification(notificationId);
-        break;
-      default:
-        break;
-    }
-  };
-
-  const toggleMessageExpansion = (notificationId) => {
-    setExpandedMessages(prev => ({
-      ...prev,
-      [notificationId]: !prev[notificationId]
-    }));
-  };
-
   return (
     <div className="flex h-screen w-full overflow-hidden -mt-20 scroll-bar" style={{ backgroundColor: 'var(--dark-bg)' }}>
       {/* Sidebar - Fixed Width */}
@@ -100,15 +30,8 @@ function DashboardContent() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="h-20 flex items-center justify-end px-10">
-          <div className="relative cursor-pointer" onClick={(e) => { e.stopPropagation(); setShowNotificationPanel(!showNotificationPanel); }}>
-            <Bell size={24} style={{ color: 'var(--secondary-text-color)' }} />
-            {notifications.length > 0 && (
-              <span className="absolute -top-1 -right-1 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold" style={{ backgroundColor: 'var(--notification-count-bg)' }}>
-                {notifications.length}
-              </span>
-            )}
-          </div>
+        <header className="h-20 flex items-center justify-end px-10 pt-10">
+          <NotificationBell />
         </header>
 
         {/* Scrollable Area */}
@@ -136,25 +59,6 @@ function DashboardContent() {
           </div>
         </main>
       </div>
-
-      {showNotificationPanel && (
-        <div className="fixed inset-0 z-50 flex justify-end" onClick={() => setShowNotificationPanel(false)}>
-          <div onClick={(e) => e.stopPropagation()}>
-            <NotificationPanel
-              notifications={notifications}
-              pastNotifications={pastNotifications}
-              expandedMessages={expandedMessages}
-              isLoadingPast={isLoadingPast}
-              onClose={() => setShowNotificationPanel(false)}
-              onMarkAllAsRead={handleMarkAllAsRead}
-              onCloseNotification={handleCloseNotification}
-              onActionButton={handleActionButton}
-              onToggleMessageExpansion={toggleMessageExpansion}
-              onLoadPastNotifications={handleLoadPastNotifications}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

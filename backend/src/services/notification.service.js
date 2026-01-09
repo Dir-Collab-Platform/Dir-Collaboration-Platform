@@ -14,6 +14,7 @@ export const createNotification = async ({ userId, message, type, repoId, target
         });
 
         // emmitting to the user's private socket room
+        console.log(`Emitting notification to room user:${userId}:`, message);
         getIO().to(`user:${userId}`).emit("new_notification", notification);
 
         // logging (as requested: new_notification activity)

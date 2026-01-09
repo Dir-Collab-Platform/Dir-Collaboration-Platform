@@ -23,6 +23,7 @@ export default function NotificationProvider({ children }) {
                 const response = await apiRequest('/api/notifications');
                 if (response.status === 'success') {
                     setNotifications(response.data || []);
+                    console.log('Fetched notifications: ', response.data)
                     const unread = (response.data || []).filter(n => !n.isRead).length;
                     setUnreadCount(unread);
                 }
@@ -46,11 +47,14 @@ export default function NotificationProvider({ children }) {
 
         // Listen for new notifications
         const handleNewNotification = (notification) => {
-            console.log('Received new notification:', notification);
+            console.log('SOCKET: Received new_notification event:', notification);
             setNotifications(prev => [notification, ...prev]);
-            
+
             // Only increment unread if notification is for current user
-            if (notification.userId === userId || notification.userId === userId.toString()) {
+            const isTarget = notification.userId === userId || notification.userId === userId.toString();
+            console.log(`SOCKET: Notification for current user? ${isTarget} (Notif userId: ${notification.userId}, Current userId: ${userId})`);
+
+            if (isTarget) {
                 setUnreadCount(prev => prev + 1);
             }
         };
@@ -72,7 +76,12 @@ export default function NotificationProvider({ children }) {
                 setNotifications(prev =>
                     prev.map(n => n._id === notificationId ? { ...n, isRead: true } : n)
                 );
-                setUnreadCount(prev => Math.max(0, prev - 1));
+                // Recalculate unread count to be safe
+                setNotifications(current => {
+                    const unread = current.filter(n => !n.isRead).length;
+                    setUnreadCount(unread);
+                    return current;
+                });
             }
         } catch (error) {
             console.error('Failed to mark notification as read:', error);
@@ -82,17 +91,26 @@ export default function NotificationProvider({ children }) {
 
     const markAllAsRead = useCallback(async () => {
         try {
-            // Backend doesn't have a bulk mark-all endpoint yet, so we'll do it client-side
-            // Or we can update each one individually
             const unreadNotifications = notifications.filter(n => !n.isRead);
-            
+            if (unreadNotifications.length === 0) return;
+
+            // Optimistic update
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setUnreadCount(0);
+
             await Promise.all(
-                unreadNotifications.map(n => markAsRead(n._id))
+                unreadNotifications.map(n => apiRequest(`/api/notifications/${n._id}/read`, { method: 'PATCH' }))
             );
         } catch (error) {
             console.error('Failed to mark all as read:', error);
+            // Re-fetch to sync if failed
+            const response = await apiRequest('/api/notifications');
+            if (response.status === 'success') {
+                setNotifications(response.data || []);
+                setUnreadCount((response.data || []).filter(n => !n.isRead).length);
+            }
         }
-    }, [notifications, markAsRead]);
+    }, [notifications]);
 
     const deleteNotification = useCallback(async (notificationId) => {
         try {
@@ -101,17 +119,32 @@ export default function NotificationProvider({ children }) {
             });
 
             if (response.status === 'success') {
-                const deleted = notifications.find(n => n._id === notificationId);
-                setNotifications(prev => prev.filter(n => n._id !== notificationId));
-                if (deleted && !deleted.isRead) {
-                    setUnreadCount(prev => Math.max(0, prev - 1));
-                }
+                setNotifications(prev => {
+                    const next = prev.filter(n => n._id !== notificationId);
+                    setUnreadCount(next.filter(n => !n.isRead).length);
+                    return next;
+                });
             }
         } catch (error) {
             console.error('Failed to delete notification:', error);
             throw error;
         }
-    }, [notifications]);
+    }, []);
+
+    const refresh = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await apiRequest('/api/notifications');
+            if (response.status === 'success') {
+                setNotifications(response.data || []);
+                setUnreadCount((response.data || []).filter(n => !n.isRead).length);
+            }
+        } catch (error) {
+            console.error('Failed to refresh notifications:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     const value = {
         notifications,
@@ -120,25 +153,7 @@ export default function NotificationProvider({ children }) {
         markAsRead,
         markAllAsRead,
         deleteNotification,
-        refresh: () => {
-            // Trigger refresh
-            setIsLoading(true);
-            const fetchNotifications = async () => {
-                try {
-                    const response = await apiRequest('/api/notifications');
-                    if (response.status === 'success') {
-                        setNotifications(response.data || []);
-                        const unread = (response.data || []).filter(n => !n.isRead).length;
-                        setUnreadCount(unread);
-                    }
-                } catch (error) {
-                    console.error('Failed to refresh notifications:', error);
-                } finally {
-                    setIsLoading(false);
-                }
-            };
-            fetchNotifications();
-        }
+        refresh
     };
 
     return (

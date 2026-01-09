@@ -1,301 +1,109 @@
 import React from 'react';
-import {
-  MessageSquare,
-  AlertCircle,
-  X,
-  ExternalLink,
-  GitPullRequestArrow
-} from 'lucide-react';
+import { MessageSquare, AlertCircle, X, ExternalLink, GitPullRequestArrow, Bell } from 'lucide-react';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
+import { getRelativeTime } from '../../../utils/utils';
 
-function NotificationItem({
-  notification,
-  expanded,
-  onClose,
-  onAction,
-  onToggleExpand,
-  isPast = false
-}) {
-  const { type } = notification;
+const TYPE_CONFIG = {
+  message: {
+    icon: MessageSquare,
+    color: '#673255',
+    label: 'Message',
+  },
+  github: {
+    icon: GithubIcon,
+    color: '#2b3137',
+    label: 'GitHub',
+  },
+  alert: {
+    icon: AlertCircle,
+    color: '#ff4757',
+    label: 'Alert',
+  },
+  default: {
+    icon: Bell,
+    color: 'var(--secondary-button)',
+    label: 'Notification',
+  }
+};
 
-  if (type === 'message') {
-    return (
-      <div
-        className={`rounded-xl p-4 mb-3 transition-all ${notification.read ? 'opacity-70' : ''}`}
-        style={{
-          backgroundColor: 'var(--dimmer-dark-bg)',
-          border: '1px solid var(--main-border-color)'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'}
-      >
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-1.5 text-sm">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: '#673255' }}>
-              <MessageSquare size={14} style={{ color: 'var(--primary-text-color)' }} />
-            </div>
-            <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
-            <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
-          </div>
-          <button
-            className="p-0.5 rounded hover:bg-gray-800"
-            style={{ color: 'var(--secondary-text-color)' }}
-            onClick={() => onClose(notification.id)}
+function NotificationItem({ notification, onClose, onAction, isPast = false }) {
+  const { _id, message, isRead, type, createdAt } = notification;
+  const config = TYPE_CONFIG[type] || TYPE_CONFIG.default;
+  const Icon = config.icon;
+
+  const timeLabel = getRelativeTime(createdAt);
+
+  return (
+    <div
+      className={`group relative rounded-xl p-4 mb-3 transition-all border border-(--main-border-color) 
+        ${isRead ? 'opacity-60 grayscale-[0.2]' : 'bg-(--dimmer-dark-bg) hover:bg-(--card-bg-lighter) shadow-sm'}`}
+    >
+      <div className="flex gap-3">
+        {/* Icon & Status */}
+        <div className="flex-shrink-0 mt-1">
+          <div
+            className="flex items-center justify-center w-8 h-8 rounded-lg shadow-inner"
+            style={{ backgroundColor: config.color }}
           >
-            <X size={12} />
-          </button>
-        </div>
-        <h4 className="text-sm font-semibold mb-2 ml-8" style={{ color: 'var(--secondary-text-color)' }}>
-          {notification.channel}
-        </h4>
-
-        <div className="flex gap-2.5 mb-3 ml-4">
-          <div className="flex-shrink-0 ml-2">
-            <img src={notification.userImg} alt={notification.userName} className="w-8 h-8 rounded-full" style={{ border: '1px solid rgba(239, 238, 238, 0.2)' }} />
+            <Icon size={16} className="text-white" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
-              {expanded ? notification.fullMessage : notification.shortMessage}
-            </p>
-            {notification.hasMore && (
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <div className="flex justify-between items-start mb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-(--secondary-text-color)">
+                {config.label}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-(--main-border-color)" />
+              <span className="text-xs text-(--secondary-text-color)">
+                {timeLabel}
+              </span>
+            </div>
+
+            <button
+              className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-all"
+              style={{ color: 'var(--secondary-text-color)' }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onClose(_id);
+              }}
+            >
+              <X size={14} />
+            </button>
+          </div>
+
+          <p className="text-sm leading-relaxed text-(--primary-text-color) mb-3">
+            {message}
+          </p>
+
+          {/* Actions */}
+          <div className="flex gap-2">
+            {!isRead && (
               <button
-                className="text-xs mt-1 hover:underline"
-                style={{ color: 'var(--secondary-text-color)' }}
-                onClick={() => onToggleExpand(notification.id)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-(--primary-button) text-(--primary-text-color) hover:brightness-110 transition-all active:scale-95"
+                onClick={() => onAction('Mark as read', _id)}
               >
-                {expanded ? 'see less' : 'more'}
+                Mark as Read
               </button>
             )}
-          </div>
-        </div>
-        <div className="flex gap-2 justify-center">
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Reply', notification.id)}
-          >
-            Reply
-          </button>
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Mark as read', notification.id)}
-          >
-            Mark as read
-          </button>
-        </div>
-      </div>
-    );
-  } else if (type === 'github') {
-    return (
-      <div
-        className={`rounded-xl p-4 mb-3 transition-all ${notification.read ? 'opacity-70' : ''}`}
-        style={{
-          backgroundColor: 'var(--dimmer-dark-bg)',
-          border: '1px solid var(--main-border-color)'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'}
-      >
-        <div className="flex justify-between items-center mb-2 ">
-          <div className="flex items-center gap-1.5 text-sm">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: '#673255' }}>
-              <GithubIcon className="w-3.5 h-3.5" style={{ color: 'var(--primary-text-color)' }} />
-            </div>
-            <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
-            <ExternalLink size={12} className="ml-1" style={{ color: 'var(--secondary-text-color)', opacity: 0.6 }} />
-            <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
-          </div>
-          <button
-            className="p-0.5 rounded hover:bg-gray-800"
-            style={{ color: 'var(--secondary-text-color)' }}
-            onClick={() => onClose(notification.id)}
-          >
-            <X size={12} />
-          </button>
-        </div>
-        <h4 className="text-sm font-semibold mb-2 ml-6" style={{ color: 'var(--secondary-text-color)' }}>
-          {notification.repo}
-        </h4>
-        <div className="mb-3 ml-6">
-          <div className="flex items-center gap-2 mb-2">
-            <GitPullRequestArrow size={14} style={{ color: 'var(--secondary-text-color)' }} />
-            <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
-              <strong style={{ color: 'var(--primary-text-color)' }}>{notification.user}</strong> created a pull request
-            </p>
-          </div>
-          <div className="flex items-start gap-2 ">
-            <div className="flex-1">
-              <p className="text-xs" style={{ color: 'var(--mid-dim-font-color)' }}>
-                {expanded ? notification.fullPR : notification.shortPR}
-              </p>
-              {notification.hasMore && (
-                <button
-                  className="text-xs mt-1 hover:underline"
-                  style={{ color: 'var(--secondary-text-color)' }}
-                  onClick={() => onToggleExpand(notification.id)}
-                >
-                  {expanded ? 'see less' : 'more'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2 justify-center">
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Review', notification.id)}
-          >
-            Review
-          </button>
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Reject', notification.id)}
-          >
-            Reject
-          </button>
-        </div>
-      </div>
-    );
-  } else if (type === 'alert') {
-    return (
-      <div
-        className={`rounded-xl p-4 mb-3 transition-all ${notification.read ? 'opacity-70' : ''}`}
-        style={{
-          backgroundColor: 'var(--dimmer-dark-bg)',
-          border: '1px solid main-border-color'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--card-bg)'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--dimmer-dark-bg)'}
-      >
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex items-center gap-1.5 text-sm">
-            <div className="flex items-center justify-center w-6 h-6 rounded-full" style={{ backgroundColor: 'var(--dark-bg)' }}>
-              <GithubIcon className="w-3.5 h-3.5" style={{ color: 'var(--primary-text-color)' }} />
-            </div>
-            <span className="font-medium" style={{ color: 'var(--primary-text-color)' }}>{notification.label}</span>
-            <AlertCircle size={16} style={{ color: '#ff4757' }} />
-            <span className="text-xs ml-1" style={{ color: 'var(--secondary-text-color)' }}>{notification.time}</span>
-          </div>
-          <button
-            className="p-0.5 rounded hover:bg-gray-800"
-            style={{ color: 'var(--secondary-text-color)' }}
-            onClick={() => onClose(notification.id)}
-          >
-            <X size={12} />
-          </button>
-        </div>
-        <div className="flex items-center gap-1.5 mb-2">
-          <h4 className="text-sm font-semibold" style={{ color: 'var(--secondary-text-color)' }}>{notification.repo}</h4>
-          <ExternalLink size={12} style={{ color: 'var(--secondary-text-color)', opacity: 0.6 }} />
-        </div>
-        <div className="mb-3">
-          <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>
-            {expanded ? notification.fullAlert : notification.shortAlert}
-          </p>
-          {notification.hasMore && (
             <button
-              className="text-xs mt-1 hover:underline"
-              style={{ color: 'var(--secondary-text-color)' }}
-              onClick={() => onToggleExpand(notification.id)}
+              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-(--secondary-button) text-(--secondary-text-color) border border-(--main-border-color) hover:bg-(--secondary-button-hover) transition-all active:scale-95"
+              onClick={() => onAction('View', _id)}
             >
-              {expanded ? 'see less' : 'more'}
+              View Details
             </button>
-          )}
-        </div>
-        <div className="flex gap-2 justify-center">
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Checkout', notification.id)}
-          >
-            Checkout
-          </button>
-          <button
-            className="px-3 py-1.5 rounded text-xs font-medium transition-colors border hover:-translate-y-0.5"
-            style={{
-              backgroundColor: 'var(--secondary-button)',
-              color: 'var(--secondary-text-color)',
-              borderColor: 'rgba(239, 238, 238, 0.2)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button)';
-              e.currentTarget.style.borderColor = 'rgba(239, 238, 238, 0.2)';
-            }}
-            onClick={() => onAction('Ignore', notification.id)}
-          >
-            Ignore
-          </button>
+          </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Unread Indicator */}
+      {!isRead && (
+        <div className="absolute top-4 right-4 w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+      )}
+    </div>
+  );
 }
 
 export default NotificationItem;

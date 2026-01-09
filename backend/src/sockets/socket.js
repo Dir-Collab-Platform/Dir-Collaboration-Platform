@@ -38,6 +38,7 @@ export const initSocket = (server) => {
 
         // joining private user room - for any notifications
         socket.join(`user:${userId}`);
+        console.log(`Socket ${socket.id} joined room user:${userId}`);
 
         // Automatic joining via handshake query parameters
         const { workspaceId, channelId } = socket.handshake.query;

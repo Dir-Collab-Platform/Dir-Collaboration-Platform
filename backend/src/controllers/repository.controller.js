@@ -904,11 +904,23 @@ export const getContents = async (req, res) => {
       async () => {
         const octokit = createGitHubClient(req.user.accessToken);
 
-        const { data } = await octokit.rest.repos.getContent({
-          owner: targetOwner,
-          repo: targetRepo,
-          path: path,
-        });
+        let data;
+        try {
+          const response = await octokit.rest.repos.getContent({
+            owner: targetOwner,
+            repo: targetRepo,
+            path: path,
+          });
+          data = response.data;
+        } catch (err) {
+          // specific handling for empty repositories
+          if (err.status === 404 && err.message.includes("empty")) {
+            // Return empty directory structure
+            data = [];
+          } else {
+            throw err;
+          }
+        }
 
         if (Array.isArray(data)) {
           // Return a clean object for "directory" type
@@ -986,7 +998,7 @@ export const getRepoLanguages = async (req, res) => {
 
     // Check Authentication
     if (!req.user || !req.user.accessToken) {
-       return res.status(StatusCodes.OK).json({ status: "success", data: [] });
+      return res.status(StatusCodes.OK).json({ status: "success", data: [] });
     }
 
     const cacheKey = `repo:languages:${targetOwner.toLowerCase()}:${targetRepo.toLowerCase()}`;
@@ -1000,15 +1012,15 @@ export const getRepoLanguages = async (req, res) => {
           let languages = {};
 
           try {
-              // explicit endpoint as requested
-              const { data } = await octokit.request('GET /repos/{owner}/{repo}/languages', {
-                owner: targetOwner,
-                repo: targetRepo,
-              });
-              languages = data;
+            // explicit endpoint as requested
+            const { data } = await octokit.request('GET /repos/{owner}/{repo}/languages', {
+              owner: targetOwner,
+              repo: targetRepo,
+            });
+            languages = data;
           } catch (err) {
-              console.warn(`Languages API failed for ${targetOwner}/${targetRepo}:`, err.message);
-              return []; // return empty stats if API fails
+            console.warn(`Languages API failed for ${targetOwner}/${targetRepo}:`, err.message);
+            return []; // return empty stats if API fails
           }
 
           //calculate the percentage from each language
@@ -1030,8 +1042,8 @@ export const getRepoLanguages = async (req, res) => {
 
       res.status(StatusCodes.OK).json({ status: "success", data: stats });
     } catch (err) {
-        // Fallback for cache errors
-         res.status(StatusCodes.OK).json({ status: "success", data: [] });
+      // Fallback for cache errors
+      res.status(StatusCodes.OK).json({ status: "success", data: [] });
     }
 
   } catch (error) {

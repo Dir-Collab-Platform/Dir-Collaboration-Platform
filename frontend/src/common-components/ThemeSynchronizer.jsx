@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext/AuthContext';
+import { useAuth } from '../context/AuthContext/AuthContext';
 
 export default function ThemeSynchronizer() {
     const { user } = useAuth();

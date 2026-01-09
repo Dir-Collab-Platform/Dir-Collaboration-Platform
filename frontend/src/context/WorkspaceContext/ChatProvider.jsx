@@ -211,17 +211,34 @@ export default function ChatProvider({ children }) {
         c._id === activeChannelId || c.channel_id === activeChannelId
     );
 
-    // Enrich messages with sender info
+    // Enrich messages with sender info and aggregated reactions
     const enrichedMessages = messages.map(msg => {
         // Handle both populated sender or raw ID
         const senderId = typeof msg.senderId === 'object' ? msg.senderId?._id : msg.senderId;
         const sender = users.find(u => u._id?.toString() === senderId?.toString()) ||
             (typeof msg.senderId === 'object' ? msg.senderId : {});
 
+        // Aggregate reactions
+        const rawReactions = msg.reactions || [];
+        const reactionCounts = rawReactions.reduce((acc, r) => {
+            const emoji = r.emoji;
+            if (!acc[emoji]) {
+                acc[emoji] = { emoji, count: 0, userIds: [] };
+            }
+            acc[emoji].count += 1;
+            const rUserId = r.userId?._id || r.userId;
+            if (rUserId) acc[emoji].userIds.push(rUserId.toString());
+            return acc;
+        }, {});
+
+        const aggregatedReactions = Object.values(reactionCounts);
+
         return {
             ...msg,
             senderAvatar: sender?.avatarUrl,
-            senderName: sender?.githubUsername || sender?.username || "Unknown"
+            senderName: sender?.githubUsername || sender?.username || "Unknown",
+            reactions: aggregatedReactions,
+            rawReactions: rawReactions
         };
     });
 
@@ -287,6 +304,7 @@ export default function ChatProvider({ children }) {
         }
     }
 
+
     /**
      * Delete a channel
      */
@@ -321,6 +339,99 @@ export default function ChatProvider({ children }) {
         }
     }
 
+    /**
+     * Add or Toggle Reaction to a message
+     */
+    async function addReaction(messageId, emoji) {
+        if (!workspaceId) return;
+
+        try {
+            // Optimistic Update
+            setMessages(prev => prev.map(msg => {
+                if (msg._id === messageId) {
+                    const currentUserId = user?._id || user?.id;
+                    if (!currentUserId) return msg;
+
+                    const rawReactions = msg.reactions || [];
+                    // Check if I already reacted
+                    const existingIndex = rawReactions.findIndex(r => {
+                        const rUserId = r.userId?._id || r.userId;
+                        return rUserId?.toString() === currentUserId.toString() && r.emoji === emoji;
+                    });
+
+                    let newReactions = [...rawReactions];
+                    if (existingIndex > -1) {
+                        // Toggle Off: Remove
+                        newReactions.splice(existingIndex, 1);
+                    } else {
+                        // Toggle On: Add
+                        newReactions.push({
+                            emoji,
+                            userId: { _id: currentUserId, githubUsername: user.githubUsername }
+                        });
+                    }
+                    return { ...msg, reactions: newReactions };
+                }
+                return msg;
+            }));
+
+            const res = await apiRequest(`/api/messages/${messageId}/reactions`, {
+                method: 'PUT',
+                body: JSON.stringify({ emoji, repoId: workspaceId }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            return res.data;
+        } catch (err) {
+            console.error("Add Reaction Error:", err);
+        }
+    }
+
+    /**
+     * Leave a channel
+     */
+    async function leaveChannel(channelId) {
+        if (!workspaceId || !channelId) return;
+
+        try {
+            const res = await apiRequest(`/api/repos/${workspaceId}/channels/${channelId}/leave`, {
+                method: 'POST'
+            });
+
+            if (res.status === 'success') {
+                // Remove from local channels list?
+                // Actually, if we leave, we shouldn't see it in the sidebar anymore?
+                // OR should we just be removed from participants but still see it if public?
+                // Backend logic: removing from participants array.
+                // Assuming Sidebar shows *all* channels or only *joined* channels?
+                // listChannels endpoint usually returns all channels in repo.
+                // So leaving doesn't hide it necessarily, unless logic says so.
+                // But typically "Leave Channel" implies you act like you are not in it.
+
+                // For now, prompt usually implies removing from list if it's "my channels". 
+                // But listChannels implementation (Step 503) returns `workspace.channels`.
+                // It doesn't filter by "my channels".
+                // So "Leaving" just means not receiving notifications or showing up in members list.
+
+                // However, the requested behavior usually implies navigating away if active.
+                if (activeChannelId === channelId) {
+                    // Switch to General or first available
+                    const general = channels.find(c => c.name === 'general');
+                    if (general && general._id !== channelId) {
+                        setActiveChannelId(general._id);
+                    } else if (channels.length > 0) {
+                        const first = channels.find(c => c._id !== channelId);
+                        if (first) setActiveChannelId(first._id);
+                    }
+                }
+                return true;
+            }
+        } catch (err) {
+            console.error("Leave Channel Error:", err);
+            throw err;
+        }
+    }
+
     const value = {
         users,
         channels,
@@ -333,7 +444,9 @@ export default function ChatProvider({ children }) {
         setActiveChannelId,
         sendMessage,
         createChannel,
-        deleteChannel
+        deleteChannel,
+        addReaction,
+        leaveChannel
     }
 
     return (

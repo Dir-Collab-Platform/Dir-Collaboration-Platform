@@ -1,5 +1,5 @@
 import React from 'react';
-import { GitCommit, GitBranch, MessageSquare, GitPullRequest, AlertCircle, FileCode } from 'lucide-react';
+import { GitCommit, GitBranch, MessageSquare, GitPullRequest, AlertCircle, Workflow, Folder } from 'lucide-react';
 import { getRelativeTime } from '../../../utils/utils';
 
 const getIcon = (type) => {
@@ -8,7 +8,8 @@ const getIcon = (type) => {
     case 'branch': return { icon: GitBranch, color: 'text-blue-500' };
     case 'merge': return { icon: GitPullRequest, color: 'text-purple-500' };
     case 'issue': return { icon: AlertCircle, color: 'text-red-500' };
-    case 'repository': return { icon: FileCode, color: 'text-green-500' };
+    case 'repository': return { icon: Folder, color: 'text-green-500' };
+    case 'workspace': return {icon: Workflow, color: 'text-indigo-500'};
     default: return { icon: MessageSquare, color: 'text-gray-500' };
   }
 };

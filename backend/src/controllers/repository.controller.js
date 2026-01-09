@@ -831,6 +831,13 @@ export const createRemoteRepo = async (req, res) => {
       `Created new GitHub remote repository ${newRepo[0].githubRepoName} and workspace ${newRepo[0].workspaceName}`
     );
 
+    // Invalidate activity feed cache since new activity was created
+    const activityFeedKeys = [
+      `activity:feed:${req.user._id}:1:10`,
+      `activity:feed:${req.user._id}:1:20`,
+    ];
+    await Promise.all(activityFeedKeys.map((key) => redisClient.del(key)));
+
     //cache invalidation
     await redisClient.del(`user:stats:${req.user._id}`);
 
@@ -842,6 +849,13 @@ export const createRemoteRepo = async (req, res) => {
     ]);
 
     await session.commitTransaction();
+
+    // Emit socket event to notify user that stats have been updated
+    getIO().to(`user:${req.user._id}`).emit("stats_updated", {
+      message: "Dashboard stats updated",
+      repositoryId: newRepo[0]._id,
+      repositoryName: newRepo[0].githubRepoName,
+    });
 
     res.status(StatusCodes.CREATED).json({
       status: "success",

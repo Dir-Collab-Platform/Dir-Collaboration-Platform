@@ -2,6 +2,7 @@ import React, { useContext } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { LayoutDashboard, Folder, Workflow, Search, Settings, LogOut } from "lucide-react"
 import { useAuth} from "../../../context/AuthContext/AuthContext"
+import Avatar from "../../Workspace/components/Chat/Avatar";
 
 export default function Sidebar() {
     const { user, logout } = useAuth();
@@ -37,18 +38,18 @@ export default function Sidebar() {
 
             <div className="flex items-center gap-3 mb-10 px-2">
                 <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden" style={{ backgroundColor: 'var(--card-bg-lighter)' }}>
-                    <img
-                        src={user?.avatarUrl || "/assets/images/person.jpg"}
+                    <Avatar
+                        src={user?.avatarUrl}
+                        size={40}
                         alt="User profile"
-                        className="w-full h-full object-cover"
                     />
                 </div>
                 <div className="min-w-0">
                     <p className="text-sm font-semibold truncate" style={{ color: 'var(--primary-text-color)' }}>
-                        {user?.githubUsername || "Zeamanuel Mbit"}
+                        {user?.githubUsername || "No logged in user"}
                     </p>
                     <p className="text-xs truncate" style={{ color: 'var(--secondary-text-color)' }}>
-                        @{user?.githubUsername?.toLowerCase() || "zeaman"}
+                        @{user?.githubUsername?.toLowerCase() || "--"}
                     </p>
                 </div>
             </div>

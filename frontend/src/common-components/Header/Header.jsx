@@ -1,29 +1,16 @@
 import { useState, useEffect, useRef, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Plus, Menu } from 'lucide-react';
+import { Plus, Menu } from 'lucide-react';
 
-import NotificationPanel from './components/NotificationPanel';
 import CreateRepoModal from './components/CreateRepoModal';
 import SidebarMenu from './components/SidebarMenu';
+import NotificationBell from './components/NotificationBell';
 import Logo from '../Logo';
-import { DashboardContext } from '../../context/DashboardContext/DashboardContext';
 
 function Header() {
   const navigate = useNavigate();
-  const { notifications, markNotificationRead, deleteNotification } = useContext(DashboardContext);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isCreateRepoOpen, setIsCreateRepoOpen] = useState(false);
-
-  // Filter for unread or pass all to panel? Let's pass all.
-  // const unreadCount = notifications ? notifications.filter(n => !n.isRead).length : 0;
-
-  const [expandedMessages, setExpandedMessages] = useState({});
-  const [pastNotifications, setPastNotifications] = useState([]); // Keep local for now or fetch? Utils
-  const [isLoadingPast, setIsLoadingPast] = useState(false);
-
-  const notificationPanelRef = useRef(null);
-  const bellBtnRef = useRef(null);
 
   const handleNewRepoClick = () => {
     setIsCreateRepoOpen(true);
@@ -33,94 +20,23 @@ function Header() {
     setIsCreateRepoOpen(false);
   };
 
-  const toggleNotificationPanel = (e) => {
-    if (e) e.stopPropagation();
-    setIsNotificationOpen(!isNotificationOpen);
-  };
-
-  const closeNotificationPanel = () => {
-    setIsNotificationOpen(false);
-  };
-
-  const handleMarkAllAsRead = () => {
-    // Optimistic or batch call
-    if (notifications) {
-      notifications.forEach(n => {
-        if (!n.isRead) markNotificationRead(n._id);
-      });
-    }
-  };
-
-  const handleCloseNotification = (id) => {
-    deleteNotification(id);
-  };
-
-  const handleLoadPastNotifications = () => {
-    // Already loaded all?
-    setIsLoadingPast(false);
-  };
-
-  const handleActionButton = (action, notificationId) => {
-    switch (action.toLowerCase()) {
-      case 'reply':
-        break;
-      case 'mark as read':
-        markNotificationRead(notificationId);
-        break;
-      case 'review':
-        break;
-      case 'reject':
-        handleCloseNotification(notificationId);
-        break;
-      case 'checkout':
-        break;
-      case 'ignore':
-        handleCloseNotification(notificationId);
-        break;
-      default:
-    }
-  };
-
-  const toggleMessageExpansion = (notificationId) => {
-    setExpandedMessages(prev => ({
-      ...prev,
-      [notificationId]: !prev[notificationId]
-    }));
-  };
-
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        notificationPanelRef.current &&
-        !notificationPanelRef.current.contains(event.target) &&
-        bellBtnRef.current &&
-        !bellBtnRef.current.contains(event.target)
-      ) {
-        closeNotificationPanel();
-      }
-    };
-
     const handleEscapeKey = (event) => {
       if (event.key === 'Escape') {
-        if (isNotificationOpen) {
-          closeNotificationPanel();
-        }
         if (isCreateRepoOpen) {
           handleCloseCreateRepo();
         }
       }
     };
 
-    if (isNotificationOpen || isCreateRepoOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+    if (isCreateRepoOpen) {
       document.addEventListener('keydown', handleEscapeKey);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscapeKey);
     };
-  }, [isNotificationOpen, isCreateRepoOpen]);
+  }, [isCreateRepoOpen]);
 
   return (
     <>
@@ -153,49 +69,7 @@ function Header() {
               <span>New Repository</span>
             </button>
 
-            <div className="relative">
-              <button
-                ref={bellBtnRef}
-                onClick={toggleNotificationPanel}
-                className="p-2 rounded-md transition-colors relative"
-                style={{ color: 'var(--secondary-text-color)' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-                  e.currentTarget.style.color = 'var(--primary-text-color)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--secondary-text-color)';
-                }}
-              >
-                <Bell size={24} />
-                {notifications && notifications.filter(n => !n.isRead).length > 0 && (
-                  <span
-                    className="absolute -top-1 -right-1 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
-                    style={{ backgroundColor: 'var(--notification-count-bg)' }}
-                  >
-                    {notifications.filter(n => !n.isRead).length}
-                  </span>
-                )}
-              </button>
-
-              {isNotificationOpen && (
-                <div ref={notificationPanelRef}>
-                  <NotificationPanel
-                    notifications={notifications}
-                    pastNotifications={pastNotifications}
-                    expandedMessages={expandedMessages}
-                    isLoadingPast={isLoadingPast}
-                    onClose={closeNotificationPanel}
-                    onMarkAllAsRead={handleMarkAllAsRead}
-                    onCloseNotification={handleCloseNotification}
-                    onActionButton={handleActionButton}
-                    onToggleMessageExpansion={toggleMessageExpansion}
-                    onLoadPastNotifications={handleLoadPastNotifications}
-                  />
-                </div>
-              )}
-            </div>
+            <NotificationBell />
 
             <button
               onClick={() => setIsMenuOpen(true)}

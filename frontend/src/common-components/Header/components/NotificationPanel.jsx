@@ -2,18 +2,8 @@ import React from 'react';
 import { Bell, X, CheckCheck } from 'lucide-react';
 import NotificationItem from './NotificationItem';
 
-function NotificationPanel({
-  notifications,
-  pastNotifications,
-  expandedMessages,
-  isLoadingPast,
-  onClose,
-  onMarkAllAsRead,
-  onCloseNotification,
-  onActionButton,
-  onToggleMessageExpansion,
-  onLoadPastNotifications
-}) {
+function NotificationPanel({ notifications, onClose, onMarkAllAsRead, onCloseNotification, onActionButton }) {
+  
   return (
     <div
       className="absolute top-12 right-0 w-[480px] max-h-[800px] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
@@ -69,61 +59,29 @@ function NotificationPanel({
         <div className="flex-1 overflow-y-auto p-2 scroll-bar">
           {notifications.map(notification => (
             <NotificationItem
-              key={notification.id}
+              key={notification._id}
               notification={notification}
-              expanded={expandedMessages[notification.id] || false}
               onClose={onCloseNotification}
               onAction={onActionButton}
-              onToggleExpand={onToggleMessageExpansion}
-            />
-          ))}
-          {pastNotifications.map(notification => (
-            <NotificationItem
-              key={notification.id}
-              notification={notification}
-              expanded={expandedMessages[notification.id] || false}
-              onClose={onCloseNotification}
-              onAction={onActionButton}
-              onToggleExpand={onToggleMessageExpansion}
-              isPast={true}
             />
           ))}
 
-          {notifications.length === 0 && pastNotifications.length === 0 && (
-            <div className="text-center py-8">
-              <p style={{ color: 'var(--secondary-text-color)' }}>No notifications</p>
+          {notifications.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110"
+                style={{ backgroundColor: 'rgba(239, 238, 238, 0.05)', border: '1px solid rgba(239, 238, 238, 0.1)' }}
+              >
+                <Bell size={24} style={{ color: 'var(--secondary-text-color)', opacity: 0.5 }} />
+              </div>
+              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--primary-text-color)' }}>
+                All caught up!
+              </h4>
+              <p className="text-xs max-w-[200px]" style={{ color: 'var(--secondary-text-color)', opacity: 0.7 }}>
+                You have no new notifications at the moment.
+              </p>
             </div>
           )}
-        </div>
-
-        <div
-          className="p-4 border-t flex justify-end shrink-0"
-          style={{
-            backgroundColor: 'var(--dark-bg)',
-            borderColor: 'rgba(220, 219, 219, 0.2)'
-          }}
-        >
-          <button
-            className="px-6 py-2.5 rounded-md text-sm font-medium transition-colors hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{
-              backgroundColor: 'var(--primary-button)',
-              color: 'var(--primary-text-color)'
-            }}
-            onMouseEnter={(e) => {
-              if (!isLoadingPast) {
-                e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isLoadingPast) {
-                e.currentTarget.style.backgroundColor = 'var(--primary-button)';
-              }
-            }}
-            onClick={onLoadPastNotifications}
-            disabled={isLoadingPast}
-          >
-            {isLoadingPast ? 'Loading...' : 'Load past notifications'}
-          </button>
         </div>
       </div>
     </div>

@@ -52,19 +52,6 @@ passport.use(
           user.lastLogin = new Date();
         }
 
-        // Only create the welcome notification if it's a brand new user
-        if (isNewUser && totalRepos > 0) {
-          const welcomeNote = await Notification.create({
-            userId: user._id,
-            message: `Welcome! We found ${totalRepos} repositories on your GitHub. Head over to Discovery to import your first workspace.`,
-            type: "message",
-            isRead: false,
-            targetType: "system",
-          });
-
-          user.notifications.push(welcomeNote._id);
-        }
-
         await user.save();
 
         user.accessToken = accessToken;

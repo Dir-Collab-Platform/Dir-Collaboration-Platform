@@ -56,3 +56,27 @@
     --paragraph2-size: 16px;
     --paragraph-mini-size: 14px;
 }
+
+[data-theme="light"] {
+    --dark-bg: #FFFFFF;
+    --dimmer-dark-bg: #F3F4F6;
+    --card-bg: #FFFFFF;
+    --card-bg-lighter: #F9FAFB;
+    --card-bg-lighter2: #E5E7EB;
+    
+    --primary-text-color: #111827;
+    --secondary-text-color: #4B5563;
+    --mid-dim-font-color: #6B7280;
+    --meta-tag-color: #E5E7EB;
+    
+    --main-border-color: #E5E7EB;
+    --popup-border: rgba(0, 0, 0, 0.1);
+    
+    --secondary-button: #F3F4F6;
+    --secondary-button-hover: #E5E7EB;
+    
+    --received-message: #E0E7FF;
+    --sent-message: #DBEAFE;
+    
+    --active-tab-bg: #F3F4F6;
+}

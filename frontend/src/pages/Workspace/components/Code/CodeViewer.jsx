@@ -157,7 +157,7 @@ export default function CodeViewer() {
 
         {/* Code Content */}
         <pre
-          className="!m-0 !p-6 !bg-transparent !text-[13px] grow overflow-visible"
+          className="m-0! p-6! bg-transparent! text-[13px]! grow overflow-visible"
           style={{ color: "var(--primary-text-color)" }}
         >
           <code

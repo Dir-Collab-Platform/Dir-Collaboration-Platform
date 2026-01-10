@@ -41,7 +41,7 @@ export default function Sidebar() {
                     <p className="text-sm font-bold truncate text-(--text-primary)">
                         {user?.githubUsername || "Guest"}
                     </p>
-                    <p className="text-[10px] font-mono uppercase tracking-widest truncate text-(--text-secondary) opacity-50">
+                    <p className="text-[10px] font-mono tracking-widest truncate text-(--text-secondary) opacity-50">
                         @{user?.githubUsername?.toLowerCase() || "anon"}
                     </p>
                 </div>

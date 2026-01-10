@@ -1,12 +1,12 @@
-import { useState, useEffect, useRef, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Plus, Menu } from 'lucide-react';
+import { useState, useEffect, useRef, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { Plus, Menu } from "lucide-react";
 
-import CreateRepoModal from './components/CreateRepoModal';
-import SidebarMenu from './components/SidebarMenu';
-import NotificationBell from './components/NotificationBell';
-import Logo from '../Logo';
-import { useAuth } from '../../context/AuthContext/AuthContext';
+import CreateRepoModal from "./components/CreateRepoModal";
+import SidebarMenu from "./components/SidebarMenu";
+import NotificationBell from "./components/NotificationBell";
+import Logo from "../Logo";
+import { useAuth } from "../../context/AuthContext/AuthContext";
 
 function Header() {
   const navigate = useNavigate();
@@ -24,7 +24,7 @@ function Header() {
 
   useEffect(() => {
     const handleEscapeKey = (event) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         if (isCreateRepoOpen) {
           handleCloseCreateRepo();
         }
@@ -32,11 +32,11 @@ function Header() {
     };
 
     if (isCreateRepoOpen) {
-      document.addEventListener('keydown', handleEscapeKey);
+      document.addEventListener("keydown", handleEscapeKey);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleEscapeKey);
+      document.removeEventListener("keydown", handleEscapeKey);
     };
   }, [isCreateRepoOpen]);
 
@@ -45,15 +45,15 @@ function Header() {
       <nav
         className="p-4 fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: 'var(--dark-bg)',
-          borderBottom: '1px solid var(--main-border-color)'
+          backgroundColor: "var(--dark-bg)",
+          borderBottom: "1px solid var(--main-border-color)",
         }}
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <div 
-              className="cursor-pointer" 
-              onClick={() => navigate(isAuthenticated ? '/dashboard' : '/')}
+            <div
+              className="cursor-pointer"
+              onClick={() => navigate(isAuthenticated ? "/dashboard" : "/")}
             >
               <Logo />
             </div>
@@ -64,11 +64,17 @@ function Header() {
               onClick={handleNewRepoClick}
               className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all hover:-translate-y-0.5"
               style={{
-                backgroundColor: 'var(--primary-button)',
-                color: 'var(--primary-text-color)'
+                backgroundColor: "var(--primary-button)",
+                color: "var(--primary-text-color)",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "var(--primary-button-hover)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  "var(--primary-button)")
+              }
             >
               <Plus size={16} />
               <span>New Repository</span>
@@ -79,14 +85,15 @@ function Header() {
             <button
               onClick={() => setIsMenuOpen(true)}
               className="p-2 rounded-md transition-colors"
-              style={{ color: 'var(--secondary-text-color)' }}
+              style={{ color: "var(--secondary-text-color)" }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-                e.currentTarget.style.color = 'var(--primary-text-color)';
+                e.currentTarget.style.backgroundColor =
+                  "var(--secondary-button-hover)";
+                e.currentTarget.style.color = "var(--primary-text-color)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = 'var(--secondary-text-color)';
+                e.currentTarget.style.backgroundColor = "transparent";
+                e.currentTarget.style.color = "var(--secondary-text-color)";
               }}
             >
               <Menu size={24} />
@@ -100,20 +107,15 @@ function Header() {
         onClose={() => setIsMenuOpen(false)}
       />
 
-      {isCreateRepoOpen && (
-        <CreateRepoModal
-          onClose={handleCloseCreateRepo}
-        />
-      )}
+      {isCreateRepoOpen && <CreateRepoModal onClose={handleCloseCreateRepo} />}
 
       {isMenuOpen && (
         <div
           className="fixed inset-0 z-40"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
           onClick={() => setIsMenuOpen(false)}
         />
       )}
-
     </>
   );
 }

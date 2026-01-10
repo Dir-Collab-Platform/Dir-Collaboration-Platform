@@ -90,7 +90,10 @@ export default function CodeViewer() {
     return (
         <div className="code-viewer-container flex flex-col w-full border rounded-2xl overflow-hidden shadow-2xl" style={{
             backgroundColor: 'var(--code-viewer-container)',
-            borderColor: 'var(--main-border-color)'
+            borderColor: 'var(--main-border-color)',
+            filter: 'none',
+            backdropFilter: 'none',
+            opacity: 1
         }}>
             {/* Header */}
             <div className="code-upper flex items-center justify-between px-6 py-3 border-b" style={{
@@ -106,7 +109,7 @@ export default function CodeViewer() {
             </div>
 
             {/* Code Body with Synchronized Gutter */}
-            <div className="grow overflow-auto custom-scrollbar relative flex bg-transparent">
+            <div className="grow overflow-auto custom-scrollbar relative flex bg-transparent" style={{ filter: 'none', backdropFilter: 'none' }}>
                 {/* Manual Gutter: This ensures line numbers always match line height exactly */}
                 <div className="gutter shrink-0 py-6 bg-transparent border-r select-none text-right" style={{
                     width: '3.5rem',
@@ -120,9 +123,10 @@ export default function CodeViewer() {
                 </div>
 
                 {/* Code Content */}
-                <pre className="!m-0 !p-6 !bg-transparent !text-[13px] grow overflow-visible">
+                <pre className="!m-0 !p-6 !bg-transparent !text-[13px] grow overflow-visible" style={{ color: 'var(--primary-text-color)' }}>
                     <code
                         className={`language-${extension} leading-relaxed block whitespace-pre`}
+                        style={{ color: 'var(--primary-text-color)' }}
                         dangerouslySetInnerHTML={{ __html: highlightedHtml }}
                     />
                 </pre>
@@ -146,20 +150,34 @@ export default function CodeViewer() {
                 pre, code {
                     tab-size: 4 !important;
                     -moz-tab-size: 4 !important;
+                    color: var(--primary-text-color) !important;
                 }
                 pre[class*="language-"] {
                     text-shadow: none !important;
                     font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+                    color: var(--primary-text-color) !important;
+                    background: transparent !important;
+                }
+                code[class*="language-"] {
+                    color: var(--primary-text-color) !important;
+                    background: transparent !important;
+                    text-shadow: none !important;
                 }
                 /* Ensure both gutter and code have the exact same line height */
                 .leading-relaxed {
                     line-height: 1.625 !important;
                 }
-                .token.comment { color: #8b949e !important; font-style: italic; }
-                .token.string { color: #a5d6ff !important; }
-                .token.keyword { color: #ff7b72 !important; font-weight: 600; }
-                .token.function { color: #d2a8ff !important; }
-                .token.number { color: #79c0ff !important; }
+                /* High contrast syntax highlighting - override any dimming */
+                .token.comment { color: #8b949e !important; font-style: italic; opacity: 1 !important; }
+                .token.string { color: #a5d6ff !important; opacity: 1 !important; }
+                .token.keyword { color: #ff7b72 !important; font-weight: 600 !important; opacity: 1 !important; }
+                .token.function { color: #d2a8ff !important; opacity: 1 !important; }
+                .token.number { color: #79c0ff !important; opacity: 1 !important; }
+                /* Ensure default text is high contrast */
+                .token {
+                    opacity: 1 !important;
+                    color: var(--primary-text-color) !important;
+                }
             `}} />
         </div>
     )

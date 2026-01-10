@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 import Logo from '../../../common-components/Logo';
 
 
 const Navbar = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
 
     const BASE_URL = 'http://localhost:5000';
 
@@ -19,11 +19,11 @@ const Navbar = () => {
                 {/* Logo */}
                 <Logo />
                 {/* Center Links */}
-                <div className="hidden md:flex items-center gap-8">
+                {/* <div className="hidden md:flex items-center gap-8">
                     <a href="#product" className="text-[var(--secondary-text-color)] mx-4 text-sm font-medium hover:text-[var(--primary-text-color)] transition-colors no-underline">Product</a>
                     <a href="#features" className="text-[var(--secondary-text-color)] mx-4 text-sm font-medium hover:text-[var(--primary-text-color)] transition-colors no-underline">Features</a>
                     <a href="#pricing" className="text-[var(--secondary-text-color)] mx-4 text-sm font-medium hover:text-[var(--primary-text-color)] transition-colors no-underline">Pricing</a>
-                </div>
+                </div> */}
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-6">

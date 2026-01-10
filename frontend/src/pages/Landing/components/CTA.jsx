@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 
 const CTA = () => {
     const navigate = useNavigate();
+    const BASE_URL = 'http://localhost:5000';
 
     const handleGetStarted = () => {
         alert("Redirecting to Dashboard...");
-        navigate('/dashboard');
+        navigate(`${BASE_URL}/auth/github`);
     };
 
     return (
@@ -17,9 +18,9 @@ const CTA = () => {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[500px] h-[300px] bg-blue-900/20 blur-[100px] rounded-full pointer-events-none"></div>
 
                 <div className="relative z-10 max-w-2xl mx-auto">
-                    <h2 className="text-[var(--header1-size)] font-semibold mb-4 text-white text-3xl md:text-4xl">Ready to build the future?</h2>
+                    <h2 className="text-[var(--header1-size)] font-semibold mb-4 text-white text-3xl md:text-4xl">Ready for Seamless Team Collaboration?</h2>
                     <p className="text-[var(--paragraph1-size)] text-[var(--secondary-text-color)] leading-relaxed mb-10 text-lg">
-                        Join thousands of developers and start shipping faster today.
+                        Transform your static repositories into dynamic, real-time workspaces today.
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

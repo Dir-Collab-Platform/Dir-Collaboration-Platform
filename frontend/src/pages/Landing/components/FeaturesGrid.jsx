@@ -1,4 +1,5 @@
 import React from 'react';
+import { GithubIcon } from '../../../../public/assets/icons/icons';
 
 const FeaturesGrid = () => {
     return (
@@ -10,10 +11,10 @@ const FeaturesGrid = () => {
                 <div className="md:col-span-2 bg-[var(--card-bg)] rounded-xl border border-[var(--main-border-color)] p-8 flex flex-col md:flex-row items-center gap-8 relative overflow-hidden group bg-[var(--dimmer-dark-bg)]">
                     <div className="flex-1 z-10">
                         <div className="inline-block px-3 py-1 bg-indigo-500/10 text-indigo-400 rounded-full text-xs font-semibold mb-4">
-                            Workflow
+                            Collaboration
                         </div>
-                        <h3 className="text-[var(--header2-size)] font-semibold mb-3 text-white">Integrated Messaging</h3>
-                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">Chat with your team directly inside the file you're editing. Mention code snippets and resolve issues instantly.</p>
+                        <h3 className="text-[var(--header2-size)] font-semibold mb-3 text-white">Real-Time Collaboration</h3>
+                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">Context-aware messaging scoped to specific channels and workspaces. Mention code snippets and resolve issues instantly.</p>
 
                         <div className="flex gap-2 mt-6">
                             <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-[#1D1D29]"></div>
@@ -47,10 +48,10 @@ const FeaturesGrid = () => {
                 <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--main-border-color)] p-8 flex flex-col relative overflow-hidden group">
                     <div className="mb-auto z-10">
                         <div className="h-8 w-8 text-indigo-400 mb-4">
-                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                         </div>
-                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">Version Control</h3>
-                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">Visual branching and merge conflict resolution like you've never seen before.</p>
+                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">Deep Analytics</h3>
+                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">View repository statistics, star counts, and contribution heatmaps. Monitor global and repository-specific activity logs.</p>
                     </div>
 
                     {/* Visual abstract */}
@@ -68,9 +69,9 @@ const FeaturesGrid = () => {
                 {/* Feature 3: Real-time Sync (Span 1) */}
                 <div className="bg-[var(--card-bg)] rounded-xl border border-[var(--main-border-color)] p-8 flex flex-col justify-between group">
                     <div>
-                        <div className="text-2xl font-bold text-indigo-500 mb-2">27ms</div>
-                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">Real-time Sync</h3>
-                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)] mb-4">Multi-cursor editing with sub-millisecond latency for teams of any size.</p>
+                        <div className="text-2xl font-bold text-indigo-500 mb-2">Instant</div>
+                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">File Navigation</h3>
+                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)] mb-4">Cache-first file tree exploration for instant access to code. Optimized loading architecture ensures zero lag.</p>
                     </div>
                     <div className="flex items-center justify-between mt-4 pb-2 border-b border-gray-800">
                         <span className="text-xs text-gray-500">Powered by DIR Sync Engine</span>
@@ -81,11 +82,11 @@ const FeaturesGrid = () => {
                 {/* Feature 4: Enterprise Grade Security (Span 2) */}
                 <div className="md:col-span-2 bg-[var(--card-bg)] rounded-xl border border-[var(--main-border-color)] p-8 flex items-center gap-8">
                     <div className="w-24 h-24 shrink-0 rounded-full border-4 border-dashed border-gray-700 flex items-center justify-center">
-                        <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                        <GithubIcon className="w-10 h-10 text-gray-500" />
                     </div>
                     <div>
-                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">Enterprise Grade Security</h3>
-                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">SOC2, end-to-end encryption, and role-based access control built into the foundation of the platform.</p>
+                        <h3 className="text-[var(--header2-size)] font-semibold mb-2 text-white">GitHub Integration</h3>
+                        <p className="text-[var(--paragraph2-size)] text-[var(--secondary-text-color)]">Track live build statuses and workflow runs directly in the dashboard. Manual and automatic synchronization with GitHub metadata.</p>
                     </div>
                 </div>
 

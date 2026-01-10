@@ -1,115 +1,167 @@
-# Dir Collaboration Platform
+# **Dir Collaboration Platform**
 
-**Dir** is a high-performance, developer-centric collaboration platform designed to bridge the gap between static GitHub repositories and dynamic, real-time team interaction. It transforms robust version control data into live "Workspaces," integrating code exploration with persistent, context-aware chat, reactions, and project management tools.
+*Dir Collaboration Platform is a high-performance, real-time developer workspace designed for seamless team collaboration. Built with a modern stack of React, Express, and Socket.io, the platform allows teams to import GitHub repositories into interactive environments featuring instant file navigation and deep repository analytics. By categorizing projects into intuitive topics and integrating real-time GitHub Actions updates, the platform enables users to track project changes, development workflows, and team discussions in a single unified interface. With built-in multi-channel chat and an optimized loading architecture, it ensures developers stay updated on every commit, action, and conversation without the lag of traditional project management tools.*
 
----
-
-## 🏗 High-Level Architecture
-
-The platform operates on a loosely coupled **Client-Server** architecture, optimized for high concurrency and real-time data flow.
-
--   **Frontend (SPA)**: A **React 19** based Single Page Application utilizing **Vite** for build performance. It handles optimistic UI updates, communicates via REST for transactional data, and uses WebSockets for real-time events.
--   **Backend (API Gateway & Orchestration)**: A **Node.js/Express 5** server acting as the central orchestration layer. It manages authentication (JWT/Passport), business logic, and proxies data requests to the GitHub API.
--   **Data Persistence Layer**:
-    -   **MongoDB**: Stores application state (Workspaces, Channels, Messages, Users, Activity Logs, Tags).
-    -   **Redis**: Acts as a high-speed throughput cache for GitHub API responses and complex query results (e.g., repository stars, file trees) to prevent rate-limiting and ensure sub-millisecond response times.
--   **Real-Time Engine**: A dedicated **Socket.io** layer handles event broadcasting (message received, user typing, channel updates, stats updates) to specific "rooms" based on Workspace IDs.
+🔗 **Live** [http://localhost:5173](http://localhost:5173) (Local Development)
+<br/>
+📧 **Contact:** [dir.collab.platform@gmail.com](mailto:dir.collab.platform@gmail.com)
 
 ---
 
-## 🛠 Technical Stack
+## 📌 **Overview**
 
-### **Frontend**
-| Technology | Justification |
-| :--- | :--- |
-| **React 19** | Leveraging the latest concurrent features for smooth rendering of complex file trees and chat lists. |
-| **Vite** | Chosen for its lightning-fast HMR (Hot Module Replacement) and optimized production builds. |
-| **TailwindCSS 4** | Provides a utility-first, performant styling engine that enables rapid UI iteration without style bloat. |
-| **react-router v7** | Handles client-side routing with modern data loading capabilities. |
-| **Socket.io-client** | Ensures robust, bidirectional communication for chat and notifications with automatic reconnection logic. |
-| **Context API** | Simplified global state management for Authentication, Workspaces, and Chat data. |
+Dir bridges the gap between static repositories and dynamic team interaction through:
 
-### **Backend**
-| Technology | Justification |
-| :--- | :--- |
-| **Node.js / Express 5** | Asynchronous, non-blocking I/O ideal for handling concurrent API requests and socket connections. |
-| **Socket.io** | Powers the event-driven architecture required for "Leave Channel", "Reaction Updates", "Stats Updates", and "Typing Indicators". |
-| **Redis** | **CRITICAL**: Serves as a volatile cache for GitHub repository contents and discovery lists. Prevents hitting GitHub's strict API rate limits. |
-| **MongoDB (Mongoose)** | Flexible schema design perfect for the nested nature of `Workspaces -> Channels -> Messages`. |
-| **Passport.js** | Modular authentication middleware handling GitHub OAuth strategies seamlessly. |
+### 💻 Developers
 
----
+* **Import Repositories:** Instantly import public or private GitHub repos into a workspace.
+* **Real-Time Chat:** Context-aware messaging scoped to specific channels and workspaces.
+* **File Navigation:** Cache-first file tree exploration for instant access to code.
+* **GitHub Actions:** Track live build statuses and workflow runs directly in the dashboard.
 
-## 🚀 Implemented Capabilities
+### 🚀 Teams
 
-The following advanced features are currently production-ready:
+* **Workspaces:** Dedicated environments for projects with persistent chat history.
+* **Collaboration:** See typing indicators, live reactions, and member presence.
+* **Sync:** Manual and automatic synchronization with GitHub metadata.
 
-### 1. **Workspace Management (Import & Create)**
--   **Import Existing:** Users can import any public or private GitHub repository they have access to. The system validates the repo, bootstraps a local `Workspace` record, and sets up a default `#general` channel.
--   **Create Remote:** Users can create **brand new repositories** on GitHub directly from the platform. This initializes the repo on GitHub (with README/GitIgnore) and immediately provisions a corresponding Workspace in Dir.
--   **Tags:** Custom tagging system for organizing workspaces ("Active", "Archived", "Learning", etc.).
+### 📊 Project Leads
 
-### 2. **Cache-First File System Exploration**
-Browsing large repositories is instantaneous. When a user utilizes the File Tree:
-1.  **Lazy Loading:** The frontend only fetches the *immediate* children of a folder when expanded.
-2.  **Redis Caching:** The backend checks Redis for the specific path key (`repo:content:owner:repo:path`).
-3.  **Result:** < 5ms response times for cached paths, with automatic fallback to GitHub API on miss (then cached).
-
-### 3. **Advanced Discovery & Search**
--   **Real-time Search:** Filter active workspaces by name, GitHub repo name, or tags.
--   **Pagination:** Efficiently handles user workspace lists with "Load More" functionality.
--   **Smart Caching:** Discovery lists are cached per user but invalidated instantly upon Import/Create/Delete actions to ensure data consistency.
-
-### 4. **Real-Time Contextual Chat**
-Chat is scoped to "Channels" within "Workspaces".
--   **Optimistic Updates:** UI shows messages/reactions immediately while confirming with the server.
--   **Rich Interactions:** Supports message deletion, granular reaction tracking (`:thumbsup:`, etc.), and user mentions.
--   **Socket Rooms:** Users only receive events for the specific workspace/channel they are viewing.
-
-### 5. **GitHub Synchronization**
--   **Webhooks:** Intelligent webhook registration upon workspace creation to listen for remote changes.
--   **Manual Sync:** "Propagate" button to force-pull latest metadata (description, language, privacy status) from GitHub.
--   **Stats Tracking:** Caches and displays live repository stars from GitHub with a dedicated TTL to avoid rate limits.
+* **Analytics:** View repository statistics, star counts, and contribution heatmaps.
+* **Management:** Organize workspaces with custom tags and topics.
+* **Activity Feeds:** Monitor global and repository-specific activity logs.
 
 ---
 
-## ⚡ Performance Highlights
+## 🏗 **Project Architecture**
 
-### **Handling Large Repositories**
-Fetching a file tree for a repo like `facebook/react` can overwhelm the browser if done recursively. **Dir** solves this by:
-1.  **Lazy Loading Strategy:** Only fetching what is visible.
-2.  **Aggressive Redis Caching:** Caching individual API responses from GitHub.
-3.  **Lean Queries:** Using Mongoose `.lean()` for read-heavy operations to avoid the overhead of full Mongoose document hydration.
+The system operates on a loosely coupled Client-Server architecture optimized for high concurrency:
+
+```
+Dir-Collaboration-Platform/
+│
+├── frontend/      # React 19 + Vite SPA
+├── backend/       # Node.js + Express 5 API Gateway
+├── docs/          # Documentation files
+└── .github/       # GitHub workflows
+```
+
+🟦 **Frontend:** React 19 (Vite, TailwindCSS 4, Socket.io-client) <br/>
+🟩 **Backend:** Node.js (Express 5, Passport.js, Socket.io) <br/>
+🗄 **Database:** MongoDB (Persistence) & Redis (Caching) <br/>
+🔌 **Real-Time:** Socket.io (Event broadcasting) <br/>
+🐙 **Integration:** GitHub REST API
 
 ---
 
-## 📦 Installation & Setup
+## 🔧 **Tech Stack**
 
-### **Prerequisites**
--   Node.js (v18+)
--   MongoDB Instance (Local or Atlas)
--   Redis Instance (Local or Cloud)
--   GitHub OAuth App (Client ID & Secret)
+| Layer           | Technologies                   |
+| --------------- | ------------------------------ |
+| Frontend        | React 19, Vite, TailwindCSS 4  |
+| Backend         | Node.js, Express 5             |
+| Database        | MongoDB (Mongoose)             |
+| Caching         | Redis                          |
+| Real-Time       | Socket.io                      |
+| Auth            | Passport.js (GitHub OAuth)     |
+| Routing         | React Router v7                |
 
-### **1. Backend Setup**
-```bash
+---
+
+## 👥 **Authentication & Access**
+
+The platform uses **GitHub OAuth** for authentication. There are no hardcoded test accounts; access is granted via your GitHub account.
+
+### 🔹 User
+
+* **Login:** Authenticate via GitHub.
+* **Permissions:** Read/Write access depends on your GitHub repository permissions.
+* **Session:** Managed via secure HTTP-only cookies (`dir.sid`).
+
+---
+
+## 🐙 **GitHub Integration**
+
+The application relies heavily on the GitHub API.
+
+⚠️ **Important for Setup:**
+
+* You must create a **GitHub OAuth App** in your developer settings.
+* The **Client ID** and **Client Secret** are required in the backend `.env` file.
+* **Webhooks** are registered automatically for real-time repo updates.
+
+---
+
+# 🚀 **Getting Started**
+
+## 1️⃣ Clone the Repository
+
+```sh
+git clone https://github.com/Dir-Collab-Platform/Dir-Collab
+cd Dir-Collaboration-Platform
+```
+
+---
+
+## 2️⃣ Install Dependencies
+
+### Backend
+
+```sh
 cd backend
-# Create .env file
-echo "NODE_ENV=development
+npm install
+```
+
+### Frontend
+
+```sh
+cd ../frontend
+npm install
+```
+
+---
+
+# 🔐 **Environment Variables**
+
+### Backend (`/backend/.env`)
+
+Create a `.env` file in the `backend` directory:
+
+```env
+NODE_ENV=development
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/dir_collab
-SESSION_SECRET=your_session_secret
+SESSION_SECRET=your_super_secret_session_key
 MAIN_URL=http://localhost:5173
-GITHUB_CLIENT_ID=your_id
-GITHUB_CLIENT_SECRET=your_secret
+GITHUB_CLIENT_ID=your_github_client_id
+GITHUB_CLIENT_SECRET=your_github_client_secret
 REDIS_URL=redis://localhost:6379
 REDIS_DB=0
 BASE_URL=http://localhost:5000
-JWT_SECRET=supersecret
+JWT_SECRET=your_jwt_secret
 GITHUB_CALLBACK_URL=http://localhost:5000/api/auth/github/callback
-CLIENT_URL=http://localhost:5173" > .env
+CLIENT_URL=http://localhost:5173
+```
 
-npm install
+### Frontend (`/frontend/.env`)
+
+Create a `.env` file in the `frontend` directory:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000
+VITE_USE_MOCK=false  # Set to true to use mock data without backend
+```
+
+---
+
+# ▶️ **Run Locally**
+
+### Start Backend
+
+Ensure MongoDB and Redis are running, then:
+
+```sh
+cd backend
 npm run dev
 ```
 

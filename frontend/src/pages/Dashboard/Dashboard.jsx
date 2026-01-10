@@ -1,10 +1,10 @@
-import Sidebar from './Sidebar';
-import StatsOverview from './StatsOverview';
-import ActivityFeed from './ActivityFeed';
-import RecentRepositories from './RecentRepositories';
-import ContributionSummary from './ContributionSummary';
-import NotificationBell from '../../../common-components/Header/components/NotificationBell';
-import { DashboardContext } from '../../../context/DashboardContext/DashboardContext';
+import Sidebar from './components/Sidebar';
+import StatsOverview from './components/StatsOverview';
+import ActivityFeed from './components/ActivityFeed';
+import RecentRepositories from './components/RecentRepositories';
+import ContributionSummary from './components/ContributionSummary';
+import NotificationBell from '../../common-components/Header/components/NotificationBell';
+import { DashboardContext } from '../../context/DashboardContext/DashboardContext';
 import { useContext } from 'react';
 
 function DashboardContent() {
@@ -13,15 +13,15 @@ function DashboardContent() {
   // Show loader while fetching dashboard data
   if (isLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#0D0D19] text-white">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
-        <span className="ml-3">Loading Dashboard...</span>
+      <div className="flex h-screen w-full items-center justify-center bg-(--bg-main) text-(--text-primary)">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-(--text-active)"></div>
+        <span className="ml-3 font-medium">Loading Dashboard...</span>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden -mt-20 scroll-bar" style={{ backgroundColor: 'var(--dark-bg)' }}>
+    <div className="flex h-screen w-full overflow-hidden -mt-20 scroll-bar bg-(--bg-main) transition-colors duration-300">
       {/* Sidebar - Fixed Width */}
       <div className="w-64 flex-shrink-0">
         <Sidebar />

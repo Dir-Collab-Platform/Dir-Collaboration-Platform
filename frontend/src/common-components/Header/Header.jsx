@@ -109,7 +109,6 @@ function Header() {
         />
       )}
 
-      <div className="pt-8"></div>
     </>
   );
 }

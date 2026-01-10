@@ -58,15 +58,17 @@ export default function WorkspaceHeader({ showRepoView, onCreateWorkspace, onTog
     if (!repository) return null;
 
     return (
-        <div className="flex justify-between py-4 px-6">
-            <div className="workspace-name flex gap-4 font-semibold items-center">
-                <h1 className="header1 text-(--primary-text-color)">
+        <div className="flex flex-col md:flex-row justify-between py-4 px-6 gap-4">
+            <div className="workspace-name flex gap-3 font-semibold items-center min-w-0">
+                <h1 className="header1 text-(--primary-text-color) truncate text-base md:text-xl lg:text-3xl shrink min-w-0" title={repository.full_name}>
                     {repository.full_name}
                 </h1>
-                <MetaTag name={repository.visibility || (repository.private ? 'private' : 'public')} />
+                <div className="shrink-0">
+                    <MetaTag name={repository.visibility || (repository.private ? 'private' : 'public')} />
+                </div>
             </div>
 
-            <div className="buttons flex gap-4">
+            <div className="buttons flex gap-2 md:gap-4 flex-wrap">
                 {showRepoView && <CreateWorkspaceButton onClick={onCreateWorkspace} />}
                 {!showRepoView && <ChatToggleButton onClick={onToggleChat} isOpen={showChat} />}
                 <ForkButton count={repository.forks_count || 0} />

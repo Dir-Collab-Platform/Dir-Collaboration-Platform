@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import Button from "../../common-components/button";
+import MetaTag from "../../common-components/MetaTag";
 
 export default function WorkSpacesSlot({
   projectName,
@@ -22,12 +23,7 @@ export default function WorkSpacesSlot({
               {projectName}
             </h2>
 
-            <Button
-              variant="base"
-              className="rounded-full px-3 py-0.5 text-sm text-(--secondary-text-color) border border-(--main-border-color)"
-            >
-              {visibility}
-            </Button>
+            <MetaTag name={visibility} />
           </div>
 
           {/* Language Stats Bar - will be populated from languages prop */}

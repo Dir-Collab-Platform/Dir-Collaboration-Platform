@@ -1,4 +1,5 @@
 import { Star, Workflow } from "lucide-react";
+import MetaTag from "../../common-components/MetaTag";
 
 function RepositoryCard({ name, visibility, description, stars, updatedAt, languages, isImported }) {
   return (
@@ -10,9 +11,7 @@ function RepositoryCard({ name, visibility, description, stars, updatedAt, langu
             {isImported && <Workflow size={18} className="text-(--primary-text-color)" />}
             {name}
           </h2>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#2D2D3F] border border-(--main-border-color) text-(--secondary-text-color)">
-            {visibility}
-          </span>
+          <MetaTag name={visibility}/>
         </div>
 
         {/* Description */}

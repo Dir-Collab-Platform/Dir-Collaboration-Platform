@@ -13,8 +13,8 @@ const RecentRepositories = () => {
 
   return (
     <>
-      <div className="bg-[#1D1D29] rounded-xl p-8 border border-white/5 h-full">
-        <h3 className="text-xl font-bold text-white mb-8">Quick Access</h3>
+      <div className="bg-(--bg-card) rounded-xl p-8 border border-white/5 h-fit shadow-sm">
+        <h3 className="text-xl font-bold text-(--text-primary) mb-8">Quick Access</h3>
         <div className="space-y-6 mb-10">
           {repos.map((repo, i) => (
             <div
@@ -23,10 +23,10 @@ const RecentRepositories = () => {
               className="flex justify-between items-center group cursor-pointer"
             >
               <div className="min-w-0 pr-4">
-                <p className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors truncate">{repo.githubRepoName || repo.name}</p>
-                <p className="text-xs text-gray-500 truncate">{repo.description}</p>
+                <p className="text-sm font-bold text-(--text-primary) group-hover:text-indigo-400 transition-colors truncate">{repo.githubRepoName || repo.name}</p>
+                <p className="text-xs text-(--text-dim) truncate">{repo.description}</p>
               </div>
-              <ExternalLink size={18} className="text-gray-500 group-hover:text-white shrink-0" />
+              <ExternalLink size={18} className="text-(--text-dim) group-hover:text-(--text-active) shrink-0" />
             </div>
           ))}
         </div>

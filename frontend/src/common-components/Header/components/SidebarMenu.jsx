@@ -1,14 +1,6 @@
 import React, { useContext } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
-import {
-    LayoutDashboard,
-    Folder,
-    Settings,
-    Search,
-    LogOut,
-    X,
-    Workflow
-} from "lucide-react"
+import { LayoutDashboard, Folder, Settings, Search, LogOut, X, Workflow } from "lucide-react"
 import { useAuth } from "../../../context/AuthContext/AuthContext"
 import Avatar from "../../../pages/Workspace/components/Chat/Avatar";
 
@@ -27,7 +19,7 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
 
     return (
         <div
-            className={`fixed top-0 right-0 w-80 h-screen z-50 transition-transform duration-300 overflow-y-auto bg-(--dark-bg) border-l border-(--popup-border) ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+            className={`fixed top-0 right-0 w-80 h-screen z-50 transition-transform duration-300 overflow-y-auto bg-(--dark-bg) border-l border-(--main-border-color) ${isMenuOpen ? "translate-x-0" : "translate-x-full"
                 }`}
         >
             <button
@@ -137,13 +129,15 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
 
             <hr className="my-4 mx-4 border-(--main-border-color)" />
 
-            <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors mx-4 text-[#ff4757] hover:bg-[#ff47571a]"
-            >
-                <LogOut size={20} className="text-[#ff4757]" />
-                <span>Log out</span>
-            </button>
+            <div className="px-4">
+                <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors text-[#ff4757] hover:bg-[#ff47571a]"
+                >
+                    <LogOut size={20} className="text-[#ff4757]" />
+                    <span>Log out</span>
+                </button>
+            </div>
         </div>
     )
 }

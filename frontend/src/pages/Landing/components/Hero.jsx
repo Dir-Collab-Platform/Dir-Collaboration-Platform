@@ -1,17 +1,16 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 import Particles from './Particles';
 
 const Hero = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const BASE_URL = 'http://localhost:5000';
 
 
     const handleJoinBeta = () => {
         alert("Redirecting to Dashboard...");
-        
-     navigate(`${BASE_URL}/auth/github`);
+        window.location.href = `${BASE_URL}/auth/github`;
     };
 
     return (

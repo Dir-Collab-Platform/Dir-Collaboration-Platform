@@ -1,14 +1,14 @@
 import React from 'react';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 
 const CTA = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const BASE_URL = 'http://localhost:5000';
 
     const handleGetStarted = () => {
         alert("Redirecting to Dashboard...");
-        navigate(`${BASE_URL}/auth/github`);
+        window.location.href = `${BASE_URL}/auth/github`;
     };
 
     return (

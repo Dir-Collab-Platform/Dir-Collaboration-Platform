@@ -42,8 +42,8 @@ Dir-Collaboration-Platform/
 │
 ├── frontend/      # React 19 + Vite SPA
 ├── backend/       # Node.js + Express 5 API Gateway
-├── docs/          # Documentation files
-└── .github/       # GitHub workflows
+├── Screenshots/   # Some screenshots of Dir platform
+
 ```
 
 🟦 **Frontend:** React 19 (Vite, TailwindCSS 4, Socket.io-client) <br/>

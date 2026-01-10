@@ -42,13 +42,18 @@ export const handleGithubWebhook = async (req, res) => {
     switch (eventType) {
       case "push":
         await invalidateRepoCache(repo.ownerId, repo._id);
-        logMessage = `pushed to ${payload.ref.split("/").pop()}`;
+        logMessage = `pushed to ${payload.repository.name}`;
         break;
       case "issue":
         logMessage = `${payload.action} issue: ${payload.issue.title}`;
         break;
       case "star":
-        logMessage = `starred the repository`;
+        logMessage = `starred ${payload.repository.name}`;
+        break;
+      case "pull_request":
+        logMessage = `${payload.action} pull request: ${payload.pull_request.title}`;
+      case "fork":
+        logMessage = `${payload.sender.login} forked ${payload.repository.name}`;
     }
 
     if (logMessage) {

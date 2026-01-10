@@ -6,9 +6,11 @@ import CreateRepoModal from './components/CreateRepoModal';
 import SidebarMenu from './components/SidebarMenu';
 import NotificationBell from './components/NotificationBell';
 import Logo from '../Logo';
+import { useAuth } from '../../context/AuthContext/AuthContext';
 
 function Header() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCreateRepoOpen, setIsCreateRepoOpen] = useState(false);
 
@@ -49,7 +51,10 @@ function Header() {
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto flex justify-between items-center">
           <div className="flex items-center gap-8">
-            <div className="cursor-pointer" onClick={() => navigate('/')}>
+            <div 
+              className="cursor-pointer" 
+              onClick={() => navigate(isAuthenticated ? '/dashboard' : '/')}
+            >
               <Logo />
             </div>
           </div>

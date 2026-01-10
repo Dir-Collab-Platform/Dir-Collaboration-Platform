@@ -1,5 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Dashboard from './pages/Dashboard/components/Dashboard';
+import Dashboard from './pages/Dashboard/Dashboard';
 import Repositories from './pages/Repositories/Repositories';
 import Workspace from './pages/Workspace/Workspace';
 import Repository from './pages/Repository/Repository';

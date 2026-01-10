@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { Star, Workflow } from "lucide-react";
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
+import Avatar from '../Workspace/components/Chat/Avatar';
 
 export default function WorkSpacesHeader() {
   const { user } = useAuth();
@@ -10,17 +11,16 @@ export default function WorkSpacesHeader() {
   return (
     <div className="flex justify-between items-center">
       <div className="flex gap-3 items-center">
-        <img
-          className="w-12 h-12 rounded-full"
-          src={user?.avatarUrl || "https://via.placeholder.com/60"}
-          alt="profilepic"
+        <Avatar
+          size={50}
+          src={ user?.avatarUrl }
         />
         <div className="flex flex-col">
           <span className="font-semibold text-(--primary-text-color)">
-            {user?.githubUsername || "User"}
+            {user?.githubUsername || "No user"}
           </span>
           <span className="font-light text-xs text-(--secondary-text-color)">
-            @{user?.githubUsername?.toLowerCase() || "username"}
+            @{user?.githubUsername?.toLowerCase() || "--"}
           </span>
         </div>
       </div>

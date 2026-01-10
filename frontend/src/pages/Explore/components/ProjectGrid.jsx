@@ -7,19 +7,19 @@ const ProjectGrid = ({ repos, onLoadMore, isLoading, showButton, activeFilter, o
       <div className="w-auto max-w-90 pt-1 px-3 bg-(--card-bg-lighter) border border-(--main-border-color) border-b-none rounded-tl-2xl rounded-tr-[76px] text-(--secondary-text-color) text-[14px] flex items-end">
         <button
           onClick={() => onFilterChange("all")}
-          className={`px-4 pt-1.5 transition ${activeFilter === 'all' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-white' : ''}`}
+          className={`px-4 pt-1.5 transition ${activeFilter === 'all' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-(--text-primary)' : ''}`}
         >
           All
         </button>
         <button
           onClick={() => onFilterChange("repository")}
-          className={`px-4 pt-1.5 transition ${activeFilter === 'repository' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-white' : ''}`}
+          className={`px-4 pt-1.5 transition ${activeFilter === 'repository' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-(--text-primary)' : ''}`}
         >
           Repositories
         </button>
         <button
           onClick={() => onFilterChange("workspace")}
-          className={`px-4 pt-1.5 transition ${activeFilter === 'workspace' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-white' : ''}`}
+          className={`px-4 pt-1.5 transition ${activeFilter === 'workspace' ? 'bg-(--active-tab-bg) border border-(--main-border-color) border-b-none rounded-t-2xl text-(--text-primary)' : ''}`}
         >
           Workspaces
         </button>

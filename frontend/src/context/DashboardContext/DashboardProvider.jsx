@@ -17,7 +17,7 @@ export default function DashboardProvider({ children }) {
     try {
       const [statsRes, activityRes, heatmapRes, reposRes] = await Promise.all([
         apiRequest('/api/stats').catch(() => ({ status: 'error', data: null })), // Corrected endpoint
-        apiRequest('/api/activity/feed?limit=6'),
+        apiRequest('/api/activity/feed?limit=10'),
         apiRequest('/api/activity/heatmap'),
         apiRequest('/api/repos?limit=5').catch(() => ({ status: 'error', data: [] }))
       ]);

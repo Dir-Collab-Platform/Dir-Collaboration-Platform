@@ -92,9 +92,11 @@ function FileItem({ item, depth = 0, searchTerm = "" }) {
                             Loading...
                         </div>
                     ) : item.children && item.children.length > 0 ? (
-                        item.children.map((child, index) => (
-                            <FileItem key={child.path || index} item={child} depth={depth + 1} searchTerm={searchTerm} />
-                        ))
+                        [...item.children]
+                            .sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name))
+                            .map((child, index) => (
+                                <FileItem key={child.path || index} item={child} depth={depth + 1} searchTerm={searchTerm} />
+                            ))
                     ) : item.children && item.children.length === 0 ? (
                         <div style={{ paddingLeft: `${(depth + 1) * 12 + 12}px` }} className="py-1.5 text-(--secondary-text-color) opacity-50 text-sm italic">
                             Empty folder
@@ -146,9 +148,11 @@ export default function FileTree() {
 
             <div className="overflow-y-auto flex-1 custom-scrollbar">
                 {contents.length > 0 ? (
-                    contents.map((item, index) => (
-                        <FileItem key={index} item={item} searchTerm={searchTerm} />
-                    ))
+                    [...contents]
+                        .sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name))
+                        .map((item, index) => (
+                            <FileItem key={index} item={item} searchTerm={searchTerm} />
+                        ))
                 ) : (
                     <div className="px-3 py-4 text-center">
                         <span className="paragraph2 text-(--secondary-text-color) opacity-50 italic">

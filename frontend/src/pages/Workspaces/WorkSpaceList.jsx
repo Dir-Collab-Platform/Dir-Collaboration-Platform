@@ -6,9 +6,10 @@ import WorkSpacesSlot from "./WorkSpacesSlot";
 import { WorkspacesContext } from '../../context/WorkspacesContext/WorkspacesContext';
 import { useAuth } from '../../context/AuthContext/AuthContext';
 import { getRelativeTime } from '../../utils/utils';
+import WorkSpacesHeader from "./WorkSpacesHeader";
 
 export default function WorkSpaceList() {
-  const { workspaces, isLoading } = useContext(WorkspacesContext);
+  const { workspaces, isLoading, error } = useContext(WorkspacesContext);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -34,15 +35,28 @@ export default function WorkSpaceList() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="text-red-500 text-center p-6">
+        Error loading Workspaces: {error}
+      </div>
+    );
+  }
+
+
   return (
     <>
+      <WorkSpacesHeader />
+
+      <hr className="my-8" style={{ borderColor: 'var(--main-border-color)' }} />
+
       <div className="flex w-full items-center gap-5">
         <div className="flex w-5/6 items-center">
           <div className="relative flex flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={20} style={{ color: 'var(--secondary-text-color)' }} />
             <input
               type="text"
-              placeholder="Search for repositories..."
+              placeholder="Search for workspaces..."
               className="flex-1 pl-12 py-2.5 rounded-l-xl focus:outline-none focus:ring-2"
               style={{
                 backgroundColor: 'var(--secondary-button-hover)',

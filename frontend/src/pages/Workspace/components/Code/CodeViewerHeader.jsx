@@ -27,53 +27,59 @@ export default function CodeViewerHeader() {
 
     return (
         <div className="code-viewer-header flex flex-col gap-4">
-            <div className="upper flex justify-between items-center">
-                <div className="file-path-branch flex gap-4 items-center">
-                    <h2 className="header2 font-semibold">
-                        <span className="opacity-50">{repository?.name || 'Unknown-repository'}/</span>
-                        <span className="opacity-50">{dirPath}</span>
-                        <span className="text-(--active-text-color)">{fileName}</span>
+            <div className="upper flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="file-path-branch flex gap-3 items-center min-w-0 w-full sm:w-auto">
+                    <h2 className="header2 font-semibold truncate flex min-w-0" title={`${repository?.name}/${dirPath}${fileName}`}>
+                        <span className="opacity-50 truncate-start max-w-[150px] md:max-w-[300px] shrink">
+                            {repository?.name || 'Unknown'}/{dirPath}
+                        </span>
+                        <span className="text-(--text-active) shrink-0 ml-1">{fileName}</span>
                     </h2>
-                    <MetaTagWithIcon
-                        icon={<GitBranch size={16} />}
-                        name={repository?.default_branch || 'main'}
-                    />
+                    <div className="shrink-0 hidden xs:block">
+                        <MetaTagWithIcon
+                            icon={<GitBranch size={16} />}
+                            name={repository?.default_branch || 'main'}
+                        />
+                    </div>
                 </div>
 
-                <CodeToolBar />
+                <div className="w-full sm:w-auto overflow-x-auto no-scrollbar">
+                    <CodeToolBar />
+                </div>
             </div>
 
-            <div className="lower flex justify-between items-center pr-6 py-4 border-y border-(--main-border-color)">
+            <div className="lower flex flex-col lg:flex-row justify-between items-start lg:items-center pr-6 py-4 border-y border-(--main-border-color) gap-4">
                 {
                     lastCommit?.commit?.message ?
-                        <div className="last-commit flex gap-2 items-center paragraph2 text-(--secondary-text-color)">
-                            Last commit
-                            <p className="font-extrabold text-(--primary-text-color)">
+                        <div className="last-commit flex flex-wrap gap-2 items-center paragraph2 text-(--secondary-text-color)">
+                            <span className="shrink-0">Last commit</span>
+                            <p className="font-extrabold text-(--text-primary) shrink-0">
                                 {lastCommit?.author?.login}
                             </p>
-                            <p className="truncate max-w-50" title={lastCommit?.commit?.message}>
+                            <p className="truncate max-w-[200px] sm:max-w-[400px]" title={lastCommit?.commit?.message}>
                                 {lastCommit?.commit?.message ? `"${lastCommit?.commit?.message}"` : 'No message Found'}
-
                             </p>
-                            <p className="font-mono text-xs opacity-60">
-                                {lastCommit?.sha?.substring(0, 6)}
-                            </p>
-                            <p title={'Commited at: ' + lastCommit?.commit?.author?.date}>
-                                <span className="font-extrabold text-(--primary-text-color)">
-                                    {getRelativeTime(lastCommit?.commit?.author?.date)}
-                                </span> ago
-                            </p>
+                            <div className="flex gap-2 items-center shrink-0">
+                                <p className="font-mono text-[10px] opacity-60 bg-(--bg-dim) px-1.5 py-0.5 rounded">
+                                    {lastCommit?.sha?.substring(0, 6)}
+                                </p>
+                                <p className="text-sm" title={'Commited at: ' + lastCommit?.commit?.author?.date}>
+                                    <span className="font-extrabold text-(--text-primary)">
+                                        {getRelativeTime(lastCommit?.commit?.author?.date)}
+                                    </span> ago
+                                </p>
+                            </div>
                         </div>
                         :
-                        <div className='text-(--secondary-text-color) font-medium pl-6'>No commits Found!</div>
+                        <div className='text-(--secondary-text-color) font-medium'>No commits Found!</div>
                 }
 
-                <div className="lower-tool-bar flex gap-4">
-                    <button className="svg-btn icon-btn hover:text-(--active-text-color) transition-colors cursor-pointer">
+                <div className="lower-tool-bar flex gap-4 shrink-0">
+                    <button className="svg-btn icon-btn hover:text-(--text-active) transition-colors cursor-pointer p-1">
                         <Download size={20} />
                     </button>
 
-                    <button className="svg-btn icon-btn hover:text-(--active-text-color) transition-colors cursor-pointer">
+                    <button className="svg-btn icon-btn hover:text-(--text-active) transition-colors cursor-pointer p-1">
                         <Copy size={20} />
                     </button>
                 </div>

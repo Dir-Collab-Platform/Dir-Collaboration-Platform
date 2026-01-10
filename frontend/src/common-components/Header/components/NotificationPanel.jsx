@@ -3,51 +3,31 @@ import { Bell, X, CheckCheck } from 'lucide-react';
 import NotificationItem from './NotificationItem';
 
 function NotificationPanel({ notifications, onClose, onMarkAllAsRead, onCloseNotification, onActionButton }) {
-  
+
   return (
     <div
-      className="absolute top-12 right-0 w-[480px] max-h-[800px] rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col"
+      className="absolute top-12 right-0 w-[90vw] sm:w-[480px] max-h-[80vh] rounded-2xl shadow-2xl z-(--z-popup) overflow-hidden flex flex-col border border-(--border-main)"
       style={{
-        backgroundColor: 'var(--dark-bg)',
-        border: '1px solid rgba(239, 238, 238, 0.2)'
+        backgroundColor: 'var(--bg-card)',
       }}
     >
       <div
-        className="p-4 border-b flex justify-between items-center"
-        style={{
-          backgroundColor: 'var(--dark-bg)',
-          borderColor: 'rgba(239, 238, 238, 0.2)'
-        }}
+        className="p-4 border-b flex justify-between items-center bg-(--bg-card) border-(--border-main)"
       >
         <div className="flex items-center gap-2">
-          <Bell size={20} style={{ color: 'var(--secondary-text-color)' }} />
-          <h3 className="font-semibold" style={{ color: 'var(--secondary-text-color)' }}>Notifications ({notifications.length})</h3>
+          <Bell size={18} className="text-(--text-secondary)" />
+          <h3 className="font-bold text-sm text-(--text-secondary)">NOTIFICATIONS ({notifications.length})</h3>
         </div>
         <div className="flex items-center gap-3">
           <button
-            className="flex items-center gap-1 px-3 py-1.5 rounded text-xs transition-colors"
-            style={{
-              backgroundColor: 'var(--primary-button)',
-              color: 'var(--primary-text-color)'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button-hover)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--primary-button)'}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-(--button-primary) text-white hover:bg-(--button-primary-hover) transition-all active:scale-95"
             onClick={onMarkAllAsRead}
           >
-            <span>Mark all as read</span>
+            <span>Mark all read</span>
             <CheckCheck size={12} />
           </button>
           <button
-            className="p-1 rounded"
-            style={{ color: 'var(--secondary-text-color)' }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = 'var(--secondary-button-hover)';
-              e.currentTarget.style.color = 'var(--primary-text-color)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = 'var(--secondary-text-color)';
-            }}
+            className="p-1.5 rounded-full text-(--text-secondary) hover:bg-(--bg-card-hover) hover:text-(--text-primary) transition-colors"
             onClick={onClose}
           >
             <X size={16} />
@@ -55,8 +35,8 @@ function NotificationPanel({ notifications, onClose, onMarkAllAsRead, onCloseNot
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col max-h-[650px]">
-        <div className="flex-1 overflow-y-auto p-2 scroll-bar">
+      <div className="flex-1 flex flex-col max-h-[600px]">
+        <div className="flex-1 overflow-y-auto p-2 scroll-bar bg-(--bg-card)">
           {notifications.map(notification => (
             <NotificationItem
               key={notification._id}
@@ -67,17 +47,16 @@ function NotificationPanel({ notifications, onClose, onMarkAllAsRead, onCloseNot
           ))}
 
           {notifications.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform hover:scale-110"
-                style={{ backgroundColor: 'rgba(239, 238, 238, 0.05)', border: '1px solid rgba(239, 238, 238, 0.1)' }}
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-6 bg-(--bg-dim) border border-(--border-main) text-(--text-secondary) opacity-50"
               >
-                <Bell size={24} style={{ color: 'var(--secondary-text-color)', opacity: 0.5 }} />
+                <Bell size={28} />
               </div>
-              <h4 className="text-sm font-semibold mb-1" style={{ color: 'var(--primary-text-color)' }}>
+              <h4 className="text-base font-bold mb-2 text-(--text-primary)">
                 All caught up!
               </h4>
-              <p className="text-xs max-w-[200px]" style={{ color: 'var(--secondary-text-color)', opacity: 0.7 }}>
+              <p className="text-sm text-(--text-secondary) max-w-[240px]">
                 You have no new notifications at the moment.
               </p>
             </div>

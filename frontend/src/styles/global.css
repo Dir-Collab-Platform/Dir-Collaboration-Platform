@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+
   *,
   *::before,
   *::after {
@@ -12,11 +13,12 @@
   }
 
   body {
-    background-color: var(--dark-bg);
-    color: var(--primary-text-color);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
     font-family: var(--main-font-family);
     min-height: 100vh;
     padding-top: var(--body-padding-top);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   #root {
@@ -28,15 +30,19 @@
   .header1 {
     font-size: var(--header1-size);
   }
+
   .header2 {
     font-size: var(--header2-size);
   }
+
   .paragraph1 {
     font-size: var(--paragraph1-size);
   }
+
   .paragraph2 {
     font-size: var(--paragraph2-size);
   }
+
   .paragraph-mini {
     font-size: var(--paragraph-mini-size);
   }
@@ -74,41 +80,45 @@
     }
   }
 
-  /* hide scrollbar but keep scroll */
+  /* Hide scrollbar but keep scrolling */
   .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    -ms-overflow-style: none;      /* IE & old Edge */
+    scrollbar-width: none;         /* Firefox */
   }
-  
+
   .no-scrollbar::-webkit-scrollbar {
-    display: none;
+    display: none;                 /* Chrome, Edge, Opera */
   }
 
-  .invisible-scrollbar {
-    scrollbar-color: hsl(0, 0%, 30%) transparent;
+  /* Styled scrollbar */
+  .scroll-bar {
+    scrollbar-width: thin;                                 /* Firefox */
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
-  /* Chrome/Edge/Opera scrollbar styling */
+  /* WebKit browsers */
   .scroll-bar::-webkit-scrollbar {
-    width: 8px;           /* thickness */
+    width: 8px;
   }
 
   .scroll-bar::-webkit-scrollbar-track {
-    background: hsl(0, 0%, 18%);  /* track color */
+    background: var(--scrollbar-track);
   }
 
   .scroll-bar::-webkit-scrollbar-thumb {
-    background: hsl(0, 0%, 30%);  /* thumb color */
+    background: var(--scrollbar-thumb);
     border-radius: 10px;
   }
 
   .scroll-bar::-webkit-scrollbar-thumb:hover {
-    background: hsl(0, 0%, 10%);  /* darker on hover */
+    background: var(--scrollbar-thumb-hover);
   }
 
-  /* for firefox */
-  .scroll-bar {
-    scrollbar-width: thin;           /* auto, thin */
-    scrollbar-color: hsl(0, 0%, 30%) hsl(0, 0%, 18%); /* thumb, track */
+  .truncate-start {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
   }
 }

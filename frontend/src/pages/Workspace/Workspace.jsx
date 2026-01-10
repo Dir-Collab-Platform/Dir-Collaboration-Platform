@@ -68,7 +68,7 @@ function WorkspaceContent({ isRepositoryView }) {
     return (
         <>
             <Header />
-            <div className={`workspace-page flex flex-col h-[calc(100vh-var(--body-padding-top))] overflow-hidden ${showRepoView ? 'max-w-[1200px] mx-auto w-full border-x border-(--main-border-color)' : ''}`}>
+            <div className={`workspace-page flex flex-col h-[calc(100vh-var(--body-padding-top))] overflow-hidden ${showRepoView ? 'max-w-7xl mx-auto w-full border-x border-(--border-main)' : ''}`} style={{ backgroundColor: 'var(--bg-main)' }}>
 
                 <section className="shrink-0">
                     <WorkspaceHeader
@@ -79,7 +79,7 @@ function WorkspaceContent({ isRepositoryView }) {
                     />
                 </section>
 
-                <main className={`grow grid gap-6 px-6 pb-6 overflow-hidden relative
+                <main className={`grow grid gap-4 md:gap-6 px-4 md:px-6 pb-4 md:pb-6 overflow-hidden relative
                     ${showRepoView
                         ? "grid-cols-1"
                         : "grid-cols-1 lg:grid-cols-[1fr_28rem] xl:grid-cols-[1fr_34rem]"
@@ -98,11 +98,11 @@ function WorkspaceContent({ isRepositoryView }) {
 
                             {/* Mobile Chat Panel Overlay */}
                             {showChat && (
-                                <div className="absolute inset-0 z-50 lg:hidden flex flex-col bg-(--dark-bg)">
+                                <div className="absolute inset-0 z-(--z-panel) lg:hidden flex flex-col bg-(--bg-main)">
                                     <ChatPanel />
                                     <button
                                         onClick={() => setShowChat(false)}
-                                        className="absolute top-2 right-2 p-2 bg-(--secondary-button) rounded-full text-(--primary-text-color)"
+                                        className="absolute top-4 right-4 z-(--z-popup) p-2 bg-(--button-secondary) rounded-full text-(--text-primary) shadow-xl border border-(--border-main) hover:scale-110 transition-transform"
                                     >
                                         ✕
                                     </button>

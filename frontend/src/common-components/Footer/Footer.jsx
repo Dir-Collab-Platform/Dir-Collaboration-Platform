@@ -3,7 +3,7 @@ import { Copyright } from 'lucide-react';
 
 function Footer() {
   return (
-    <footer className="bg-[var(--dark-bg)] border-t border-[var(--main-border-color)] py-6 w-full mt-auto">
+    <footer className="bg-[var(--dark-bg)] border-t border-[var(--main-border-color)] py-6 w-full mt-12">
   <div className="flex justify-center items-center flex-wrap gap-6 px-4 md:px-6 lg:px-8
                   xs:flex-col xs:gap-3 xs:text-center">
     

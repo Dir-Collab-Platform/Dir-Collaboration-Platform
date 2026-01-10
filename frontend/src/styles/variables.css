@@ -3,81 +3,98 @@
 :root {
     --body-padding-top: 80px;
 
-    /* Colors */
+    /* Semantic Colors - Default (Dark) */
+    --bg-main: #18181B;
+    --bg-dim: #1A1A1E;
+    --bg-card: #1D1D29;
+    --bg-card-hover: #222230;
+    --bg-active: #1F1F31;
 
-    /* bg color */
-    --dark-bg: #18181B;
-    /* --dark-bg: #0d1117; */ /*victory's color*/
-    --dimmer-dark-bg: #1A1A1E;
-    --notification-count-bg: #BE2D2D;
-    --card-bg: #1D1D29;
-    --card-bg-lighter: #222230;
-    --card-bg-lighter2: #222226;
-    --primary-button: #1F1F56;
-    --primary-button-hover: #29297F;
-    --primary-button-active: #19194D;
-    --secondary-button: #242429;
-    --secondary-button-hover: #303036;
-    --meta-tag-color: #303040;
-    --active-tab-bg: #1F1F31;
-    --received-message: #213370;
-    --sent-message: #1A295B;
+    --button-primary: #1F1F56;
+    --button-primary-hover: #29297F;
+    --button-secondary: #242429;
+    --button-secondary-hover: #303036;
+
+    --meta-tag-color: #3d2e2e;
+
+    --text-primary: #FFFFFF;
+    --text-secondary: #9CA3AF;
+    --text-dim: #C4C4C4;
+    --text-active: #5B5EDE;
+
+    --border-main: hsla(0, 3%, 90%, .13);
+    --border-popup: #EFEEEE47;
+
+    --notif-bg: #BE2D2D;
+
+    --sent-message: #1F1F56;
+    --received-message: #242429;
+
+    /* Legacy/Backwards Compatibility */
+    --dark-bg: var(--bg-main);
+    --dimmer-dark-bg: var(--bg-dim);
+    --card-bg: var(--bg-card);
+    --card-bg-lighter: var(--bg-card-hover);
+    --primary-button: var(--button-primary);
+    --secondary-button: var(--button-secondary);
+    --primary-text-color: var(--text-primary);
+    --secondary-text-color: var(--text-secondary);
+    --main-border-color: var(--border-main);
+    --active-text-color: var(--text-active);
 
     --code-viewer-container: #161b22;
     --code-upper-bg: #0d1117;
-    
-    /* font color */
-    --primary-text-color: #FFFFFF;
-    --secondary-text-color: #9CA3AF;
-    --active-text-color: #5B5EDE;
-    --channel-hash-color: #806346;
-    --mid-dim-font-color: #C4C4C4;
-    
-    --code-function: #AEC4AB;
-    --code-string: #E06666;
-    --code-keyword: #4255C2;
-    
-    /* border color */
-    --main-border-color: hsla(0, 3%, 90%, .13);
-    --popup-border: #EFEEEE47; /* opacity supposed to be - 28%*/
-
-    /* shadow color */
-    --card-shadow-color: #8B4A4A;
-    --popup-shadow: #E1A6A6; /* opacity supposed to be - 15%*/
 
     /* Font */
-
-    /* Font family */
     --main-font-family: "Inter", sans-serif;
-
-    /* Font sizes */
     --header1-size: 32px;
     --header2-size: 24px;
     --paragraph1-size: 20px;
     --paragraph2-size: 16px;
     --paragraph-mini-size: 14px;
+
+    /* Z-Index Hierarchy */
+    --z-sidebar: 1000;
+    --z-popup: 900;
+    --z-panel: 800;
+
+    --scrollbar-thumb: #4d4d4d;
+    --scrollbar-thumb-hover: #1a1a1a;
+    --scrollbar-track: #2e2e2e;
+
 }
 
 [data-theme="light"] {
-    --dark-bg: #FFFFFF;
-    --dimmer-dark-bg: #F3F4F6;
-    --card-bg: #FFFFFF;
-    --card-bg-lighter: #F9FAFB;
+    --bg-main: #FFFFFF;
+    --bg-dim: #F3F4F6;
+    --bg-card: #f7f7f7;
+    --bg-card-hover: #F9FAFB;
+    --bg-active: #F3F4F6;
+
+    --button-primary: #5B5EDE;
+    --button-primary-hover: #4C4EBF;
+    --button-secondary: #F3F4F6;
+    --button-secondary-hover: #E5E7EB;
+
+    --meta-tag-color: hsl(0, 14%, 86%);
+
+    --text-primary: #111827;
+    --text-secondary: #4B5563;
+    --text-dim: #6B7280;
+    --text-active: #5B5EDE;
+
+    --border-main: #E5E7EB;
+    --border-popup: rgba(0, 0, 0, 0.1);
+
     --card-bg-lighter2: #E5E7EB;
-    
-    --primary-text-color: #111827;
-    --secondary-text-color: #4B5563;
-    --mid-dim-font-color: #6B7280;
-    --meta-tag-color: #E5E7EB;
-    
-    --main-border-color: #E5E7EB;
-    --popup-border: rgba(0, 0, 0, 0.1);
-    
-    --secondary-button: #F3F4F6;
-    --secondary-button-hover: #E5E7EB;
-    
     --received-message: #E0E7FF;
-    --sent-message: #DBEAFE;
-    
-    --active-tab-bg: #F3F4F6;
+    --sent-message: #5B5EDE;
+
+    /* Inherit code viewer from dark usually, or adjust */
+    --code-viewer-container: #F6F8FA;
+    --code-upper-bg: #EBEEF0;
+
+    --scrollbar-track: #f1f1f1;
+    --scrollbar-thumb: #c1c1c1;
+    --scrollbar-thumb-hover: #a8a8a8;
 }

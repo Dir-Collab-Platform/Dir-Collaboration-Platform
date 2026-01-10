@@ -16,7 +16,7 @@ export default function CodeBody() {
     return (
         <div className="code-body flex flex-col gap-4 h-full pl-6 overflow-y-auto scroll-bar">
             <CodeViewerHeader />
-            <div className="flex flex-col gap-8 pr-6 pb-10">
+            <div className="flex flex-col gap-8 pr-6 pb-10 h-full">
                 {isEditingFile ? (
                     <CodeEditor activeFile={activeFile} />
                 ) : (

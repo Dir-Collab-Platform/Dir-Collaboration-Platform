@@ -1,18 +1,20 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 import Particles from './Particles';
 
 const Hero = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
+    const BASE_URL = 'http://localhost:5000';
+
 
     const handleJoinBeta = () => {
         alert("Redirecting to Dashboard...");
-        navigate('/dashboard');
+        window.location.href = `${BASE_URL}/auth/github`;
     };
 
     return (
-        <section className="relative pt-20 pb-16 text-center max-w-[1200px] mx-auto px-5">
+        <section className="relative pt-20 pb-16 text-center max-w-[1400px] mx-auto px-5">
             {/* Background Effects */}
             <Particles />
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-indigo-500/20 rounded-full blur-[100px] -z-10 animate-pulse"></div>
@@ -27,7 +29,7 @@ const Hero = () => {
 
                 <p className="text-[var(--paragraph1-size)] text-[var(--secondary-text-color)] leading-relaxed max-w-2xl mx-auto mb-10 text-lg">
                     The ultimate integrated repository for modern development teams. <br className="hidden md:block" />
-                    Manage, code, and deploy in one unified interface.
+                    Manage, code, and chat in one unified interface.
                 </p>
 
                 <div className="mb-20">
@@ -40,9 +42,11 @@ const Hero = () => {
                     </button>
                 </div>
 
-                {/* IDE Mockup */}
-                <div className="relative mx-auto max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-[var(--main-border-color)] bg-[#0D1117]" style={{ boxShadow: '0 0 100px -20px rgba(66, 85, 194, 0.2)' }}>
-                    {/* Window Controls */}
+                {/* Visuals Container */}
+                <div className="flex flex-col xl:flex-row gap-8 items-center justify-center">
+                    {/* IDE Mockup */}
+                    {/* <div className="relative w-full xl:w-1/2 max-w-2xl rounded-xl overflow-hidden shadow-2xl border border-[var(--main-border-color)] bg-[#0D1117]" style={{ boxShadow: '0 0 100px -20px rgba(66, 85, 194, 0.2)' }}>
+                        
                     <div className="flex items-center px-4 py-3 bg-[#161B22] border-b border-[var(--main-border-color)]">
                         <div className="flex gap-2">
                             <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
@@ -53,14 +57,14 @@ const Hero = () => {
                     </div>
 
                     <div className="flex text-left font-mono text-sm h-[320px]">
-                        {/* Sidebar */}
+                        
                         <div className="w-12 border-r border-[var(--main-border-color)] flex flex-col items-center py-4 gap-6 text-gray-500">
                             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
                         </div>
 
-                        {/* Code Area */}
+                        
                         <div className="flex-1 p-6 bg-[#0D1117] overflow-hidden">
                             <div className="flex mb-1">
                                 <div className="w-6 text-gray-600 select-none text-right pr-4">1</div>
@@ -111,6 +115,16 @@ const Hero = () => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    </div> */}
+
+                    {/* Dashboard Screenshot */}
+                    <div className="relative w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-[var(--main-border-color)] bg-[#0D1117]" style={{ boxShadow: '0 0 100px -20px rgba(139, 92, 246, 0.2)' }}>
+                        <img 
+                            src="/assets/images/screenshot_1.5x_postspark_2026-01-10_08-33-16 copy.png" 
+                            alt="Dir Dashboard Interface" 
+                            className="w-full h-auto object-cover block"
+                        />
                     </div>
                 </div>
             </div>

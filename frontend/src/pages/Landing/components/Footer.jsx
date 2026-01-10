@@ -8,7 +8,7 @@ const Footer = () => {
                     <div className="w-5 h-5 bg-indigo-900/50 rounded flex items-center justify-center text-white text-[10px] font-bold">
                         D
                     </div>
-                    <span className="opacity-60">© 2024 DIR Platform.</span>
+                    <span className="opacity-60">© 2026 Dir Platform.</span>
                 </div>
 
                 <div className="flex items-center gap-8">

@@ -56,10 +56,10 @@ export default function NotificationBell() {
                 <Bell size={24} className="group-hover:text-(--primary-text-color) transition-colors" />
                 {unreadCount > 0 && (
                     <span
-                        className="absolute -top-1 -right-1 text-white text-[2px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-sm animate-in fade-in zoom-in duration-300 line-height-0"
+                        className="absolute -top-1 -right-1 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg animate-in fade-in zoom-in duration-300 leading-none"
                         style={{ backgroundColor: 'var(--notification-count-bg)' }}
                     >
-                        {unreadCount}
+                        {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                 )}
             </button>

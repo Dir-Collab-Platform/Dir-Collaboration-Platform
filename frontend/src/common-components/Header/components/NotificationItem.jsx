@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageSquare, AlertCircle, X, ExternalLink, GitPullRequestArrow, Bell } from 'lucide-react';
 import { GithubIcon } from '../../../../public/assets/icons/icons';
 import { getRelativeTime } from '../../../utils/utils';
@@ -27,11 +28,34 @@ const TYPE_CONFIG = {
 };
 
 function NotificationItem({ notification, onClose, onAction, isPast = false }) {
-  const { _id, message, isRead, type, createdAt } = notification;
+  const { _id, message, isRead, type, createdAt, repoId, targetType } = notification;
   const config = TYPE_CONFIG[type] || TYPE_CONFIG.default;
   const Icon = config.icon;
+  const navigate = useNavigate();
 
   const timeLabel = getRelativeTime(createdAt);
+
+  // Check if this is a workspace invite notification
+  const isWorkspaceInvite = targetType === "repository" && 
+    (message?.toLowerCase().includes("added you to") || 
+     message?.toLowerCase().includes("invited"));
+
+  const handleViewDetails = () => {
+    // If it's a workspace invite, navigate to the workspace
+    if (isWorkspaceInvite && repoId) {
+      // Get the workspace ID (handle both string and populated object)
+      const workspaceId = typeof repoId === 'object' ? repoId._id || repoId : repoId;
+      
+      // Mark as read first, then navigate
+      if (!isRead) {
+        onAction('Mark as read', _id);
+      }
+      navigate(`/workspace/${workspaceId}`);
+    } else {
+      // For other notifications, just trigger the view action
+      onAction('View', _id);
+    }
+  };
 
   return (
     <div
@@ -90,7 +114,7 @@ function NotificationItem({ notification, onClose, onAction, isPast = false }) {
             )}
             <button
               className="px-3 py-1.5 rounded-lg text-xs font-bold bg-(--secondary-button) text-(--secondary-text-color) border border-(--main-border-color) hover:bg-(--secondary-button-hover) transition-all active:scale-95"
-              onClick={() => onAction('View', _id)}
+              onClick={handleViewDetails}
             >
               View Details
             </button>

@@ -1,6 +1,8 @@
 import { StatusCodes } from "http-status-codes";
 import { Notification } from "../models/notification.model.js";
 import { User } from "../models/user.model.js";
+import { getIO } from "../sockets/socket.js";
+import redisClient from "../config/redis.js";
 
 // @route GET /api/notifications
 export const getNotifications = async (req, res) => {
@@ -33,6 +35,16 @@ export const markAsRead = async (req, res) => {
         if (!notification) {
             return res.status(StatusCodes.NOT_FOUND).json({ message: "Notification not found or unauthorized" });
         }
+
+        // Invalidate stats cache so Dashboard notification count updates
+        const statsCacheKey = `user:stats:${req.user._id}`;
+        await redisClient.del(statsCacheKey);
+
+        // Emit socket event to notify user to refresh dashboard stats
+        getIO().to(`user:${req.user._id}`).emit("stats_updated", {
+            message: "Dashboard stats updated",
+            reason: "notification_marked_as_read"
+        });
 
         res.status(StatusCodes.OK).json({ status: "success", data: notification });
     } catch (error) {

@@ -82,6 +82,9 @@ export default function NotificationProvider({ children }) {
                     setUnreadCount(unread);
                     return current;
                 });
+                
+                // Backend emits stats_updated socket event which DashboardProvider listens to
+                // This will automatically refresh the Dashboard notification count
             }
         } catch (error) {
             console.error('Failed to mark notification as read:', error);
@@ -101,6 +104,9 @@ export default function NotificationProvider({ children }) {
             await Promise.all(
                 unreadNotifications.map(n => apiRequest(`/api/notifications/${n._id}/read`, { method: 'PATCH' }))
             );
+            
+            // Backend emits stats_updated socket event for each notification marked as read
+            // DashboardProvider listens to this and will automatically refresh
         } catch (error) {
             console.error('Failed to mark all as read:', error);
             // Re-fetch to sync if failed

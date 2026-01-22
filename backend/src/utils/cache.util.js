@@ -8,7 +8,7 @@ export const getOrSetCache = async (key, cb, ttl = 3600) => {
 
     if (cachedData) {
       //Cache Hit Scenario
-      return JSON.parse(cachedData) // ✅ ObjectIds are now strings (expected)
+      return JSON.parse(cachedData); //  ObjectIds are now strings (expected)
     }
 
     // cache miss sceanario
@@ -16,21 +16,24 @@ export const getOrSetCache = async (key, cb, ttl = 3600) => {
 
     // storing the result in redis with expiration
     if (freshData) {
-      await redisClient.setEx(key, ttl, JSON.stringify(freshData)) // ✅ ObjectIds stringified (expected)
+      await redisClient.setEx(key, ttl, JSON.stringify(freshData)); //  ObjectIds stringified (expected)
     }
 
     return freshData;
   } catch (error) {
-    console.error("Redis Cache Error: ", error)
-    return await cb(); // returning to db 
+    console.error("Redis Cache Error: ", error);
+    return await cb(); // returning to db
   }
-}
+};
 
 //added this to handle cache invalidation specifically for webhook events
-// ✅ Fix: Use toObjectIdString to ensure consistent string conversion
-export const getDiscoveryKey = (userId) => `repos:discovery:${toObjectIdString(userId)}`;
-export const getActiveListKey = (userId) => `repos:active:${toObjectIdString(userId)}`;
-export const getRepoDetailKey = (repoId) => `repos:detail:${toObjectIdString(repoId)}`;
+//  Fix: Use toObjectIdString to ensure consistent string conversion
+export const getDiscoveryKey = (userId) =>
+  `repos:discovery:${toObjectIdString(userId)}`;
+export const getActiveListKey = (userId) =>
+  `repos:active:${toObjectIdString(userId)}`;
+export const getRepoDetailKey = (repoId) =>
+  `repos:detail:${toObjectIdString(repoId)}`;
 
 //wipe all internal cache when webhook request a push request
 //also as the changes affect the users discovery and active repos list we will also invalidate the cache
@@ -50,4 +53,6 @@ export const invalidateRepoCache = async (userId, repoId) => {
 };
 
 export const getRepoContentKey = (owner, repo, path) =>
-  `repo:content:${(owner || "").toLowerCase()}:${(repo || "").toLowerCase()}:${path || ""}`;
+  `repo:content:${(owner || "").toLowerCase()}:${(repo || "").toLowerCase()}:${
+    path || ""
+  }`;

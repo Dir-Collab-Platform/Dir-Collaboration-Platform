@@ -219,6 +219,7 @@ export const getActiveRepos = async (req, res) => {
         cacheKey,
         async () => {
           return await Repository.find(query)
+            .sort({ createdAt: -1 })
             .select("-webhookEvents")
             .populate("members.userId", "avatarUrl githubUsername")
             .lean();
@@ -292,11 +293,11 @@ export const getActiveRepos = async (req, res) => {
       ];
     }
 
-    // ✅ Also use .lean() here for consistency
+    // use .lean() here for consistency
     const repos = await Repository.find(query)
       .select("-webhookEvents")
       .populate("members.userId", "avatarUrl githubUsername")
-      .lean(); // ✅ Add .lean() for consistency with cached path
+      .lean(); // .lean() for consistency with cached path
 
     // Fetch stars from GitHub for filtered results too
     const workspacesWithStars = await Promise.all(
@@ -344,12 +345,11 @@ export const getActiveRepos = async (req, res) => {
       (sum, ws) => sum + (ws.stars || 0),
       0
     );
-
     res.status(StatusCodes.OK).json({
       status: "success",
       totalStars,
       results: workspacesWithStars.length,
-      data: workspacesWithStars,
+      data: workSpaces,
     });
   } catch (error) {
     res
@@ -362,7 +362,7 @@ export const getActiveRepos = async (req, res) => {
 //@route GET /api/repos/:id
 export const getActiveRepo = async (req, res) => {
   try {
-    // ✅ Validate ObjectId format
+    //  Validate ObjectId format
     if (!isValidObjectId(req.params.id)) {
       return res.status(StatusCodes.BAD_REQUEST).json({
         status: "error",
@@ -376,7 +376,7 @@ export const getActiveRepo = async (req, res) => {
       async () => {
         return await Repository.findById(req.params.id)
           .populate("members.userId", "githubUsername avatarUrl")
-          .lean(); // ✅ Consistent with getActiveRepos - returns plain objects with string IDs
+          .lean(); // Consistent with getActiveRepos - returns plain objects with string IDs
       },
       3600
     );
@@ -726,7 +726,7 @@ export const createWorkspace = async (req, res) => {
 
     await Promise.all([
       redisClient.del(getActiveListKey(req.user._id)),
-      redisClient.del(getRepoDetailKey(newRepo[0]._id)), // ✅ Fix: Use newRepo[0]._id not req.params._id
+      redisClient.del(getRepoDetailKey(newRepo[0]._id)), //  Fix: Use newRepo[0]._id not req.params._id
       redisClient.del(getDiscoveryKey(req.user._id)),
       redisClient.del(`user:stats:${req.user._id}`),
     ]);
@@ -1027,13 +1027,19 @@ export const getRepoLanguages = async (req, res) => {
 
           try {
             // explicit endpoint as requested
-            const { data } = await octokit.request('GET /repos/{owner}/{repo}/languages', {
-              owner: targetOwner,
-              repo: targetRepo,
-            });
+            const { data } = await octokit.request(
+              "GET /repos/{owner}/{repo}/languages",
+              {
+                owner: targetOwner,
+                repo: targetRepo,
+              }
+            );
             languages = data;
           } catch (err) {
-            console.warn(`Languages API failed for ${targetOwner}/${targetRepo}:`, err.message);
+            console.warn(
+              `Languages API failed for ${targetOwner}/${targetRepo}:`,
+              err.message
+            );
             return []; // return empty stats if API fails
           }
 
@@ -1059,7 +1065,6 @@ export const getRepoLanguages = async (req, res) => {
       // Fallback for cache errors
       res.status(StatusCodes.OK).json({ status: "success", data: [] });
     }
-
   } catch (error) {
     res
       .status(StatusCodes.INTERNAL_SERVER_ERROR)

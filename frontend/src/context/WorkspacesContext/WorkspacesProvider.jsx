@@ -3,6 +3,7 @@ import { useParams, useLocation } from 'react-router-dom'; // Required for ID an
 import { apiRequest } from '../../services/api/api';
 import { WorkspacesContext } from './WorkspacesContext';
 
+
 export default function WorkspacesProvider({ children }) {
   const [workspaces, setWorkspaces] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

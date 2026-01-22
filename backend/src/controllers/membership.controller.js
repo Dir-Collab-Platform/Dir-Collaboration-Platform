@@ -4,6 +4,9 @@ import { Repository } from "../models/repository.model.js";
 import { createLog } from "../utils/activity.util.js";
 import { createNotification } from "../services/notification.service.js";
 import { toObjectId } from "../utils/objectId.util.js";
+import { getIO } from "../sockets/socket.js";
+import { invalidateWorkspaceStatsCache, getActiveListKey } from "../utils/cache.util.js";
+import redisClient from "../config/redis.js";
 
 //@route /api/repos/:repoId/members
 //@desc inviting a member
@@ -70,6 +73,18 @@ export const inviteMember = async (req, res) => {
       invitedUser._id,
       `Invited ${githubUsername} as ${role} to join the workspace`
     );
+
+    // Invalidate caches for the invited user so their Dashboard and Workspaces page update
+    await invalidateWorkspaceStatsCache(invitedUser._id);
+    await redisClient.del(getActiveListKey(invitedUser._id));
+
+    // Emit socket event to notify the invited user to refresh their dashboard
+    getIO().to(`user:${invitedUser._id}`).emit("stats_updated", {
+      message: "Dashboard stats updated",
+      repositoryId: workspace._id,
+      repositoryName: workspace.workspaceName,
+      reason: "invited_to_workspace"
+    });
 
     res.status(StatusCodes.OK).json({
       status: "success",
@@ -241,6 +256,18 @@ export const removeMember = async (req, res) => {
       memberIdToRemove,
       "Removed user from workspace"
     );
+
+    // Invalidate caches for the removed user so their Dashboard and Workspaces page update
+    await invalidateWorkspaceStatsCache(memberIdToRemove);
+    await redisClient.del(getActiveListKey(memberIdToRemove));
+
+    // Emit socket event to notify the removed user to refresh their dashboard
+    getIO().to(`user:${memberIdToRemove}`).emit("stats_updated", {
+      message: "Dashboard stats updated",
+      repositoryId: repoId,
+      repositoryName: updatedWorkspace.workspaceName,
+      reason: "removed_from_workspace"
+    });
 
     res
       .status(StatusCodes.OK)

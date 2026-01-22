@@ -52,6 +52,23 @@ export const invalidateRepoCache = async (userId, repoId) => {
   }
 };
 
+// Helper function to invalidate both workspace list and stats caches
+// This ensures Dashboard and Workspaces page stay synchronized
+export const invalidateWorkspaceStatsCache = async (userId) => {
+  if (!userId) return;
+  
+  const keys = [
+    getActiveListKey(userId),
+    `user:stats:${userId}`
+  ];
+
+  try {
+    await redisClient.del(keys);
+  } catch (err) {
+    console.error("Workspace Stats Cache Invalidation Error:", err);
+  }
+};
+
 export const getRepoContentKey = (owner, repo, path) =>
   `repo:content:${(owner || "").toLowerCase()}:${(repo || "").toLowerCase()}:${
     path || ""

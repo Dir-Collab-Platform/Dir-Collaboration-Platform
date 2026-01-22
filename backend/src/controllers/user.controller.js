@@ -51,10 +51,11 @@ export const getUserStats = async (req, res) => {
     const stats = await getOrSetCache(
       cacheKey,
       async () => {
-        //count number of repositories owned
-        //count the number documents in Repository collection with ownerId as userId
+        // Count workspaces where user is a member (same query as getActiveRepos)
+        // This ensures Dashboard count matches Workspaces page count
+        // Includes both owned workspaces and workspaces where user was invited
         const [activeWorkspacesCount, unreadNotifications] = await Promise.all([
-          Repository.countDocuments({ ownerId: userId }),
+          Repository.countDocuments({ "members.userId": userId }),
           Notification.countDocuments({ userId: userId, isRead: false }),
         ]);
 

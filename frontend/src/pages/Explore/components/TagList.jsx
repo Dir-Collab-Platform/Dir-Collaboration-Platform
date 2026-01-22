@@ -24,18 +24,27 @@ const TagList = ({ tags, setTags, selectedTag, setSelectedTag }) => {
     if (!newTagName.trim() || isProcessing) return;
 
     setIsProcessing(true);
-    // Send name, description, and hex color to the mock API
-    const res = await createCustomTag(newTagName, description, selectedColor.hex);
-    
-    if (res.status === "success") {
-      setTags((prev) => [...prev, res.data]);
-      // Reset form states
-      setNewTagName("");
-      setDescription("");
-      setSelectedColor(TAG_COLORS[0]);
-      setIsInputMode(false);
+    try {
+      // Send name, description, and hex color to the API
+      const res = await createCustomTag(newTagName, description, selectedColor.hex);
+      
+      if (res.status === "success") {
+        setTags((prev) => [...prev, res.data]);
+        // Reset form states
+        setNewTagName("");
+        setDescription("");
+        setSelectedColor(TAG_COLORS[0]);
+        setIsInputMode(false);
+      } else {
+        console.error("Failed to create tag:", res.message || "Unknown error");
+        alert(res.message || "Failed to create tag. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error creating tag:", error);
+      alert(error.message || "Failed to create tag. Please try again.");
+    } finally {
+      setIsProcessing(false);
     }
-    setIsProcessing(false);
   };
 
   const handleDelete = async (e, tagId) => {

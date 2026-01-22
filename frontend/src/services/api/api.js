@@ -26,8 +26,15 @@ const apiRequest = async (endpoint, options = {}) => {
 
   const token = localStorage.getItem('token');
 
+  // Stringify body if it's an object and method requires a body
+  let body = options.body;
+  if (body && typeof body === 'object' && !(body instanceof FormData) && !(body instanceof URLSearchParams)) {
+    body = JSON.stringify(body);
+  }
+
   const config = {
     ...options,
+    body,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),

@@ -138,11 +138,11 @@ function RepositoryList() {
           })}
         </div>
       </div>
-      <div className="flex justify-center mt-8">
+      {/* <div className="flex justify-center mt-8">
         <Button variant="primary" className="px-12 py-2 rounded-lg">
           Load More
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

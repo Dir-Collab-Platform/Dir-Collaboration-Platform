@@ -51,7 +51,8 @@ export const handleGithubWebhook = async (req, res) => {
         logMessage = `starred ${payload.repository.name}`;
         break;
       case "pull_request":
-        logMessage = `${payload.action} pull request: ${payload.pull_request.title}`;
+        logMessage = ` made a pull request: ${payload.pull_request.title}`;
+        break; 
       case "fork":
         logMessage = `${payload.sender.login} forked ${payload.repository.name}`;
     }

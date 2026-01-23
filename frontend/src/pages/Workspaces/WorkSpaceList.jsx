@@ -106,9 +106,9 @@ export default function WorkSpaceList() {
             </div>
           );
         })}
-        <Button variant="primary" className={"px-12 py-2 rounded-lg my-2"}>
+        {/* <Button variant="primary" className={"px-12 py-2 rounded-lg my-2"}>
           Load More
-        </Button>
+        </Button> */}
       </div>
     </>
   );

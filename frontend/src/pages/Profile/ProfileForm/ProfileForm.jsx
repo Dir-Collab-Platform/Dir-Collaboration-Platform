@@ -2,36 +2,35 @@ import { Plus } from "lucide-react";
 import Button from "../../../common-components/button";
 import Input, { TextArea } from "../../../common-components/input";
 import { useAuth } from "../../../context/AuthContext/AuthContext";
-import { apiRequest } from "../../../services/api/api";
+import { useProfile } from "../../../context/ProfileContext/ProfileContext";
 import { useState, useEffect } from "react";
 
 export default function ProfileForm() {
   const { user, refreshUser } = useAuth();
+  const { profile, updateProfile } = useProfile();
+
   const [bio, setBio] = useState('');
   const [profileUrl, setProfileUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
-  // Initialize state from context
+  // Initialize state from profile (from ProfileContext) or user (from AuthContext)
   useEffect(() => {
-    if (user) {
-      setBio(user.bio || '');
-      setProfileUrl(user.profileUrl || '');
+    const data = profile || user;
+    if (data) {
+      setBio(data.bio || '');
+      setProfileUrl(data.profileUrl || '');
     }
-  }, [user]);
+  }, [profile, user]);
 
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      const res = await apiRequest('/api/profile', {
-        method: 'PATCH',
-        body: {
-          bio: bio,
-          profileUrl: profileUrl
-        }
+      await updateProfile({
+        bio: bio,
+        profileUrl: profileUrl
       });
-      if (res.status === 'success') {
-        await refreshUser();
-      }
+      // Also refresh auth user to keep everything in sync
+      await refreshUser();
     } catch (err) {
       console.error("Save profile failed:", err);
     } finally {
@@ -40,9 +39,10 @@ export default function ProfileForm() {
   };
 
   const handleCancel = () => {
-    if (user) {
-      setBio(user.bio || '');
-      setProfileUrl(user.profileUrl || '');
+    const data = profile || user;
+    if (data) {
+      setBio(data.bio || '');
+      setProfileUrl(data.profileUrl || '');
     }
   };
 

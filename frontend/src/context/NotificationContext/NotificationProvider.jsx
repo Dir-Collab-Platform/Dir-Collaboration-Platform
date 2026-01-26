@@ -23,7 +23,7 @@ export default function NotificationProvider({ children }) {
                 const response = await apiRequest('/api/notifications');
                 if (response.status === 'success') {
                     setNotifications(response.data || []);
-                    console.log('Fetched notifications: ', response.data)
+                    // console.log('Fetched notifications: ', response.data)
                     const unread = (response.data || []).filter(n => !n.isRead).length;
                     setUnreadCount(unread);
                 }

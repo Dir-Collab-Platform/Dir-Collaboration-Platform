@@ -16,6 +16,22 @@ export const sendMessage = async (req, res) => {
         const { content, attachments } = req.body;
         const userId = req.user._id;
 
+        // 1. RBAC & Existence Check (Fetch Repo First)
+        // We find the repo to get the participant list for this specific channel
+        const repo = await Repository.findOne({ "channels.channel_id": channelId });
+        if (!repo) return res.status(StatusCodes.NOT_FOUND).json({ message: "Repository/Channel not found" });
+
+        const channel = repo.channels.find(c => c.channel_id.toString() === channelId);
+        if (!channel) return res.status(StatusCodes.NOT_FOUND).json({ message: "Channel not found" });
+
+        // PERMISSION CHECK: If private, user MUST be a participant
+        if (channel.isPrivate) {
+            const isParticipant = channel.participants.some(p => p.toString() === userId.toString());
+            if (!isParticipant) {
+                return res.status(StatusCodes.FORBIDDEN).json({ message: "You are not a participant of this private channel" });
+            }
+        }
+
         //  Create message
         const newMessage = await Message.create({
             channelId,
@@ -61,10 +77,7 @@ export const sendMessage = async (req, res) => {
         }
 
         // Handle General Participant Notifications
-        // We find the repo to get the participant list for this specific channel
-        const repo = await Repository.findOne({ "channels.channel_id": channelId });
-        const channel = repo?.channels.find(c => c.channel_id.toString() === channelId);
-
+        // We already have 'channel' from the top check
         if (channel && channel.participants.length > 0) {
             // Notify participants who WERE NOT already mentioned and are NOT the sender
             const usersToNotify = channel.participants.filter(pId =>
@@ -75,7 +88,7 @@ export const sendMessage = async (req, res) => {
             await Promise.all(usersToNotify.map(pId =>
                 createNotification({
                     userId: pId,
-                    message: `New message in #${channel.name}`,
+                    message: `New message in ${channel.isPrivate ? 'private channel ' : '#'}${channel.name}`,
                     type: "message",
                     repoId: repoId,
                     targetType: "message",
@@ -99,8 +112,30 @@ export const sendMessage = async (req, res) => {
 // @route GET /api/repos/:repoId/channels/:channelId/messages
 export const getMessages = async (req, res) => {
     try {
-        const { channelId } = req.params;
+        const { channelId, repoId } = req.params; // repoId assumed in params
         const { limit = 50, offset = 0 } = req.query;
+        const userId = req.user._id;
+
+        // 1. RBAC Check
+        // We need to look up privacy settings first. 
+        // Optimized query: Select only the channels array
+        const repo = await Repository.findOne(
+            { "channels.channel_id": channelId },
+            { "channels.$": 1 }
+        );
+
+        if (!repo || !repo.channels || repo.channels.length === 0) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Channel not found" });
+        }
+
+        const channel = repo.channels[0]; // Projection returns only matching element
+
+        if (channel.isPrivate) {
+            const isParticipant = channel.participants.some(p => p.toString() === userId.toString());
+            if (!isParticipant) {
+                return res.status(StatusCodes.FORBIDDEN).json({ message: "Access denied to private channel" });
+            }
+        }
 
         const messages = await Message.find({ channelId })
             .sort({ createdAt: -1 })

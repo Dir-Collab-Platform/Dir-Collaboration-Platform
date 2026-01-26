@@ -1,12 +1,12 @@
 import { useContext, useState } from 'react'
-import { Plus, X } from "lucide-react"
+import { Plus, X, Lock } from "lucide-react"
 import { ChatContext } from "../../../../context/WorkspaceContext/WorkspaceContext"
 import AddChannelModal from './AddChannelModal'
 
 /**
  * ChannelTag Component
  */
-function ChannelTag({ name, notif_count, isActive, onClick, onDelete }) {
+function ChannelTag({ name, notif_count, isActive, isPrivate, onClick, onDelete }) {
     const [isHovered, setIsHovered] = useState(false);
 
     return (
@@ -20,8 +20,8 @@ function ChannelTag({ name, notif_count, isActive, onClick, onDelete }) {
                     : 'bg-(--meta-tag-color) text-(--secondary-text-color) hover:brightness-110'}
             `}
         >
-            <span className={`font-bold ${isActive ? 'text-white/70' : 'text-(--channel-hash-color)'}`}>
-                #
+            <span className={`flex items-center justify-center ${isActive ? 'text-white/70' : 'text-(--channel-hash-color)'}`}>
+                {isPrivate ? <Lock size={10} /> : "#"}
             </span>
             <p className="text-xs font-semibold">{name}</p>
             {
@@ -85,6 +85,7 @@ export default function ChannelList() {
                                 name={channel.name}
                                 notif_count={channel.unreadCount || 0}
                                 isActive={activeChannelId === channelId}
+                                isPrivate={channel.isPrivate}
                                 onClick={() => setActiveChannelId(channelId)}
                                 onDelete={() => handleDeleteChannel(channelId, channel.name)}
                             />

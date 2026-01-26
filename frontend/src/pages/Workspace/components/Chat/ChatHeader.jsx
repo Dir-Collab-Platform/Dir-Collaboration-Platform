@@ -87,15 +87,23 @@ import { ChatContext } from '../../../../context/WorkspaceContext/WorkspaceConte
 // ... (imports remain)
 
 export default function ChatHeader({ name, notif_count }) {
-    const { leaveChannel, activeChannelId } = useContext(ChatContext)
+    const { leaveChannel, deleteChannel, activeChannelId } = useContext(ChatContext)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
 
     // Function to execute when user confirms delete
-    const handleDeleteChannel = () => {
-        console.log(`Channel #${name} deleted`)
-        // Future logic: call API to delete channel
+    const handleDeleteChannel = async () => {
+        if (activeChannelId) {
+            try {
+                await deleteChannel(activeChannelId);
+                console.log(`Channel #${name} deleted`);
+                setIsDeleteModalOpen(false);
+            } catch (error) {
+                console.error("Failed to delete channel", error);
+                alert("Failed to delete channel: " + error.message);
+            }
+        }
     }
 
     // Function to execute when user confirms leave

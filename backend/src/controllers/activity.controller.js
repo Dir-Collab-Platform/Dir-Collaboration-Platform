@@ -49,7 +49,7 @@ export const getActivityFeed = async (req, res) => {
           id: log._id,
           user: log.userId?.githubUsername || "Unknown User",
           action: log.action,
-          targetName: log.repoId?.name || "repository",
+          targetName: log.repoId?.name,
           targetType: log.targetType,
           message: log.details?.message || "",
           timestamp: log.createdAt,

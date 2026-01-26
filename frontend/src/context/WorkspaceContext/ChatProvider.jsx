@@ -186,6 +186,29 @@ export default function ChatProvider({ children }) {
             }
         };
 
+        const handleUserLeftChannel = ({ channelId, userId }) => {
+            // If the current user left a channel (from another client or backend action)
+            if (userId?.toString() === user?._id?.toString()) {
+                // Find the channel to check if it's private
+                const channel = channels.find(c => c._id === channelId || c.channel_id === channelId);
+                if (channel?.isPrivate) {
+                    // Remove private channel from list
+                    setChannels(prev => prev.filter(c => c._id !== channelId));
+
+                    // Switch active channel if needed
+                    if (activeChannelId === channelId) {
+                        const general = channels.find(c => c.name === 'general' && c._id !== channelId);
+                        if (general) {
+                            setActiveChannelId(general._id);
+                        } else {
+                            const firstAvailable = channels.find(c => c._id !== channelId);
+                            setActiveChannelId(firstAvailable?._id || null);
+                        }
+                    }
+                }
+            }
+        };
+
         // Listen to channel-specific room events
         socket.on('message_received', handleMessageReceived);
         socket.on('message_deleted', handleMessageDeleted);
@@ -193,6 +216,7 @@ export default function ChatProvider({ children }) {
         socket.on('channel_updated', handleChannelUpdated);
         socket.on('channel_deleted', handleChannelDeleted);
         socket.on('new_channel', handleNewChannel);
+        socket.on('user_left_channel', handleUserLeftChannel);
 
         return () => {
             socket.off('message_received', handleMessageReceived);
@@ -201,6 +225,7 @@ export default function ChatProvider({ children }) {
             socket.off('channel_updated', handleChannelUpdated);
             socket.off('channel_deleted', handleChannelDeleted);
             socket.off('new_channel', handleNewChannel);
+            socket.off('user_left_channel', handleUserLeftChannel);
         };
     }, [socket, isConnected, activeChannelId, workspaceId]);
 
@@ -273,7 +298,7 @@ export default function ChatProvider({ children }) {
     /**
      * Create a new channel
      */
-    async function createChannel(name) {
+    async function createChannel(name, options = {}) {
         if (!workspaceId || !/^[0-9a-fA-F]{24}$/.test(workspaceId)) {
             throw new Error('Invalid workspace ID');
         }
@@ -281,7 +306,11 @@ export default function ChatProvider({ children }) {
         try {
             const res = await apiRequest(`/api/repos/${workspaceId}/channels`, {
                 method: 'POST',
-                body: JSON.stringify({ name }),
+                body: JSON.stringify({
+                    name,
+                    isPrivate: options.isPrivate,
+                    participants: options.participants // Array of user IDs
+                }),
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -289,13 +318,11 @@ export default function ChatProvider({ children }) {
 
             if (res.status === 'success') {
                 // Channel will be added via socket event 'new_channel'
-                // But we can also add it optimistically
-                const newChannel = {
+                // Remove optimistic update to prevent duplicates
+                return {
                     ...res.data,
                     _id: res.data.channel_id || res.data._id
                 };
-                setChannels(prev => [...prev, newChannel]);
-                return newChannel;
             }
             throw new Error(res.message || 'Failed to create channel');
         } catch (err) {
@@ -394,34 +421,34 @@ export default function ChatProvider({ children }) {
         if (!workspaceId || !channelId) return;
 
         try {
+            // Find the channel to check if it's private
+            const channelToLeave = channels.find(c => c._id === channelId || c.channel_id === channelId);
+            const isPrivateChannel = channelToLeave?.isPrivate;
+
             const res = await apiRequest(`/api/repos/${workspaceId}/channels/${channelId}/leave`, {
                 method: 'POST'
             });
 
             if (res.status === 'success') {
-                // Remove from local channels list?
-                // Actually, if we leave, we shouldn't see it in the sidebar anymore?
-                // OR should we just be removed from participants but still see it if public?
-                // Backend logic: removing from participants array.
-                // Assuming Sidebar shows *all* channels or only *joined* channels?
-                // listChannels endpoint usually returns all channels in repo.
-                // So leaving doesn't hide it necessarily, unless logic says so.
-                // But typically "Leave Channel" implies you act like you are not in it.
+                // If it's a private channel, remove it from the list (user loses access)
+                if (isPrivateChannel) {
+                    setChannels(prev => prev.filter(c => c._id !== channelId));
+                }
 
-                // For now, prompt usually implies removing from list if it's "my channels". 
-                // But listChannels implementation (Step 503) returns `workspace.channels`.
-                // It doesn't filter by "my channels".
-                // So "Leaving" just means not receiving notifications or showing up in members list.
-
-                // However, the requested behavior usually implies navigating away if active.
+                // If we're currently viewing this channel, switch to another
                 if (activeChannelId === channelId) {
                     // Switch to General or first available
-                    const general = channels.find(c => c.name === 'general');
-                    if (general && general._id !== channelId) {
+                    const general = channels.find(c => c.name === 'general' && c._id !== channelId);
+                    if (general) {
                         setActiveChannelId(general._id);
-                    } else if (channels.length > 0) {
-                        const first = channels.find(c => c._id !== channelId);
-                        if (first) setActiveChannelId(first._id);
+                    } else {
+                        // Find first available channel that's not the one we're leaving
+                        const firstAvailable = channels.find(c => c._id !== channelId);
+                        if (firstAvailable) {
+                            setActiveChannelId(firstAvailable._id);
+                        } else {
+                            setActiveChannelId(null);
+                        }
                     }
                 }
                 return true;

@@ -18,7 +18,7 @@
 //     )
 // }
 
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import ChannelList from "./Chat/ChannelList"
 import Chat from "./Chat/Chat"
 import ChatHeader from "./Chat/ChatHeader"
@@ -51,6 +51,23 @@ export default function ChatPanel() {
     const activeChannelMessages = messages?.filter(m => m.channelId === activeChannel?._id) || []
     // this should be changed to the number of messages the user have not seen yet
     const notifCount = activeChannelMessages.length
+
+    // Filter members for private channels
+    const visibleMembers = useMemo(() => {
+        if (!repository?.members) return [];
+
+        // If no active channel or it's public, show all workspace members
+        if (!activeChannel?.isPrivate) return repository.members;
+
+        // For private channels, strictly filter by participants list
+        // activeChannel.participants contains user IDs (strings or objects)
+        return repository.members.filter(member => {
+            if (!activeChannel.participants) return false;
+            return activeChannel.participants.some(participantId =>
+                participantId.toString() === member.id
+            );
+        });
+    }, [repository?.members, activeChannel]);
 
     if (isLoading) {
         return (
@@ -89,7 +106,7 @@ export default function ChatPanel() {
                     <Chat />
                 </div>
 
-                <Collaborators members={repository?.members} />
+                <Collaborators members={visibleMembers} />
             </section>
 
         </div>

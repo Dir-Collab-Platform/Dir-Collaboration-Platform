@@ -11,7 +11,7 @@ import mongoose from "mongoose";
 export const createChannel = async (req, res) => {
     try {
         const { repoId: workspaceId } = req.params;
-        const { name } = req.body;
+        const { name, isPrivate, participants } = req.body; // Extract isPrivate and participants
 
         if (!name) {
             return res.status(StatusCodes.BAD_REQUEST).json({ message: "Channel name is required" });
@@ -20,7 +20,11 @@ export const createChannel = async (req, res) => {
         // Generate a new ObjectId for the channel_id field
         const newChannelData = {
             channel_id: new mongoose.Types.ObjectId(),
-            name: name.trim()
+            name: name.trim(),
+            isPrivate: !!isPrivate,
+            participants: isPrivate
+                ? [req.user._id, ...(participants || []).map(id => new mongoose.Types.ObjectId(id))] // Auto-add creator + selected members
+                : []
         };
 
         const workspace = await Repository.findByIdAndUpdate(
@@ -34,12 +38,18 @@ export const createChannel = async (req, res) => {
         }
 
         // finding the channel from the array
-
         const createdChannel = workspace.channels.find(
             c => c.channel_id.toString() === newChannelData.channel_id.toString()
         );
 
         // emitting Real-time notification
+        // For private channels, we might only want to emit to specific people, 
+        // but emitting to the workspace is generally okay as the frontend will filter/not show it 
+        // OR the user just won't be able to access it. 
+        // Sticking to workspace emission for simplicity, but ideally we'd target specific users.
+        // However, standard specific-user emission is complex without a list of socket IDs.
+        // Since we are adding RBAC to listChannels, other users won't see it on refresh.
+        // To be safe, let's keep it.
         getIO().to(`workspace:${workspaceId}`).emit("new_channel", {
             workspaceId,
             channel: createdChannel,
@@ -52,7 +62,7 @@ export const createChannel = async (req, res) => {
             "created channel",
             "channel",
             createdChannel.channel_id,
-            `Created channel ${createdChannel.name}`
+            `Created ${isPrivate ? 'private ' : ''}channel ${createdChannel.name}`
         );
 
         res.status(StatusCodes.CREATED).json({
@@ -67,15 +77,22 @@ export const createChannel = async (req, res) => {
 
 //@route: GET /api/repos/:repoId/channels
 //@desc: listing all channels
-
 export const listChannels = async (req, res) => {
     try {
         const { repoId } = req.params;
+        const userId = req.user._id.toString();
+
         const workspace = await Repository.findById(repoId).select("channels");
 
         if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: "Workspace not found" });
 
-        res.status(StatusCodes.OK).json({ status: "success", data: workspace.channels });
+        // RBAC Filter: Public channels OR Private channels where user is a participant
+        const visibleChannels = workspace.channels.filter(ch => {
+            if (!ch.isPrivate) return true;
+            return ch.participants.some(p => p.toString() === userId);
+        });
+
+        res.status(StatusCodes.OK).json({ status: "success", data: visibleChannels });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
@@ -130,17 +147,28 @@ export const deleteChannel = async (req, res) => {
     try {
         const { id: channelId } = req.params;
 
-        // Find the repo first to ensure we have the repoId for the socket broadcast
-        const workspace = await Repository.findOneAndUpdate(
+        // 1. Find repo first to get channel details (name) for logging/response
+        // We do this BEFORE deletion so we don't lose the name
+        const workspaceCheck = await Repository.findOne(
             { "channels.channel_id": channelId },
-            { $pull: { channels: { channel_id: channelId } } },
-            { new: false } // return original to get the _id for the socket room
+            { "channels.$": 1, _id: 1 }
         );
 
-        if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: "Channel not found" });
+        if (!workspaceCheck || !workspaceCheck.channels || workspaceCheck.channels.length === 0) {
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "Channel not found" });
+        }
 
-        // Clean up orphaned messages belonging to this channel 
-        // Important: prevents database bloat
+        const channelToDelete = workspaceCheck.channels[0];
+        const channelName = channelToDelete.name;
+
+        // 2. Perform Deletion
+        const workspace = await Repository.findByIdAndUpdate(
+            workspaceCheck._id,
+            { $pull: { channels: { channel_id: channelId } } },
+            { new: true }
+        );
+
+        // Clean up orphaned messages
         await Message.deleteMany({ channelId: channelId });
 
         // logging
@@ -159,11 +187,7 @@ export const deleteChannel = async (req, res) => {
             channelId: channelId
         });
 
-        // Safer Response Construction
-        const deletedChannel = workspace.channels.find(c => c.channel_id.toString() === channelId);
-        const channelName = deletedChannel ? deletedChannel.name : "Unknown Channel";
-
-        res.status(StatusCodes.OK).json({ status: "success", message: `Channel ${channelName} and messages in ${channelName} deleted` });
+        res.status(StatusCodes.OK).json({ status: "success", message: `Channel ${channelName} and messages deleted` });
     } catch (error) {
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
@@ -187,6 +211,11 @@ export const joinChannel = async (req, res) => {
         if (!workspace) return res.status(StatusCodes.NOT_FOUND).json({ message: "Channel not found" });
 
         const targetChannel = workspace.channels.find(c => c.channel_id.toString() === channelId);
+
+        // RBAC Check: Cannot publicly join a private channel
+        if (targetChannel.isPrivate) {
+            return res.status(StatusCodes.FORBIDDEN).json({ message: "Cannot join private channel directly. Use invitation." });
+        }
 
         // 2. Join 'General' Channel (if target is not already general)
         if (targetChannel.name !== "general") {

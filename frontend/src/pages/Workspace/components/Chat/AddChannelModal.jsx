@@ -40,7 +40,10 @@ export default function AddChannelModal({ isOpen, onClose, users = [] }) {
         setCreateError(null);
 
         try {
-            await chatContext.createChannel(name);
+            await chatContext.createChannel(name, {
+                isPrivate: type === 'restricted',
+                participants: type === 'restricted' ? selectedMembers : []
+            });
             // Success - close modal and reset
             onClose();
             setTimeout(() => {

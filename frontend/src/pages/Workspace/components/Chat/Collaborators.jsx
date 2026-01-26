@@ -7,6 +7,7 @@ export function InviteBtn() {
     const { inviteMember } = useContext(WorkspaceContext);
     const [isOpen, setIsOpen] = useState(false);
     const [username, setUsername] = useState("");
+    const [role, setRole] = useState("viewer");
     const [isLoading, setIsLoading] = useState(false);
     const popupRef = useRef(null);
     const btnRef = useRef(null);
@@ -26,8 +27,9 @@ export function InviteBtn() {
         if (!username.trim()) return;
         setIsLoading(true);
         try {
-            await inviteMember(username);
+            await inviteMember(username, role);
             setUsername("");
+            setRole("viewer");
             setIsOpen(false);
         } catch (error) {
             alert("Failed to invite member: " + error.message);
@@ -62,6 +64,55 @@ export function InviteBtn() {
                             className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-lg px-3 py-2 text-xs outline-none focus:border-blue-500 transition-colors"
                             autoFocus
                         />
+
+                        {/* TODO: Add radio buttons to select role: owner, core, maintainer and viewer */}
+                        <div className="flex gap-2 flex-col">
+
+                            {/* <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="owner"
+                                    checked={role === "owner"}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-xs">Owner</span>
+                            </label> */}
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="core"
+                                    checked={role === "core"}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-xs">Core</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="contributor"
+                                    checked={role === "contributor"}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-xs">Contributor</span>
+                            </label>
+                            <label className="flex items-center gap-2">
+                                <input
+                                    type="radio"
+                                    name="role"
+                                    value="viewer"
+                                    checked={role === "viewer"}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="w-4 h-4"
+                                />
+                                <span className="text-xs">Viewer</span>
+                            </label>
+                        </div>
                         <button
                             onClick={handleInvite}
                             disabled={isLoading || !username.trim()}
@@ -119,7 +170,7 @@ export default function Collaborators({ members = [] }) {
                                 return (
                                     <Avatar
                                         key={user._id || idx}
-                                        src={user.avatarUrl}
+                                        src={user.avatar || user.avatarUrl}
                                         size={34}
                                         className="border-2 border-(--card-bg) ring-1 ring-(--main-border-color)"
                                     />
@@ -153,7 +204,7 @@ export default function Collaborators({ members = [] }) {
                             return (
                                 <div key={userId || idx} className="flex justify-between items-center p-2 hover:bg-(--card-bg-lighter) rounded-lg transition-colors group">
                                     <div className="flex items-center gap-3">
-                                        <Avatar src={user.avatarUrl} size={28} />
+                                        <Avatar src={user.avatar || user.avatarUrl} size={28} />
                                         <div className="flex flex-col">
                                             <span className="paragraph2 text-(--secondary-text-color) group-hover:text-(--primary-text-color) transition-colors">
                                                 {userName}

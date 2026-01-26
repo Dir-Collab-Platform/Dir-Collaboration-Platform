@@ -29,7 +29,7 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                 <X size={20} />
             </button>
 
-            <div className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4" style={{ backgroundColor: 'var(--card-bg)' }}>
+            <div className="flex items-center gap-4 mt-16 mb-8 px-4 py-3 rounded-lg mx-4 bg-(--card-bg)">
                 <Avatar
                     src={user?.avatarUrl}
                     alt="avatar"
@@ -37,12 +37,12 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     className="rounded-full object-cover"
                 />
                 <div>
-                    <p className="font-semibold" style={{ color: 'var(--primary-text-color)' }}>{user?.githubUsername || "No logged in user"}</p>
-                    <p className="text-sm" style={{ color: 'var(--secondary-text-color)' }}>@{user?.githubUsername?.toLowerCase() || "--"}</p>
+                    <p className="font-semibold text-(--primary-text-color)">{user?.githubUsername || "No logged in user"}</p>
+                    <p className="text-sm text-(--secondary-text-color)">@{user?.githubUsername?.toLowerCase() || "--"}</p>
                 </div>
             </div>
 
-            <hr className="my-4 mx-4" style={{ borderColor: 'var(--main-border-color)' }} />
+            <hr className="my-4 mx-4 border-(--main-border-color)" />
 
             <div className="px-4 space-y-1">
                 <NavLink
@@ -50,13 +50,9 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     end
                     onClick={onClose}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? '' : 'hover:opacity-80'
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? 'bg-(--active-tab-bg) text-(--active-text-color)' : 'hover:opacity-80 text-(--secondary-text-color)'
                         }`
                     }
-                    style={({ isActive }) => ({
-                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
-                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
-                    })}
                 >
                     <LayoutDashboard size={20} />
                     <span>Dashboard</span>
@@ -66,13 +62,9 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     to="/repositories"
                     onClick={onClose}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? '' : 'hover:opacity-80'
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? 'bg-(--active-tab-bg) text-(--active-text-color)' : 'hover:opacity-80 text-(--secondary-text-color)'
                         }`
                     }
-                    style={({ isActive }) => ({
-                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
-                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
-                    })}
                 >
                     <Folder size={20} />
                     <span>Repositories</span>
@@ -82,13 +74,9 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     to="/workspaces"
                     onClick={onClose}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? '' : 'hover:opacity-80'
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? 'bg-(--active-tab-bg) text-(--active-text-color)' : 'hover:opacity-80 text-(--secondary-text-color)'
                         }`
                     }
-                    style={({ isActive }) => ({
-                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
-                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
-                    })}
                 >
                     <Workflow size={20} />
                     <span>Workspaces</span>
@@ -98,13 +86,9 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     to="/profile"
                     onClick={onClose}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? '' : 'hover:opacity-80'
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? 'bg-(--active-tab-bg) text-(--active-text-color)' : 'hover:opacity-80 text-(--secondary-text-color)'
                         }`
                     }
-                    style={({ isActive }) => ({
-                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
-                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
-                    })}
                 >
                     <Settings size={20} />
                     <span>Settings</span>
@@ -114,13 +98,9 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     to="/explore"
                     onClick={onClose}
                     className={({ isActive }) =>
-                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? '' : 'hover:opacity-80'
+                        `flex items-center gap-3 w-full p-3 rounded-lg transition-colors ${isActive ? 'bg-(--active-tab-bg) text-(--active-text-color)' : 'hover:opacity-80 text-(--secondary-text-color)'
                         }`
                     }
-                    style={({ isActive }) => ({
-                        backgroundColor: isActive ? 'var(--active-tab-bg)' : 'transparent',
-                        color: isActive ? 'var(--active-text-color)' : 'var(--secondary-text-color)'
-                    })}
                 >
                     <Search size={20} />
                     <span>Explore</span>

@@ -43,11 +43,7 @@ function Header() {
   return (
     <>
       <nav
-        className="p-4 fixed top-0 left-0 right-0 z-50"
-        style={{
-          backgroundColor: "var(--dark-bg)",
-          borderBottom: "1px solid var(--main-border-color)",
-        }}
+        className="p-4 fixed top-0 left-0 right-0 z-50 bg-(--dark-bg) border-b border-(--main-border-color)"
       >
         <div className="w-full px-4 sm:px-6 lg:px-8 mx-auto flex justify-between items-center">
           <div className="flex items-center gap-8">
@@ -62,19 +58,7 @@ function Header() {
           <div className="flex items-center gap-6">
             <button
               onClick={handleNewRepoClick}
-              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all hover:-translate-y-0.5"
-              style={{
-                backgroundColor: "var(--primary-button)",
-                color: "var(--primary-text-color)",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--primary-button-hover)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor =
-                  "var(--primary-button)")
-              }
+              className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all hover:-translate-y-0.5 bg-(--primary-button) text-(--primary-text-color) hover:bg-(--primary-button-hover)"
             >
               <Plus size={16} />
               <span>New Repository</span>
@@ -84,17 +68,7 @@ function Header() {
 
             <button
               onClick={() => setIsMenuOpen(true)}
-              className="p-2 rounded-md transition-colors"
-              style={{ color: "var(--secondary-text-color)" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "var(--secondary-button-hover)";
-                e.currentTarget.style.color = "var(--primary-text-color)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "var(--secondary-text-color)";
-              }}
+              className="p-2 rounded-md transition-colors text-(--secondary-text-color) hover:bg-(--secondary-button-hover) hover:text-(--primary-text-color)"
             >
               <Menu size={24} />
             </button>
@@ -111,8 +85,7 @@ function Header() {
 
       {isMenuOpen && (
         <div
-          className="fixed inset-0 z-40"
-          style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+          className="fixed inset-0 z-40 bg-black/50"
           onClick={() => setIsMenuOpen(false)}
         />
       )}

@@ -27,36 +27,22 @@ const ProjectCard = ({ project, onTagClick }) => {
 
   return (
     <div
-      className="p-5 rounded-xl border cursor-pointer transition-all hover:scale-[1.02]"
-      style={{
-        backgroundColor: 'var(--card-bg)',
-        borderColor: 'var(--main-border-color)'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'var(--primary-button-active)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = 'var(--main-border-color)';
-      }}
+      className="p-5 rounded-xl border cursor-pointer transition-all hover:scale-[1.02] bg-(--card-bg) border-(--main-border-color) hover:border-(--primary-button-active)"
       onClick={handleClick}
     >
       <div className="flex items-center justify-between mb-2">
         <div className='flex gap-2 justify-center items-center'>
-          <h3 className="flex items-center gap-2 font-bold text-[22px]" style={{ color: 'var(--primary-text-color)' }}>
+          <h3 className="flex items-center gap-2 font-bold text-[22px] text-(--primary-text-color)">
             {project.isImported && <Workflow size={20} className="text-(--primary-text-color)" />}
             {project.workspaceName || project.githubRepoName || project.name}
           </h3>
           <span
-            className='px-2 py-0.5 rounded-[34px] text-[12px]'
-            style={{
-              backgroundColor: 'var(--meta-tag-color)',
-              color: 'var(--secondary-text-color)'
-            }}
+            className='px-2 py-0.5 rounded-[34px] text-[12px] bg-(--meta-tag-color) text-(--secondary-text-color)'
           >
             {project.visibility || (project.isPrivate ? "private" : "public")}
           </span>
         </div>
-        <span className="text-xs flex items-center gap-1" style={{ color: 'var(--secondary-text-color)' }}>
+        <span className="text-xs flex items-center gap-1 text-(--secondary-text-color)">
           <Star size={16} />
           {project.stars || 0}
           <GithubIcon className="w-4 h-4" />
@@ -64,27 +50,23 @@ const ProjectCard = ({ project, onTagClick }) => {
       </div>
 
       <div className='flex items-center gap-3 mb-2'>
-        <h4 className='font-semibold text-[20px]' style={{ color: 'var(--mid-dim-font-color)' }}>
+        <h4 className='font-semibold text-[20px] text-(--mid-dim-font-color)'>
           {project.githubOwner || project.owner}
         </h4>
         <button
-          className='px-2 py-0.5 rounded-[34px] text-[12px]'
-          style={{
-            backgroundColor: 'var(--meta-tag-color)',
-            color: 'var(--secondary-text-color)'
-          }}
+          className='px-2 py-0.5 rounded-[34px] text-[12px] bg-(--meta-tag-color) text-(--secondary-text-color)'
         >
           Owner
         </button>
       </div>
 
-      <p className="text-sm font-light mb-4" style={{ color: 'var(--primary-text-color)' }}>
+      <p className="text-sm font-light mb-4 text-(--primary-text-color)">
         {project.description || "No description available"}
       </p>
 
       {project.languages && project.languages.length > 0 && (
         <div className="mb-4">
-          <div className="h-2 rounded overflow-hidden flex" style={{ backgroundColor: 'var(--secondary-button)' }}>
+          <div className="h-2 rounded overflow-hidden flex bg-(--secondary-button)">
             {project.languages.map((lang) => (
               <div
                 key={lang.label}
@@ -104,8 +86,8 @@ const ProjectCard = ({ project, onTagClick }) => {
                   className="w-2 h-2 rounded"
                   style={{ backgroundColor: lang.color || '#6b7280' }}
                 />
-                <span style={{ color: 'var(--mid-dim-font-color)' }}>{lang.label}</span>
-                <span style={{ color: 'var(--secondary-text-color)' }}>{lang.value.toFixed(1)}%</span>
+                <span className="text-(--mid-dim-font-color)">{lang.label}</span>
+                <span className="text-(--secondary-text-color)">{lang.value.toFixed(1)}%</span>
               </div>
             ))}
           </div>
@@ -113,7 +95,7 @@ const ProjectCard = ({ project, onTagClick }) => {
       )}
 
       {/* Tags Section - Simplified */}
-      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Tags</h3>
+      <h3 className='font-semibold text-[12px] mb-2 text-(--primary-text-color)'>Tags</h3>
       <div className="flex flex-wrap gap-2 mb-4">
         {project.tags && project.tags.map((tag, idx) => (
           <button
@@ -132,23 +114,21 @@ const ProjectCard = ({ project, onTagClick }) => {
         )}
       </div>
 
-      <h3 className='font-semibold text-[12px] mb-2' style={{ color: 'var(--primary-text-color)' }}>Collaborators</h3>
+      <h3 className='font-semibold text-[12px] mb-2 text-(--primary-text-color)'>Collaborators</h3>
       <div className="flex -space-x-2">
         {project.collaborators && project.collaborators.length > 0 ? (
           project.collaborators.map((avatar, i) => (
             <img
               key={i}
               src={avatar}
-              className="w-7 h-7 rounded-full border-2"
-              style={{ borderColor: 'var(--dark-bg)' }}
+              className="w-7 h-7 rounded-full border-2 border-(--dark-bg)"
               alt="collaborator"
             />
           ))
         ) : (
           <img
             src={project.avatar || "https://via.placeholder.com/40"}
-            className="w-7 h-7 rounded-full border-2"
-            style={{ borderColor: 'var(--dark-bg)' }}
+            className="w-7 h-7 rounded-full border-2 border-(--dark-bg)"
             alt="owner"
           />
         )}

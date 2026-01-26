@@ -19,10 +19,10 @@ function RepositoryContent() {
 
   if (!repo) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--dark-bg)' }}>
+      <div className="min-h-screen flex items-center justify-center bg-(--dark-bg)">
         <div className="text-center">
-          <h2 className="header2 mb-4" style={{ color: 'var(--primary-text-color)' }}>Repository not found</h2>
-          <p style={{ color: 'var(--secondary-text-color)' }}>The repository you're looking for doesn't exist.</p>
+          <h2 className="header2 mb-4 text-(--primary-text-color)">Repository not found</h2>
+          <p className="text-(--secondary-text-color)">The repository you're looking for doesn't exist.</p>
         </div>
       </div>
     );

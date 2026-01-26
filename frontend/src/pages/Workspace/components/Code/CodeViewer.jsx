@@ -51,12 +51,7 @@ export default function CodeViewer() {
   if (isLoadingFile) {
     return (
       <div
-        className="flex items-center justify-center h-64 rounded-2xl border"
-        style={{
-          backgroundColor: "var(--dark-bg)",
-          borderColor: "var(--main-border-color)",
-          color: "var(--secondary-text-color)",
-        }}
+        className="flex items-center justify-center h-64 rounded-2xl border bg-(--dark-bg) border-(--main-border-color) text-(--secondary-text-color)"
       >
         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-indigo-500 mr-3"></div>
         <span>Loading file content...</span>
@@ -67,12 +62,7 @@ export default function CodeViewer() {
   if (!activeFile) {
     return (
       <div
-        className="flex items-center justify-center h-64 rounded-2xl border italic"
-        style={{
-          backgroundColor: "var(--dark-bg)",
-          borderColor: "var(--main-border-color)",
-          color: "var(--secondary-text-color)",
-        }}
+        className="flex items-center justify-center h-64 rounded-2xl border italic bg-(--dark-bg) border-(--main-border-color) text-(--secondary-text-color)"
       >
         Select a file to preview
       </div>
@@ -83,12 +73,7 @@ export default function CodeViewer() {
   if (!rawContent && activeFile) {
     return (
       <div
-        className="flex items-center justify-center h-64 rounded-2xl border flex-col gap-2"
-        style={{
-          backgroundColor: "var(--dark-bg)",
-          borderColor: "var(--main-border-color)",
-          color: "var(--secondary-text-color)",
-        }}
+        className="flex items-center justify-center h-64 rounded-2xl border flex-col gap-2 bg-(--dark-bg) border-(--main-border-color) text-(--secondary-text-color)"
       >
         <span className="font-semibold">{activeFile.name}</span>
         <span className="text-sm italic opacity-60">
@@ -100,32 +85,19 @@ export default function CodeViewer() {
 
   return (
     <div
-      className="code-viewer-container flex flex-col w-full border rounded-2xl overflow-hidden shadow-2xl"
-      style={{
-        backgroundColor: "var(--code-viewer-container)",
-        borderColor: "var(--main-border-color)",
-        filter: "none",
-        backdropFilter: "none",
-        opacity: 1,
-      }}
+      className="code-viewer-container flex flex-col w-full border rounded-2xl overflow-hidden shadow-2xl bg-(--code-viewer-container) border-(--main-border-color) opacity-100"
     >
       {/* Header */}
       <div
-        className="code-upper flex items-center justify-between px-6 py-3 border-b"
-        style={{
-          backgroundColor: "var(--code-upper-bg)",
-          borderColor: "var(--main-border-color)",
-        }}
+        className="code-upper flex items-center justify-between px-6 py-3 border-b bg-(--code-upper-bg) border-(--main-border-color)"
       >
         <span
-          className="text-[10px] font-semibold tracking-widest truncate max-w-[70%]"
-          style={{ color: "var(--active-text-color)" }}
+          className="text-[10px] font-semibold tracking-widest truncate max-w-[70%] text-(--active-text-color)"
         >
           {activeFile.name}
         </span>
         <div
-          className="text-[10px] capitalize opacity-60 font-mono"
-          style={{ color: "var(--secondary-text-color)" }}
+          className="text-[10px] capitalize opacity-60 font-mono text-(--secondary-text-color)"
         >
           {extToLang[extension] || extension}
         </div>
@@ -134,21 +106,15 @@ export default function CodeViewer() {
       {/* Code Body with Synchronized Gutter */}
       <div
         className="grow overflow-auto custom-scrollbar relative flex bg-transparent"
-        style={{ filter: "none", backdropFilter: "none" }}
       >
         {/* Manual Gutter: This ensures line numbers always match line height exactly */}
         <div
-          className="gutter shrink-0 py-6 bg-transparent border-r select-none text-right"
-          style={{
-            width: "3.5rem",
-            borderColor: "var(--main-border-color)",
-          }}
+          className="gutter shrink-0 py-6 bg-transparent border-r select-none text-right w-14 border-(--main-border-color)"
         >
           {lineNumbers.map((num) => (
             <div
               key={num}
-              className="text-[13px] leading-relaxed px-3 font-mono opacity-30"
-              style={{ color: "var(--secondary-text-color)" }}
+              className="text-[13px] leading-relaxed px-3 font-mono opacity-30 text-(--secondary-text-color)"
             >
               {num}
             </div>
@@ -157,12 +123,10 @@ export default function CodeViewer() {
 
         {/* Code Content */}
         <pre
-          className="m-0! p-6! bg-transparent! text-[13px]! grow overflow-visible"
-          style={{ color: "var(--primary-text-color)" }}
+          className="m-0! p-6! bg-transparent! text-[13px]! grow overflow-visible text-(--primary-text-color)"
         >
           <code
-            className={`language-${extension} leading-relaxed block whitespace-pre`}
-            style={{ color: "var(--primary-text-color)" }}
+            className={`language-${extension} leading-relaxed block whitespace-pre text-(--primary-text-color)`}
             dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         </pre>
@@ -170,21 +134,15 @@ export default function CodeViewer() {
 
       {/* Footer */}
       <div
-        className="px-6 py-2 border-t flex justify-between items-center"
-        style={{
-          backgroundColor: "var(--code-upper-bg)",
-          borderColor: "var(--main-border-color)",
-        }}
+        className="px-6 py-2 border-t flex justify-between items-center bg-(--code-upper-bg) border-(--main-border-color)"
       >
         <div
-          className="text-[10px] font-mono opacity-60"
-          style={{ color: "var(--secondary-text-color)" }}
+          className="text-[10px] font-mono opacity-60 text-(--secondary-text-color)"
         >
           {rawContent.split("\n").length} lines • {activeFile.size || 0} bytes
         </div>
         <div
-          className="text-[10px] opacity-60 font-mono uppercase"
-          style={{ color: "var(--secondary-text-color)" }}
+          className="text-[10px] opacity-60 font-mono uppercase text-(--secondary-text-color)"
         >
           UTF-8
         </div>

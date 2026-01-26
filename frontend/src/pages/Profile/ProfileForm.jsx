@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
-import Button from "../../../common-components/button";
-import Input, { TextArea } from "../../../common-components/input";
-import { useAuth } from "../../../context/AuthContext/AuthContext";
-import { useProfile } from "../../../context/ProfileContext/ProfileContext";
+import Button from "../../common-components/button";
+import Input, { TextArea } from "../../common-components/input";
+import { useAuth } from "../../context/AuthContext/AuthContext";
+import { useProfile } from "../../context/ProfileContext/ProfileContext";
 import { useState, useEffect } from "react";
 
 export default function ProfileForm() {

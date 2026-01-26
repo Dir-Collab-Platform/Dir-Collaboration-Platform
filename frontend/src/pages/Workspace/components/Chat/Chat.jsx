@@ -30,24 +30,23 @@ function ChatInput({ onSendMessage }) {
                 <button className="p-2 text-(--secondary-text-color) hover:text-(--active-text-color) transition-colors">
                     <Paperclip size={20} />
                 </button>
-                
-                <textarea 
+
+                <textarea
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Type a message..." 
-                    className="bg-transparent text-sm text-(--primary-text-color) placeholder:text-(--secondary-text-color) placeholder:opacity-50 outline-none resize-none py-2 max-h-32 custom-scrollbar"
+                    placeholder="Type a message..."
+                    className="bg-transparent text-sm text-(--primary-text-color) placeholder:text-(--secondary-text-color) placeholder:opacity-50 outline-none resize-none py-2 max-h-32 custom-scrollbar min-h-[40px]"
                     rows={1}
-                    style={{ minHeight: '40px' }}
                 />
-                
-                <button 
+
+                <button
                     onClick={handleSend}
                     disabled={!inputValue.trim()}
                     className="p-2 text-(--active-text-color) hover:scale-110 disabled:opacity-50 disabled:hover:scale-100 transition-all"
                 >
                     <Send size={20} />
-                </button> 
+                </button>
             </div>
         </div>
     )
@@ -99,11 +98,11 @@ export default function Chat() {
                     {activeMessages?.length ? (
                         activeMessages.map(msg => {
                             // Handle both populated senderId object and string ID
-                            const messageSenderId = typeof msg.senderId === 'object' 
-                                ? msg.senderId?._id || msg.senderId?.id 
+                            const messageSenderId = typeof msg.senderId === 'object'
+                                ? msg.senderId?._id || msg.senderId?.id
                                 : msg.senderId
                             const isCurrentUser = messageSenderId?.toString() === currentUserId?.toString()
-                            
+
                             return (
                                 <MessageBubble
                                     key={msg._id}

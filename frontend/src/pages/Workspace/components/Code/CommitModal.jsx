@@ -4,18 +4,16 @@ export default function CommitModal({ isOpen, onClose, onConfirm, commitData, se
     if (!isOpen) return null
 
     return (
-        <div 
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-6" 
-            style={{ backdropFilter: 'blur(2px)' }}
+        <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-6 backdrop-blur-[2px]"
             onClick={(e) => {
                 if (e.target === e.currentTarget && !isSaving) {
                     onClose();
                 }
             }}
         >
-            <div 
-                className="bg-(--card-bg) border border-(--main-border-color) w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200"
-                style={{ filter: 'none', backdropFilter: 'none' }}
+            <div
+                className="bg-(--card-bg) border border-(--main-border-color) w-full max-w-md rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 filter-none backdrop-filter-none"
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="px-8 py-6 border-b border-(--main-border-color) flex justify-between items-center bg-(--card-bg-lighter)">
@@ -58,8 +56,7 @@ export default function CommitModal({ isOpen, onClose, onConfirm, commitData, se
                                         type="text"
                                         value={commitData?.message || ''}
                                         onChange={(e) => setCommitData({ ...commitData, message: e.target.value })}
-                                        className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500/50 transition-colors"
-                                        style={{ color: 'var(--primary-text-color)' }}
+                                        className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl py-3 pl-12 pr-4 outline-none focus:border-blue-500/50 transition-colors text-(--primary-text-color)"
                                         placeholder="Brief summary of changes"
                                         autoFocus
                                         disabled={isSaving}
@@ -74,8 +71,7 @@ export default function CommitModal({ isOpen, onClose, onConfirm, commitData, se
                                 <textarea
                                     value={commitData?.description || ''}
                                     onChange={(e) => setCommitData({ ...commitData, description: e.target.value })}
-                                    className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl p-4 outline-none focus:border-blue-500/50 transition-colors resize-none h-24 text-sm"
-                                    style={{ color: 'var(--primary-text-color)' }}
+                                    className="w-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-xl p-4 outline-none focus:border-blue-500/50 transition-colors resize-none h-24 text-sm text-(--primary-text-color)"
                                     placeholder="Add an optional extended description..."
                                     disabled={isSaving}
                                 />
@@ -93,14 +89,9 @@ export default function CommitModal({ isOpen, onClose, onConfirm, commitData, se
                             </button>
                             <button
                                 onClick={onConfirm}
-                                className="flex-1 py-3 rounded-xl font-bold text-sm bg-(--active-text-color) text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className={`flex-1 py-3 rounded-xl font-bold text-sm bg-(--active-text-color) text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95 disabled:cursor-not-allowed flex items-center justify-center gap-2 visible flex ${(isSaving || !commitData.message?.trim()) ? 'opacity-70' : 'opacity-100'}`}
                                 disabled={isSaving || !commitData.message?.trim()}
                                 type="button"
-                                style={{ 
-                                    visibility: 'visible',
-                                    display: 'flex',
-                                    opacity: (isSaving || !commitData.message?.trim()) ? 0.7 : 1
-                                }}
                             >
                                 {isSaving ? (
                                     <>

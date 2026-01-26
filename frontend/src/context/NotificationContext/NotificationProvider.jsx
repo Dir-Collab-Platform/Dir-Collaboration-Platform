@@ -47,6 +47,12 @@ export default function NotificationProvider({ children }) {
 
         // Listen for new notifications
         const handleNewNotification = (notification) => {
+            // Check if notifications are enabled in user preferences
+            if (user?.preferences?.notificationsEnabled === false) {
+                console.log('SOCKET: Received new_notification but notifications are disabled in preferences. Ignoring.');
+                return;
+            }
+
             console.log('SOCKET: Received new_notification event:', notification);
             setNotifications(prev => [notification, ...prev]);
 
@@ -82,7 +88,7 @@ export default function NotificationProvider({ children }) {
                     setUnreadCount(unread);
                     return current;
                 });
-                
+
                 // Backend emits stats_updated socket event which DashboardProvider listens to
                 // This will automatically refresh the Dashboard notification count
             }
@@ -104,7 +110,7 @@ export default function NotificationProvider({ children }) {
             await Promise.all(
                 unreadNotifications.map(n => apiRequest(`/api/notifications/${n._id}/read`, { method: 'PATCH' }))
             );
-            
+
             // Backend emits stats_updated socket event for each notification marked as read
             // DashboardProvider listens to this and will automatically refresh
         } catch (error) {
@@ -156,6 +162,7 @@ export default function NotificationProvider({ children }) {
         notifications,
         unreadCount,
         isLoading,
+        notificationsEnabled: user?.preferences?.notificationsEnabled !== false,
         markAsRead,
         markAllAsRead,
         deleteNotification,

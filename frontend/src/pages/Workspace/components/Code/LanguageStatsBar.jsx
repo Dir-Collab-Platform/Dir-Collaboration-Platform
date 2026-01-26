@@ -21,13 +21,13 @@ export default function LanguageStatsBar() {
     return (
         <div className="flex flex-col gap-4 mt-6">
             <div className="flex items-center gap-2">
-                <span className="paragraph-mini font-bold tracking-widest opacity-50" style={{ color: 'var(--secondary-text-color)' }}>
+                <span className="paragraph-mini font-bold tracking-widest opacity-50 text-(--secondary-text-color)">
                     Languages
                 </span>
             </div>
 
             {/* Language Bar */}
-            <div className="relative h-3 w-full rounded-full overflow-hidden flex" style={{ backgroundColor: 'var(--secondary-button)' }}>
+            <div className="relative h-3 w-full rounded-full overflow-hidden flex bg-(--secondary-button)">
                 {sortedLangs.map((lang) => (
                     <div
                         key={lang.label}
@@ -50,11 +50,10 @@ export default function LanguageStatsBar() {
                                 className="rounded-full size-2.5"
                                 style={{ backgroundColor: lang.color || '#6b7280' }}
                             />
-                            <p className="paragraph2 font-bold" style={{ color: 'var(--primary-text-color)' }}>{lang.label}</p>
+                            <p className="paragraph2 font-bold text-(--primary-text-color)">{lang.label}</p>
                         </div>
                         <p
-                            className="paragraph2 opacity-70 group-hover:opacity-100 transition-opacity"
-                            style={{ color: 'var(--secondary-text-color)' }}
+                            className="paragraph2 opacity-70 group-hover:opacity-100 transition-opacity text-(--secondary-text-color)"
                         >
                             {lang.value}%
                         </p>

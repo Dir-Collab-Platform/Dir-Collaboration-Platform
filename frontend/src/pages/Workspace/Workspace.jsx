@@ -27,10 +27,10 @@ function WorkspaceContent({ isRepositoryView }) {
     if (isLoading && !isImporting) return <PageLoader msg="Syncing repository" />;
 
     if (error) return (
-        <div className="h-full flex flex-col items-center justify-center p-6 text-center" style={{ backgroundColor: 'var(--dark-bg)' }}>
-            <div className="bg-red-500/10 border p-6 rounded-2xl max-w-md" style={{ borderColor: 'var(--main-border-color)' }}>
+        <div className="h-full flex flex-col items-center justify-center p-6 text-center bg-(--dark-bg)">
+            <div className="bg-red-500/10 border p-6 rounded-2xl max-w-md border-(--main-border-color)">
                 <h3 className="header2 text-red-500 font-bold mb-2">Workspace Error</h3>
-                <p className="paragraph2 mb-4" style={{ color: 'var(--secondary-text-color)' }}>{error}</p>
+                <p className="paragraph2 mb-4 text-(--secondary-text-color)">{error}</p>
                 <button
                     onClick={() => window.location.reload()}
                     className="primary-btn px-6 py-2"
@@ -68,7 +68,7 @@ function WorkspaceContent({ isRepositoryView }) {
     return (
         <>
             <Header />
-            <div className={`workspace-page flex flex-col h-[calc(100vh-var(--body-padding-top))] overflow-hidden ${showRepoView ? 'max-w-7xl mx-auto w-full border-x border-(--border-main)' : ''}`} style={{ backgroundColor: 'var(--bg-main)' }}>
+            <div className={`workspace-page flex flex-col h-[calc(100vh-var(--body-padding-top))] overflow-hidden bg-(--bg-main) ${showRepoView ? 'max-w-7xl mx-auto w-full border-x border-(--border-main)' : ''}`}>
 
                 <section className="shrink-0">
                     <WorkspaceHeader

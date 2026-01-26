@@ -50,7 +50,7 @@ function DashboardContent() {
 
             <ContributionSummary heatmapData={heatmapData} />
 
-            <footer className="pt-10 flex justify-center gap-6 text-xs" style={{ color: 'var(--secondary-text-color)' }}>
+            <footer className="pt-10 flex justify-center gap-6 text-xs text-(--secondary-text-color)">
               <span>Dir 2025 © All rights reserved.</span>
               <span className="cursor-pointer hover:opacity-80">Docs</span>
               <span className="cursor-pointer hover:opacity-80">Terms of use</span>

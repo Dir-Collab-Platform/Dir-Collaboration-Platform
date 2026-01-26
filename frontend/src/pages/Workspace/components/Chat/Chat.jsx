@@ -37,9 +37,8 @@ function ChatInput({ onSendMessage }) {
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
-                    className="bg-transparent text-sm text-(--primary-text-color) placeholder:text-(--secondary-text-color) placeholder:opacity-50 outline-none resize-none py-2 max-h-32 custom-scrollbar"
+                    className="bg-transparent text-sm text-(--primary-text-color) placeholder:text-(--secondary-text-color) placeholder:opacity-50 outline-none resize-none py-2 max-h-32 custom-scrollbar min-h-[40px]"
                     rows={1}
-                    style={{ minHeight: '40px' }}
                 />
 
                 <button

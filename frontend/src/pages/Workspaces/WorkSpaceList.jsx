@@ -29,7 +29,7 @@ export default function WorkSpaceList() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-6" style={{ color: 'var(--secondary-text-color)' }}>
+      <div className="flex items-center justify-center p-6 text-(--secondary-text-color)">
         Loading workspaces...
       </div>
     );
@@ -48,21 +48,16 @@ export default function WorkSpaceList() {
     <>
       <WorkSpacesHeader />
 
-      <hr className="my-8" style={{ borderColor: 'var(--main-border-color)' }} />
+      <hr className="my-8 border-(--main-border-color)" />
 
       <div className="flex w-full items-center gap-5">
         <div className="flex w-5/6 items-center">
           <div className="relative flex flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2" size={20} style={{ color: 'var(--secondary-text-color)' }} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--secondary-text-color)" size={20} />
             <input
               type="text"
               placeholder="Search for workspaces..."
-              className="flex-1 pl-12 py-2.5 rounded-l-xl focus:outline-none focus:ring-2"
-              style={{
-                backgroundColor: 'var(--secondary-button-hover)',
-                border: '1px solid var(--main-border-color)',
-                color: 'var(--primary-text-color)'
-              }}
+              className="flex-1 pl-12 py-2.5 rounded-l-xl focus:outline-none focus:ring-2 bg-(--secondary-button-hover) border border-(--main-border-color) text-(--primary-text-color)"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -84,10 +79,7 @@ export default function WorkSpaceList() {
         </div>
       </div>
 
-      <div className="rounded-xl my-4 flex flex-col items-center justify-center border" style={{
-        backgroundColor: 'var(--dimmer-dark-bg)',
-        borderColor: 'var(--main-border-color)'
-      }}>
+      <div className="rounded-xl my-4 flex flex-col items-center justify-center border bg-(--dimmer-dark-bg) border-(--main-border-color)">
         {filteredWorkspaces.map((workspace) => {
           const languages = workspace.languages || [];
           const contributors = workspace.members?.map(mem => mem.userId?.avatarUrl || "https://via.placeholder.com/40") || [];

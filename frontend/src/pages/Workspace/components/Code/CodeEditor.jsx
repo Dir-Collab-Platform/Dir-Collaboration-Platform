@@ -90,7 +90,7 @@ export default function CodeEditor({ activeFile }) {
     }
 
     return (
-        <div className="flex flex-col gap-4 w-full h-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-2xl overflow-hidden shadow-sm relative" style={{ filter: 'none', backdropFilter: 'none', opacity: 1 }}>
+        <div className="flex flex-col gap-4 w-full h-full bg-(--card-bg-lighter) border border-(--main-border-color) rounded-2xl overflow-hidden shadow-sm relative filter-none backdrop-filter-none opacity-100">
             {/* Editor Toolbar */}
             <div className="flex items-center justify-between px-6 py-3 border-b border-(--main-border-color) bg-(--card-bg)">
                 <div className="flex items-center gap-3">
@@ -132,12 +132,7 @@ export default function CodeEditor({ activeFile }) {
                 <textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full h-full p-8 font-mono text-sm leading-relaxed resize-none outline-none bg-transparent scroll-bar"
-                    style={{ 
-                        color: 'var(--primary-text-color)',
-                        opacity: 1,
-                        filter: 'none'
-                    }}
+                    className="w-full h-full p-8 font-mono text-sm leading-relaxed resize-none outline-none bg-transparent scroll-bar text-(--primary-text-color) opacity-100 filter-none"
                     spellCheck="false"
                     placeholder="Enter your code here..."
                 />

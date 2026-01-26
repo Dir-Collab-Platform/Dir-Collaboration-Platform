@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, BellOff } from 'lucide-react';
 import { NotificationContext } from '../../../context/NotificationContext/NotificationContext';
 import NotificationPanel from './NotificationPanel';
 
 export default function NotificationBell() {
-    const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead, deleteNotification, refresh } = useContext(NotificationContext);
+    const { notifications, unreadCount, isLoading, notificationsEnabled, markAsRead, markAllAsRead, deleteNotification, refresh } = useContext(NotificationContext);
 
     const [isOpen, setIsOpen] = useState(false);
     const bellRef = useRef(null);
@@ -12,6 +12,7 @@ export default function NotificationBell() {
 
     const togglePanel = (e) => {
         e.stopPropagation();
+        if (!notificationsEnabled) return;
         setIsOpen(!isOpen);
     };
 
@@ -50,14 +51,16 @@ export default function NotificationBell() {
             <button
                 ref={bellRef}
                 onClick={togglePanel}
-                className="p-2 rounded-md transition-colors relative group"
-                style={{ color: 'var(--secondary-text-color)' }}
+                className={`p-2 rounded-md transition-colors relative group text-(--secondary-text-color) ${!notificationsEnabled ? 'opacity-50' : ''}`}
             >
-                <Bell size={24} className="group-hover:text-(--primary-text-color) transition-colors" />
-                {unreadCount > 0 && (
+                {notificationsEnabled ? (
+                    <Bell size={24} className="group-hover:text-(--primary-text-color) transition-colors" />
+                ) : (
+                    <BellOff size={24} className="group-hover:text-(--primary-text-color) transition-colors" />
+                )}
+                {notificationsEnabled && unreadCount > 0 && (
                     <span
-                        className="absolute -top-1 -right-1 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg animate-in fade-in zoom-in duration-300 leading-none"
-                        style={{ backgroundColor: 'var(--notification-count-bg)' }}
+                        className="absolute -top-1 -right-1 text-white text-xs w-6 h-6 rounded-full flex items-center justify-center font-bold shadow-lg animate-in fade-in zoom-in duration-300 leading-none bg-(--notification-count-bg)"
                     >
                         {unreadCount > 99 ? '99+' : unreadCount}
                     </span>

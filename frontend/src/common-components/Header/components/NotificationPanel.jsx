@@ -6,10 +6,7 @@ function NotificationPanel({ notifications, onClose, onMarkAllAsRead, onCloseNot
 
   return (
     <div
-      className="absolute top-12 right-0 w-[90vw] sm:w-[480px] max-h-[80vh] rounded-2xl shadow-2xl z-(--z-popup) overflow-hidden flex flex-col border border-(--border-main)"
-      style={{
-        backgroundColor: 'var(--bg-card)',
-      }}
+      className="absolute top-12 right-0 w-[90vw] sm:w-[480px] max-h-[80vh] rounded-2xl shadow-2xl z-(--z-popup) overflow-hidden flex flex-col border border-(--border-main) bg-(--bg-card)"
     >
       <div
         className="p-4 border-b flex justify-between items-center bg-(--bg-card) border-(--border-main)"

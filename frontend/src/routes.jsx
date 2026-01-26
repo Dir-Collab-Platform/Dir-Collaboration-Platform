@@ -3,7 +3,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Repositories from './pages/Repositories/Repositories';
 import Workspace from './pages/Workspace/Workspace';
 import Repository from './pages/Repository/Repository';
-import Profile from './pages/Profile/Profile/Profile';
+import Profile from './pages/Profile/Profile';
 import CreateRepo from './pages/CreateRepository/CreateRepo';
 import Workspaces from './pages/Workspaces/Workspaces';
 import ExploreContainer from './pages/Explore/ExploreContainer';

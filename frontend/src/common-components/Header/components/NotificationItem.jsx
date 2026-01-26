@@ -36,16 +36,16 @@ function NotificationItem({ notification, onClose, onAction, isPast = false }) {
   const timeLabel = getRelativeTime(createdAt);
 
   // Check if this is a workspace invite notification
-  const isWorkspaceInvite = targetType === "repository" && 
-    (message?.toLowerCase().includes("added you to") || 
-     message?.toLowerCase().includes("invited"));
+  const isWorkspaceInvite = targetType === "repository" &&
+    (message?.toLowerCase().includes("added you to") ||
+      message?.toLowerCase().includes("invited"));
 
   const handleViewDetails = () => {
     // If it's a workspace invite, navigate to the workspace
     if (isWorkspaceInvite && repoId) {
       // Get the workspace ID (handle both string and populated object)
       const workspaceId = typeof repoId === 'object' ? repoId._id || repoId : repoId;
-      
+
       // Mark as read first, then navigate
       if (!isRead) {
         onAction('Mark as read', _id);
@@ -66,8 +66,8 @@ function NotificationItem({ notification, onClose, onAction, isPast = false }) {
         {/* Icon & Status */}
         <div className="flex-shrink-0 mt-1">
           <div
-            className="flex items-center justify-center w-8 h-8 rounded-lg shadow-inner"
-            style={{ backgroundColor: config.color }}
+            className={`flex items-center justify-center w-8 h-8 rounded-lg shadow-inner ${notification.type === 'default' || !notification.type ? 'bg-(--secondary-button)' : ''}`}
+            style={notification.type && notification.type !== 'default' ? { backgroundColor: config.color } : {}}
           >
             <Icon size={16} className="text-white" />
           </div>
@@ -87,8 +87,7 @@ function NotificationItem({ notification, onClose, onAction, isPast = false }) {
             </div>
 
             <button
-              className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-all"
-              style={{ color: 'var(--secondary-text-color)' }}
+              className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-500/10 hover:text-red-500 transition-all text-(--secondary-text-color)"
               onClick={(e) => {
                 e.stopPropagation();
                 onClose(_id);

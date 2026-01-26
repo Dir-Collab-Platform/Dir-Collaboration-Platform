@@ -22,12 +22,12 @@ const Hero = () => {
 
             <div className="relative z-10">
 
-                <h1 className="text-[72px] font-bold leading-[1.1] text-[var(--primary-text-color)] tracking-tight mb-6">
+                <h1 className="text-[72px] font-bold leading-[1.1] text-(--primary-text-color) tracking-tight mb-6">
                     The Future of <br />
                     <span className="bg-gradient-to-r from-[#4299E1] to-[#667EEA] bg-clip-text text-transparent">Collaborative Coding</span>
                 </h1>
 
-                <p className="text-[var(--paragraph1-size)] text-[var(--secondary-text-color)] leading-relaxed max-w-2xl mx-auto mb-10 text-lg">
+                <p className="text-[var(--paragraph1-size)] text-(--secondary-text-color) leading-relaxed max-w-2xl mx-auto mb-10 text-lg">
                     The ultimate integrated repository for modern development teams. <br className="hidden md:block" />
                     Manage, code, and chat in one unified interface.
                 </p>
@@ -35,7 +35,7 @@ const Hero = () => {
                 <div className="mb-20">
                     <button
                         onClick={handleJoinBeta}
-                        className="bg-[var(--active-text-color)] text-white px-8 py-3 rounded-lg font-medium transition-opacity hover:opacity-90 border-none cursor-pointer text-base"
+                        className="bg-(--active-text-color) text-white px-8 py-3 rounded-lg font-medium transition-opacity hover:opacity-90 border-none cursor-pointer text-base"
                     >
                         <GithubIcon className="inline-block mr-2" />
                         Continue With GitHub
@@ -119,10 +119,10 @@ const Hero = () => {
                     </div> */}
 
                     {/* Dashboard Screenshot */}
-                    <div className="relative w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-[var(--main-border-color)] bg-[#0D1117]" style={{ boxShadow: '0 0 100px -20px rgba(139, 92, 246, 0.2)' }}>
-                        <img 
-                            src="/assets/images/screenshot_1.5x_postspark_2026-01-10_08-33-16 copy.png" 
-                            alt="Dir Dashboard Interface" 
+                    <div className="relative w-full max-w-4xl rounded-xl overflow-hidden shadow-2xl border border-(--main-border-color) bg-[#0D1117] shadow-indigo-500/20">
+                        <img
+                            src="/assets/images/screenshot_1.5x_postspark_2026-01-10_08-33-16 copy.png"
+                            alt="Dir Dashboard Interface"
                             className="w-full h-auto object-cover block"
                         />
                     </div>

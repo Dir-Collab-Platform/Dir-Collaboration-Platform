@@ -1,7 +1,7 @@
 import { Pencil, Sun, Moon, Monitor, Bell, BellOff } from "lucide-react";
-import Button from "../../../common-components/button";
-import { useAuth } from "../../../context/AuthContext/AuthContext";
-import { apiRequest } from "../../../services/api/api";
+import Button from "../../common-components/button";
+import { useAuth } from "../../context/AuthContext/AuthContext";
+import { apiRequest } from "../../services/api/api";
 import { useState, useEffect } from "react";
 
 export default function Sidebar() {

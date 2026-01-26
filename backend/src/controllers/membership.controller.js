@@ -5,7 +5,7 @@ import { createLog } from "../utils/activity.util.js";
 import { createNotification } from "../services/notification.service.js";
 import { toObjectId } from "../utils/objectId.util.js";
 import { getIO } from "../sockets/socket.js";
-import { invalidateWorkspaceStatsCache, getActiveListKey } from "../utils/cache.util.js";
+import { invalidateWorkspaceStatsCache, getActiveListKey, invalidateRepoCache } from "../utils/cache.util.js";
 import redisClient from "../config/redis.js";
 
 //@route /api/repos/:repoId/members
@@ -30,20 +30,10 @@ export const inviteMember = async (req, res) => {
     // looking for workspace that doesn't have the invited user
 
     const workspace = await Repository.findOneAndUpdate(
-      {
-        _id: workspaceId, //  Now ObjectId
-        "members.userId": { $ne: invitedUser._id },
-      },
-      {
-        $push: {
-          members: {
-            userId: invitedUser._id,
-            role: role,
-          },
-        },
-      },
+      { _id: workspaceId, "members.userId": { $ne: invitedUser._id } },
+      { $push: { members: { userId: invitedUser._id, role } } },
       { new: true }
-    );
+    ).populate("members.userId", "githubUsername avatarUrl email");
 
     if (!workspace) {
       // If workspace is null, it's either a wrong ID or the user is already a member
@@ -53,6 +43,9 @@ export const inviteMember = async (req, res) => {
           "Invitation failed: Either workspace not found or user is already a member",
       });
     }
+
+
+
 
     // persist and emit
     await createNotification({
@@ -78,6 +71,9 @@ export const inviteMember = async (req, res) => {
     await invalidateWorkspaceStatsCache(invitedUser._id);
     await redisClient.del(getActiveListKey(invitedUser._id));
 
+    // Invalidate repository cache (covers repo details for everyone and discovery/lists for inviter)
+    await invalidateRepoCache(req.user._id, workspaceId);
+
     // Emit socket event to notify the invited user to refresh their dashboard
     getIO().to(`user:${invitedUser._id}`).emit("stats_updated", {
       message: "Dashboard stats updated",
@@ -88,9 +84,10 @@ export const inviteMember = async (req, res) => {
 
     res.status(StatusCodes.OK).json({
       status: "success",
-      message: `User ${githubUsername} has been invited successfully`,
-      data: workspace.members,
+      message: `User ${githubUsername} invited`,
+      data: workspace.members, // Send back fully populated objects
     });
+
   } catch (error) {
     // Handle validation errors
     if (
@@ -122,10 +119,15 @@ export const listMembers = async (req, res) => {
       .populate("members.userId", "githubUsername avatarUrl email")
       .select("members workspaceName");
 
+
+
     if (!workspace)
       return res
         .status(StatusCodes.NOT_FOUND)
         .json({ message: "Workspace not found" });
+
+    // Filter out any null userIds
+    workspace.members = workspace.members.filter(member => member.userId !== null);
 
     res
       .status(StatusCodes.OK)
@@ -171,10 +173,11 @@ export const updateRole = async (req, res) => {
     // finding workspace to be updated
 
     const workspace = await Repository.findOneAndUpdate(
-      { _id: repoId, "members.userId": memberIdToUpdate }, //  Both ObjectIds
-      { $set: { "members.$.role": role } },
-      { new: true }
-    ).select("members workspaceName");
+  { _id: repoId, "members.userId": memberIdToUpdate },
+  { $set: { "members.$.role": role } },
+  { new: true }
+).populate("members.userId", "githubUsername avatarUrl email") // ADD THIS
+ .select("members workspaceName");
 
     if (!workspace)
       return res
@@ -212,9 +215,9 @@ export const updateRole = async (req, res) => {
 
 // @desc evicting the member lol
 // @route DELETE /api/repos/:repoId/members/:userId
+// removeMember function updates
 export const removeMember = async (req, res) => {
   try {
-    //  Fix: Cast both to ObjectId
     const repoId = toObjectId(
       req.params.repoId || req.params.id,
       "Repository ID"
@@ -243,8 +246,8 @@ export const removeMember = async (req, res) => {
     }
 
     const updatedWorkspace = await Repository.findByIdAndUpdate(
-      repoId, //  ObjectId
-      { $pull: { members: { userId: memberIdToRemove } } }, //  ObjectId
+      repoId,
+      { $pull: { members: { userId: memberIdToRemove } } },
       { new: true }
     );
 
@@ -257,7 +260,12 @@ export const removeMember = async (req, res) => {
       "Removed user from workspace"
     );
 
-    // Invalidate caches for the removed user so their Dashboard and Workspaces page update
+    // Invalidate caches
+    // 1. Clear repo details (so fetches show updated member list)
+    // 2. Clear discovery/active lists for the user performing the action
+    await invalidateRepoCache(req.user._id, repoId);
+
+    // 3. Specific invalidation for the removed user
     await invalidateWorkspaceStatsCache(memberIdToRemove);
     await redisClient.del(getActiveListKey(memberIdToRemove));
 
@@ -268,16 +276,17 @@ export const removeMember = async (req, res) => {
       repositoryName: updatedWorkspace.workspaceName,
       reason: "removed_from_workspace"
     });
-
+    const finalWorkspace = await Repository.findById(repoId)
+  .populate("members.userId", "githubUsername avatarUrl email")
+  .select("members");
     res
       .status(StatusCodes.OK)
       .json({
         status: "success",
         message: "Member removed",
-        data: updatedWorkspace.members,
+        data: finalWorkspace.members
       });
   } catch (error) {
-    // Handle validation errors
     if (
       error.message.includes("Invalid") ||
       error.message.includes("required")

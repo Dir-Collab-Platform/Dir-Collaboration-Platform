@@ -135,14 +135,12 @@ export const getContributionHeatmap = async (req, res) => {
 
     const heatmapData = await ActivityLog.aggregate([
       {
-        //filtering logs only from past year
         $match: {
           userId: userId,
           createdAt: { $gte: oneYearAgo },
         },
       },
       {
-        // group by date
         $group: {
           _id: {
             $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
@@ -151,16 +149,27 @@ export const getContributionHeatmap = async (req, res) => {
         },
       },
       {
-        //sorting chronologically
         $sort: {
           _id: 1,
         },
       },
     ]);
 
+    // Fill in missing days
+    const fullYearData = [];
+    const dataMap = new Map(heatmapData.map((item) => [item._id, item.count]));
+
+    for (let d = new Date(oneYearAgo); d <= new Date(); d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split("T")[0];
+      fullYearData.push({
+        _id: dateStr,
+        count: dataMap.get(dateStr) || 0,
+      });
+    }
+
     res.status(StatusCodes.OK).json({
       status: "success",
-      data: heatmapData,
+      data: fullYearData,
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

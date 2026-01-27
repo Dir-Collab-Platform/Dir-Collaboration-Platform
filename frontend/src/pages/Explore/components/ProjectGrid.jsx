@@ -25,8 +25,13 @@ const ProjectGrid = ({ repos, onLoadMore, isLoading, showButton, activeFilter, o
         </button>
       </div>
 
-      <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-(--dimmer-dark-bg) border border-(--main-border-color) rounded-b-2xl rounded-tr-2xl min-h-75">
-        {repos.length > 0 ? (
+      <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-(--dimmer-dark-bg) border border-(--main-border-color) rounded-b-2xl rounded-tr-2xl min-h-[300px] relative">
+        {isLoading && repos.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 gap-3">
+            <Loader2 size={40} className="animate-spin text-(--text-active)" />
+            <p className="text-(--text-dim) animate-pulse font-medium">Searching for projects...</p>
+          </div>
+        ) : repos.length > 0 ? (
           repos.map((repo) => <ProjectCard key={repo.githubId} project={repo} onTagClick={onTagClick} />)
         ) : (
           !isLoading && <div className="col-span-full text-center py-20 text-gray-500">No projects found for this category.</div>

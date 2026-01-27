@@ -58,54 +58,6 @@ function EditFileBtn({ isOpen, activeFile = null }) {
     )
 }
 
-// New file input component that appears in the file tree
-function NewFileInput({ isVisible, onSubmit, onCancel, parentPath }) {
-    const [fileName, setFileName] = useState('')
-    const inputRef = useRef(null)
-
-    useEffect(() => {
-        if (isVisible && inputRef.current) {
-            inputRef.current.focus()
-        }
-    }, [isVisible])
-
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        if (fileName.trim()) {
-            onSubmit(fileName.trim(), parentPath)
-            setFileName('')
-        }
-    }
-
-    const handleKeyDown = (e) => {
-        if (e.key === 'Escape') {
-            onCancel()
-            setFileName('')
-        }
-    }
-
-    if (!isVisible) return null
-
-    return (
-        <form onSubmit={handleSubmit} className="flex items-center gap-2 px-2 py-1 bg-(--secondary-button) rounded-lg">
-            <input
-                ref={inputRef}
-                type="text"
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="filename.ext"
-                className="flex-1 px-2 py-1 text-xs bg-transparent border-none outline-none text-(--primary-text-color) placeholder:text-(--secondary-text-color)"
-            />
-            <button type="submit" className="text-green-500 hover:text-green-400 p-1">
-                <Plus size={14} />
-            </button>
-            <button type="button" onClick={onCancel} className="text-red-400 hover:text-red-300 p-1">
-                <X size={14} />
-            </button>
-        </form>
-    )
-}
 
 // Commit prompt banner
 function CommitPrompt({ isVisible, onCommit, onDismiss, newFiles }) {
@@ -140,11 +92,22 @@ export default function SidebarToolbar({ onShowNewFileInput, onShowCommitModal }
 
     if (!context) return null
 
-    const { isSidebarOpen, activeFile } = context
+    const { isSidebarOpen, activeFile, initiateCreation } = context
 
     const handleAddFile = () => {
-        // Trigger showing the new file input in the file tree
-        onShowNewFileInput?.()
+        // Determine target path based on active selection
+        let targetPath = '';
+        if (activeFile) {
+            if (activeFile.type === 'dir') {
+                targetPath = activeFile.path;
+            } else {
+                // Use parent folder of the active file
+                const parts = activeFile.path.split('/');
+                parts.pop();
+                targetPath = parts.join('/');
+            }
+        }
+        initiateCreation(targetPath);
     }
 
     return (
@@ -167,4 +130,4 @@ export default function SidebarToolbar({ onShowNewFileInput, onShowCommitModal }
 }
 
 // Export helper components for use in FileTree
-export { NewFileInput, CommitPrompt }
+export { CommitPrompt }

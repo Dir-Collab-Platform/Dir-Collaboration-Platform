@@ -11,6 +11,131 @@ export default function WorkspaceProvider({ children }) {
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isEditingFile, setIsEditingFile] = useState(false);
+    const [stagedFiles, setStagedFiles] = useState([]); // { path, name, type, content }
+    const [creationTarget, setCreationTarget] = useState(null); // path of folder where input should appear
+
+    // Start creation intent
+    const initiateCreation = (targetPath = '') => {
+        setCreationTarget(targetPath);
+    };
+
+    const cancelCreation = () => {
+        setCreationTarget(null);
+    };
+
+    // Stage a new file/folder (Optimistic UI Update)
+    const stageFile = (name, type, parentPath = '') => {
+        const path = parentPath ? `${parentPath}/${name}` : name;
+
+        // Add to staged list
+        const newItem = {
+            path,
+            name,
+            type,
+            content: '',
+            isStaged: true, // Marker for UI
+            sha: null // No SHA yet
+        };
+
+        setStagedFiles(prev => [...prev, newItem]);
+
+        // Optimistically update file tree
+        setData(prev => {
+            if (!prev) return prev;
+
+            // Helper to recursively insert
+            const insertItem = (items, targetPath, itemToAdd) => {
+                if (!targetPath) {
+                    // Root level
+                    return [...items, itemToAdd].sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name));
+                }
+
+                return items.map(i => {
+                    if (i.path === targetPath && i.type === 'dir') {
+                        // Insert into this folder
+                        const children = i.children || [];
+                        return {
+                            ...i,
+                            children: [...children, itemToAdd].sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name))
+                        };
+                    }
+                    if (i.children) {
+                        return { ...i, children: insertItem(i.children, targetPath, itemToAdd) };
+                    }
+                    return i;
+                });
+            };
+
+            return {
+                ...prev,
+                contents: insertItem(prev.contents || [], parentPath, newItem)
+            };
+        });
+
+        // If it's a file, open it immediately
+        if (type === 'file') {
+            setActiveFile(newItem);
+        }
+
+        // Reset creation target
+        setCreationTarget(null);
+    };
+
+    // Commit all staged changes
+    const commitChanges = async (customMessage) => {
+        if (!data?.repository?._id) return;
+
+        setIsLoadingFile(true);
+        try {
+            // Process sequentially
+            for (const file of stagedFiles) {
+                const message = customMessage || `Create ${file.name}`;
+
+                if (file.type === 'file') {
+                    await apiRequest(`/api/repos/${data.repository._id}/contents`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            path: file.path,
+                            content: file.content || '',
+                            commitMessage: message
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } else if (file.type === 'dir') {
+                    // For folders, we typically create a .keep file to persist them in git
+                    await apiRequest(`/api/repos/${data.repository._id}/contents`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            path: `${file.path}/.keep`,
+                            content: '',
+                            commitMessage: message
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+            }
+
+            // Clear staged
+            setStagedFiles([]);
+
+            // Refresh Root to ensure Sync
+            const cRes = await apiRequest(`/api/repos/contents?workspaceId=${data.repository._id}`);
+            if (cRes.status === 'success' && cRes.type === 'dir') {
+                setData(prev => ({
+                    ...prev,
+                    contents: cRes.files
+                }));
+            }
+
+            return true;
+
+        } catch (err) {
+            console.error('Commit Files Error:', err);
+            throw err;
+        } finally {
+            setIsLoadingFile(false);
+        }
+    };
 
     const location = useLocation();
     const repoPreview = location.state?.repoData; // Repo data passed from list if not imported
@@ -469,7 +594,14 @@ export default function WorkspaceProvider({ children }) {
         deleteFile,
         inviteMember,
         removeMember,
-        importRepo
+        importRepo,
+        // File Creation & Staging
+        stagedFiles,
+        creationTarget,
+        initiateCreation,
+        cancelCreation,
+        stageFile,
+        commitChanges
     };
 
     return (

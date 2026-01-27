@@ -131,7 +131,7 @@ export default function ChatHeader({ name, notif_count }) {
                     {notif_count > 0 && (
                         <div className="unread-msg flex gap-2 text-(--secondary-text-color)">
                             <span className="font-bold">{notif_count}</span>
-                            <p className="paragraph-mini">unread messages</p>
+                            <p className="paragraph-mini">messages</p>
                         </div>
                     )}
 

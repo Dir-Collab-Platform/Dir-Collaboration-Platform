@@ -13,7 +13,13 @@ import ChatProvider from '../../context/WorkspaceContext/ChatProvider';
 
 
 function WorkspaceContent({ isRepositoryView }) {
-    const { isLoading, error, repository, importRepo } = useContext(WorkspaceContext);
+    const {
+        isLoading,
+        error,
+        repository,
+        importRepo,
+        isLoadingFile
+    } = useContext(WorkspaceContext);
     const navigate = useNavigate();
 
     // State for chat panel toggle on mobile/small screens

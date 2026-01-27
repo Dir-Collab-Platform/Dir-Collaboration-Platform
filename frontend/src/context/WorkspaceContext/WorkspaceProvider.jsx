@@ -11,6 +11,131 @@ export default function WorkspaceProvider({ children }) {
     const [error, setError] = useState(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isEditingFile, setIsEditingFile] = useState(false);
+    const [stagedFiles, setStagedFiles] = useState([]); // { path, name, type, content }
+    const [creationTarget, setCreationTarget] = useState(null); // path of folder where input should appear
+
+    // Start creation intent
+    const initiateCreation = (targetPath = '') => {
+        setCreationTarget(targetPath);
+    };
+
+    const cancelCreation = () => {
+        setCreationTarget(null);
+    };
+
+    // Stage a new file/folder (Optimistic UI Update)
+    const stageFile = (name, type, parentPath = '') => {
+        const path = parentPath ? `${parentPath}/${name}` : name;
+
+        // Add to staged list
+        const newItem = {
+            path,
+            name,
+            type,
+            content: '',
+            isStaged: true, // Marker for UI
+            sha: null // No SHA yet
+        };
+
+        setStagedFiles(prev => [...prev, newItem]);
+
+        // Optimistically update file tree
+        setData(prev => {
+            if (!prev) return prev;
+
+            // Helper to recursively insert
+            const insertItem = (items, targetPath, itemToAdd) => {
+                if (!targetPath) {
+                    // Root level
+                    return [...items, itemToAdd].sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name));
+                }
+
+                return items.map(i => {
+                    if (i.path === targetPath && i.type === 'dir') {
+                        // Insert into this folder
+                        const children = i.children || [];
+                        return {
+                            ...i,
+                            children: [...children, itemToAdd].sort((a, b) => (b.type === 'dir') - (a.type === 'dir') || a.name.localeCompare(b.name))
+                        };
+                    }
+                    if (i.children) {
+                        return { ...i, children: insertItem(i.children, targetPath, itemToAdd) };
+                    }
+                    return i;
+                });
+            };
+
+            return {
+                ...prev,
+                contents: insertItem(prev.contents || [], parentPath, newItem)
+            };
+        });
+
+        // If it's a file, open it immediately
+        if (type === 'file') {
+            setActiveFile(newItem);
+        }
+
+        // Reset creation target
+        setCreationTarget(null);
+    };
+
+    // Commit all staged changes
+    const commitChanges = async (customMessage) => {
+        if (!data?.repository?._id) return;
+
+        setIsLoadingFile(true);
+        try {
+            // Process sequentially
+            for (const file of stagedFiles) {
+                const message = customMessage || `Create ${file.name}`;
+
+                if (file.type === 'file') {
+                    await apiRequest(`/api/repos/${data.repository._id}/contents`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            path: file.path,
+                            content: file.content || '',
+                            commitMessage: message
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } else if (file.type === 'dir') {
+                    // For folders, we typically create a .keep file to persist them in git
+                    await apiRequest(`/api/repos/${data.repository._id}/contents`, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            path: `${file.path}/.keep`,
+                            content: '',
+                            commitMessage: message
+                        }),
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                }
+            }
+
+            // Clear staged
+            setStagedFiles([]);
+
+            // Refresh Root to ensure Sync
+            const cRes = await apiRequest(`/api/repos/contents?workspaceId=${data.repository._id}`);
+            if (cRes.status === 'success' && cRes.type === 'dir') {
+                setData(prev => ({
+                    ...prev,
+                    contents: cRes.files
+                }));
+            }
+
+            return true;
+
+        } catch (err) {
+            console.error('Commit Files Error:', err);
+            throw err;
+        } finally {
+            setIsLoadingFile(false);
+        }
+    };
 
     const location = useLocation();
     const repoPreview = location.state?.repoData; // Repo data passed from list if not imported
@@ -52,6 +177,16 @@ export default function WorkspaceProvider({ children }) {
                     contentsRes = cRes;
                     langRes = lRes;
                     membersRes = repoRes.data.members?.length > 0 ? repoRes.data.members : mRes.data;
+
+                    // Fetch last commit asynchronously (non-blocking for initial load)
+                    apiRequest(`/api/repos/commits/latest?workspaceId=${workspaceId}`)
+                        .then(res => {
+                            if (res.status === 'success') {
+                                setData(prev => ({ ...prev, last_commit: res.data }));
+                            }
+                        })
+                        .catch(() => { });
+
                 } else if (repoPreview) {
                     // 2. GitHub Preview (Not imported): Use passed state + GitHub API proxy
                     repoData = {
@@ -82,6 +217,15 @@ export default function WorkspaceProvider({ children }) {
                     contentsRes = cRes;
                     langRes = lRes;
                     membersRes = [];
+
+                    // Fetch last commit asynchronously
+                    apiRequest(`/api/repos/commits/latest?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
+                        .then(res => {
+                            if (res.status === 'success') {
+                                setData(prev => ({ ...prev, last_commit: res.data }));
+                            }
+                        })
+                        .catch(() => { });
                 } else {
                     throw new Error("Repository not found (and no preview data provided)");
                 }
@@ -111,29 +255,26 @@ export default function WorkspaceProvider({ children }) {
                         default_branch: "main",
                         topics: repoData.tags || [],
                         members: (repoData.members || []).map(mem => {
-                        // Extract the ID string safely, handling populated vs unpopulated
-                        const userObj = typeof mem.userId === 'object' ? mem.userId : null;
-                        const userIdString = userObj?._id || mem.userId;
+                            // Extract the ID string safely, handling populated vs unpopulated
+                            const userObj = typeof mem.userId === 'object' ? mem.userId : null;
+                            const userIdString = userObj?._id || mem.userId;
 
-                        return {
-                            id: userIdString?.toString(), // Ensure it is always a string
-                            name: userObj?.githubUsername || "Unknown user",
-                            avatar: userObj?.avatarUrl,
-                            role: mem.role
-                        };
-                    })
+                            return {
+                                id: userIdString?.toString(), // Ensure it is always a string
+                                name: userObj?.githubUsername || "Unknown user",
+                                avatar: userObj?.avatarUrl,
+                                role: mem.role
+                            };
+                        })
                     },
                     files: files,
                     contents: files,
                     languages: languagesData,
-                    last_commit: null, // No commit data for now
+                    last_commit: null, // Placeholder, will be updated by background fetch
                     stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
-                if (files.length > 0) {
-                    const readme = files.find(f => f.name.toLowerCase() === 'readme.md');
-                    setActiveFile(readme || files[0]);
-                }
+                // No default file selection, let the user choose
             } catch (err) {
                 if (isMounted) {
                     const errorMessage = err.message || 'Failed to load workspace. Please check your connection and try again.';
@@ -360,37 +501,37 @@ export default function WorkspaceProvider({ children }) {
     /**
  * Remove a member from the workspace
  */
-const removeMember = async (userId) => {
-    if (!data?.repository?._id) return;
+    const removeMember = async (userId) => {
+        if (!data?.repository?._id) return;
 
-    try {
-        // Handle if userId is passed as object or string
-        const idString = typeof userId === 'object' ? (userId._id || userId.id) : userId;
+        try {
+            // Handle if userId is passed as object or string
+            const idString = typeof userId === 'object' ? (userId._id || userId.id) : userId;
 
-        const res = await apiRequest(`/api/repos/${data.repository._id}/members/${idString}`, {
-            method: 'DELETE'
-        });
+            const res = await apiRequest(`/api/repos/${data.repository._id}/members/${idString}`, {
+                method: 'DELETE'
+            });
 
-        if (res.status === 'success') {
-            // FIX: Don't manually filter. Use the authoritative list from the backend.
-            // We reuse the existing normalizeMembers helper to format the data.
-            const updatedMembers = normalizeMembers(res.data);
+            if (res.status === 'success') {
+                // FIX: Don't manually filter. Use the authoritative list from the backend.
+                // We reuse the existing normalizeMembers helper to format the data.
+                const updatedMembers = normalizeMembers(res.data);
 
-            setData(prev => ({
-                ...prev,
-                repository: {
-                    ...prev.repository,
-                    members: updatedMembers
-                }
-            }));
-            return true;
+                setData(prev => ({
+                    ...prev,
+                    repository: {
+                        ...prev.repository,
+                        members: updatedMembers
+                    }
+                }));
+                return true;
+            }
+            throw new Error(res.message || 'Failed to remove member');
+        } catch (err) {
+            console.error('Remove Member Error:', err);
+            throw err;
         }
-        throw new Error(res.message || 'Failed to remove member');
-    } catch (err) {
-        console.error('Remove Member Error:', err);
-        throw err;
-    }
-};
+    };
 
     /**
      * Import a repository (create workspace from existing GitHub repo)
@@ -453,7 +594,14 @@ const removeMember = async (userId) => {
         deleteFile,
         inviteMember,
         removeMember,
-        importRepo
+        importRepo,
+        // File Creation & Staging
+        stagedFiles,
+        creationTarget,
+        initiateCreation,
+        cancelCreation,
+        stageFile,
+        commitChanges
     };
 
     return (

@@ -802,9 +802,40 @@ Response (Directory):
 | Method   | Endpoint           | Description                                             | Auth Required |
 | :------- | :----------------- | :------------------------------------------------------ | :------------ |
 | `GET`    | **/api/repos/**    | Get all active workspaces/repositories for the user.    | Yes           |
-| `GET`    | **/api/repos/:id** | Get details of a specific repository.                   | Yes           |
-| `PATCH`  | **/api/repos/:id** | Update repository details (workspaceName, description). | Yes           |
-| `DELETE` | **/api/repos/:id** | Delete a repository from Dir (not GitHub).              | Yes           |
+| `GET`    | **/api/repos/:id**              | Get details of a specific repository.                   | Yes           |
+| `GET`    | **/api/repos/commits/latest**   | Get the most recent commit from GitHub for a repo.      | Yes           |
+| `PATCH`  | **/api/repos/:id**              | Update repository details (workspaceName, description). | Yes           |
+| `DELETE` | **/api/repos/:id**              | Delete a repository from Dir (not GitHub).              | Yes           |
+
+#### GET `/api/repos/commits/latest` Response
+
+Query Parameters:
+- `workspaceId`: (Optional) Valid MongoDB ID of an imported workspace.
+- `owner`: (Optional) GitHub account owner (required if workspaceId is missing).
+- `repo`: (Optional) GitHub repository name (required if workspaceId is missing).
+
+```json
+{
+  "status": "success",
+  "data": {
+    "sha": "7b3a1...",
+    "node_id": "MDY6Q29...",
+    "commit": {
+      "author": {
+        "name": "User Name",
+        "email": "user@example.com",
+        "date": "2026-01-27T04:22:59Z"
+      },
+      "message": "Fix layout issues",
+      "url": "..."
+    },
+    "author": {
+      "login": "username",
+      "avatar_url": "..."
+    }
+  }
+}
+```
 
 #### GET `/api/repos/` Response
 

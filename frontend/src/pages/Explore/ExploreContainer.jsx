@@ -70,13 +70,14 @@ function ExploreContainerContent() {
   return (
     <>
       <Header />
-      <div className="min-h-screen px-8 bg-(--dark-bg) text-(--primary-text-color)">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
+      <div className="min-h-screen px-4 md:px-8 bg-(--bg-main) text-(--text-primary)">
+        <div className="max-w-7xl mx-auto py-8">
+          <div className="mb-12">
             <ExploreHero
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               onSearch={handleSearch}
+              isLoading={isFetching}
             />
           </div>
           <div className="mb-10">

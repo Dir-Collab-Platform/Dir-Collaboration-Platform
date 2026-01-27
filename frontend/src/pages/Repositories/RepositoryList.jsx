@@ -76,7 +76,7 @@ function RepositoryList() {
 
       {/* SEARCH INPUT */}
       <div className="flex w-full items-center gap-5 mb-6">
-        <div className="flex w-5/6 items-center">
+        <div className="flex w-full items-center">
           <div className="relative flex flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-(--secondary-text-color)" size={20} />
             <input
@@ -90,16 +90,6 @@ function RepositoryList() {
 
           <Button variant="primary" className="py-2.5 px-6 rounded-r-xl">
             Search
-          </Button>
-        </div>
-
-        <div className="w-1/6">
-          <Button
-            variant="base"
-            className="w-full flex justify-center items-center py-2.5 rounded-xl gap-2 bg-(--secondary-button) text-(--primary-text-color) border border-(--main-border-color)"
-          >
-            <ChevronDown />
-            <span>Sort</span>
           </Button>
         </div>
       </div>

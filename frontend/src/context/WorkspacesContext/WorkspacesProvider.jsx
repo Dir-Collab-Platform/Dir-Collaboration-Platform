@@ -10,7 +10,7 @@ export default function WorkspacesProvider({ children }) {
   const [error, setError] = useState(null);
 
   // Get current context from URL if applicable
-  const { id: workspaceId } = useParams(); 
+  const { id: workspaceId } = useParams();
   const location = useLocation();
   const repoPreview = location.state?.repoData;
 

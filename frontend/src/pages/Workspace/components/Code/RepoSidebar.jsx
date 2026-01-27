@@ -8,28 +8,39 @@ import { WorkspaceContext } from '../../../../context/WorkspaceContext/Workspace
 
 export default function RepoSidebar() {
     const context = useContext(WorkspaceContext)
-    
+
     if (!context) return null
     const { repository } = context
 
     return (
-        <div className="repo-sidebar h-[calc(100vh - 4.66rem)] border-r border-(--main-border-color) rounded-tr-4xl">
-            <SidebarToolbar />
+        <div className="repo-sidebar h-full border-r border-(--main-border-color) rounded-tr-4xl flex flex-col overflow-hidden bg-(--card-bg)">
+            {/* Header / Toolbar Area - Fixed at top */}
+            <div className="shrink-0 z-10 bg-(--card-bg)">
+                <SidebarToolbar />
+            </div>
 
-            <div className="flex flex-col gap-8 px-6 py-8 overflow-y-scroll scroll-bar h-[calc(100vh-234px)]">
-                <FileTree />
+            {/* Unified Scrollable Area - Content + Footer */}
+            <div className="flex-1 overflow-y-auto scroll-bar flex flex-col min-h-0">
 
-                <hr className="border-b border-(--main-border-color)" />
+                {/* File Tree - Grows naturally, pushes footer down */}
+                <div className="flex-1 px-4 py-6">
+                    <FileTree />
+                </div>
 
-                <a href={repository?.html_url || ""} target="_blank" rel="noreferrer">
-                    <button className="flex gap-6 bg-(--primary-button) py-4 px-8 m-auto rounded-2xl text-(--button-text-color) items-center hover:bg-(--primary-button-hover) border border-(--main-border-color) cursor-pointer transition-all">
-                        <GithubIcon />
-                        <span>GitHub</span>
-                        <ExternalLink />
-                    </button>
-                </a>
-                
-                <LanguageStatsBar />
+                {/* Footer Area - Pushed to bottom of scrollable area */}
+                <div className="shrink-0 flex flex-col gap-5 px-4 pb-6 pt-2 mt-auto">
+                    <hr className="border-b border-(--main-border-color) opacity-30" />
+
+                    <a href={repository?.html_url || ""} target="_blank" rel="noreferrer" className="w-full">
+                        <button className="flex gap-4 bg-(--primary-button) py-2.5 px-6 rounded-xl text-(--button-text-color) items-center justify-center hover:bg-(--primary-button-hover) border border-(--main-border-color) cursor-pointer transition-all w-full font-bold shadow-sm active:scale-95">
+                            <GithubIcon />
+                            <span>GitHub</span>
+                            <ExternalLink size={14} />
+                        </button>
+                    </a>
+
+                    <LanguageStatsBar />
+                </div>
             </div>
         </div>
     )

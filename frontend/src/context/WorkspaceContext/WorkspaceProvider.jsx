@@ -149,10 +149,7 @@ export default function WorkspaceProvider({ children }) {
                     stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
-                if (files.length > 0) {
-                    const readme = files.find(f => f.name.toLowerCase() === 'readme.md');
-                    setActiveFile(readme || files[0]);
-                }
+                // No default file selection, let the user choose
             } catch (err) {
                 if (isMounted) {
                     const errorMessage = err.message || 'Failed to load workspace. Please check your connection and try again.';

@@ -36,7 +36,8 @@ repoRouter.post('/:id/contents', repoController.createFile);
 
 //language
 repoRouter.get('/languages', repoController.getRepoLanguages);
-//CRUD functinoalities 
+//CRUD functionalities 
+repoRouter.get('/commits/latest', repoController.getLastCommit);
 repoRouter.get('/', repoController.getActiveRepos);
 repoRouter.get('/:id', repoController.getActiveRepo);
 repoRouter.patch('/:id', repoController.updateRepo);

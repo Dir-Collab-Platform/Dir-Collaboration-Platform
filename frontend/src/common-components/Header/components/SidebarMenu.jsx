@@ -91,7 +91,7 @@ export default function SidebarMenu({ isMenuOpen, onClose }) {
                     }
                 >
                     <Settings size={20} />
-                    <span>Settings</span>
+                    <span>Profile</span>
                 </NavLink>
 
                 <NavLink

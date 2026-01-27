@@ -399,6 +399,52 @@ export const getActiveRepo = async (req, res) => {
   }
 };
 
+//@desc 4.1 get last commit of a repository
+//@route GET /api/repos/:id/last-commit
+export const getLastCommit = async (req, res) => {
+  try {
+    const { id: paramId } = req.params;
+    const { owner, repo, workspaceId: queryId } = req.query;
+
+    const repoId = paramId || queryId;
+    let targetOwner = owner;
+    let targetRepo = repo;
+
+    if (repoId && isValidObjectId(repoId)) {
+      const workspace = await Repository.findById(repoId);
+      if (!workspace) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ status: "error", message: "Workspace not found" });
+      }
+      targetOwner = workspace.githubOwner;
+      targetRepo = workspace.githubRepoName;
+    }
+
+    if (!targetOwner || !targetRepo) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ status: "error", message: "Owner and Repo name are required" });
+    }
+
+    const octokit = createGitHubClient(req.user.accessToken);
+    const { data: commits } = await octokit.rest.repos.listCommits({
+      owner: targetOwner,
+      repo: targetRepo,
+      per_page: 1,
+    });
+
+    res.status(StatusCodes.OK).json({
+      status: "success",
+      data: commits.length > 0 ? commits[0] : null,
+    });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ status: "error", message: error.message });
+  }
+};
+
 //@desc 5. Manual sync with Github
 //@route POST /api/repos/:id/sync
 export const manualSync = async (req, res) => {

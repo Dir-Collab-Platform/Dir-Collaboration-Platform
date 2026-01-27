@@ -52,6 +52,16 @@ export default function WorkspaceProvider({ children }) {
                     contentsRes = cRes;
                     langRes = lRes;
                     membersRes = repoRes.data.members?.length > 0 ? repoRes.data.members : mRes.data;
+
+                    // Fetch last commit asynchronously (non-blocking for initial load)
+                    apiRequest(`/api/repos/commits/latest?workspaceId=${workspaceId}`)
+                        .then(res => {
+                            if (res.status === 'success') {
+                                setData(prev => ({ ...prev, last_commit: res.data }));
+                            }
+                        })
+                        .catch(() => { });
+
                 } else if (repoPreview) {
                     // 2. GitHub Preview (Not imported): Use passed state + GitHub API proxy
                     repoData = {
@@ -82,6 +92,15 @@ export default function WorkspaceProvider({ children }) {
                     contentsRes = cRes;
                     langRes = lRes;
                     membersRes = [];
+
+                    // Fetch last commit asynchronously
+                    apiRequest(`/api/repos/commits/latest?owner=${repoPreview.githubOwner}&repo=${repoPreview.githubRepoName}`)
+                        .then(res => {
+                            if (res.status === 'success') {
+                                setData(prev => ({ ...prev, last_commit: res.data }));
+                            }
+                        })
+                        .catch(() => { });
                 } else {
                     throw new Error("Repository not found (and no preview data provided)");
                 }
@@ -111,22 +130,22 @@ export default function WorkspaceProvider({ children }) {
                         default_branch: "main",
                         topics: repoData.tags || [],
                         members: (repoData.members || []).map(mem => {
-                        // Extract the ID string safely, handling populated vs unpopulated
-                        const userObj = typeof mem.userId === 'object' ? mem.userId : null;
-                        const userIdString = userObj?._id || mem.userId;
+                            // Extract the ID string safely, handling populated vs unpopulated
+                            const userObj = typeof mem.userId === 'object' ? mem.userId : null;
+                            const userIdString = userObj?._id || mem.userId;
 
-                        return {
-                            id: userIdString?.toString(), // Ensure it is always a string
-                            name: userObj?.githubUsername || "Unknown user",
-                            avatar: userObj?.avatarUrl,
-                            role: mem.role
-                        };
-                    })
+                            return {
+                                id: userIdString?.toString(), // Ensure it is always a string
+                                name: userObj?.githubUsername || "Unknown user",
+                                avatar: userObj?.avatarUrl,
+                                role: mem.role
+                            };
+                        })
                     },
                     files: files,
                     contents: files,
                     languages: languagesData,
-                    last_commit: null, // No commit data for now
+                    last_commit: null, // Placeholder, will be updated by background fetch
                     stats: { forks: 0, stars: 0, watchers: 0 }
                 });
 
@@ -360,37 +379,37 @@ export default function WorkspaceProvider({ children }) {
     /**
  * Remove a member from the workspace
  */
-const removeMember = async (userId) => {
-    if (!data?.repository?._id) return;
+    const removeMember = async (userId) => {
+        if (!data?.repository?._id) return;
 
-    try {
-        // Handle if userId is passed as object or string
-        const idString = typeof userId === 'object' ? (userId._id || userId.id) : userId;
+        try {
+            // Handle if userId is passed as object or string
+            const idString = typeof userId === 'object' ? (userId._id || userId.id) : userId;
 
-        const res = await apiRequest(`/api/repos/${data.repository._id}/members/${idString}`, {
-            method: 'DELETE'
-        });
+            const res = await apiRequest(`/api/repos/${data.repository._id}/members/${idString}`, {
+                method: 'DELETE'
+            });
 
-        if (res.status === 'success') {
-            // FIX: Don't manually filter. Use the authoritative list from the backend.
-            // We reuse the existing normalizeMembers helper to format the data.
-            const updatedMembers = normalizeMembers(res.data);
+            if (res.status === 'success') {
+                // FIX: Don't manually filter. Use the authoritative list from the backend.
+                // We reuse the existing normalizeMembers helper to format the data.
+                const updatedMembers = normalizeMembers(res.data);
 
-            setData(prev => ({
-                ...prev,
-                repository: {
-                    ...prev.repository,
-                    members: updatedMembers
-                }
-            }));
-            return true;
+                setData(prev => ({
+                    ...prev,
+                    repository: {
+                        ...prev.repository,
+                        members: updatedMembers
+                    }
+                }));
+                return true;
+            }
+            throw new Error(res.message || 'Failed to remove member');
+        } catch (err) {
+            console.error('Remove Member Error:', err);
+            throw err;
         }
-        throw new Error(res.message || 'Failed to remove member');
-    } catch (err) {
-        console.error('Remove Member Error:', err);
-        throw err;
-    }
-};
+    };
 
     /**
      * Import a repository (create workspace from existing GitHub repo)
